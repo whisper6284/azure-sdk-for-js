@@ -6,13 +6,12 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { Operations } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ComputeManagementClientContext } from "../computeManagementClientContext";
+import { ComputeManagementClient } from "../computeManagementClient";
 import {
   ComputeOperationValue,
   OperationsListOptionalParams,
@@ -20,15 +19,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a Operations. */
+/** Class containing Operations operations. */
 export class OperationsImpl implements Operations {
-  private readonly client: ComputeManagementClientContext;
+  private readonly client: ComputeManagementClient;
 
   /**
    * Initialize a new instance of the class Operations class.
    * @param client Reference to the service client
    */
-  constructor(client: ComputeManagementClientContext) {
+  constructor(client: ComputeManagementClient) {
     this.client = client;
   }
 
@@ -87,6 +86,9 @@ const listOperationSpec: coreClient.OperationSpec = {
   responses: {
     200: {
       bodyMapper: Mappers.ComputeOperationListResult
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
     }
   },
   queryParameters: [Parameters.apiVersion],

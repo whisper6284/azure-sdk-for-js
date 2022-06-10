@@ -6,15 +6,16 @@ import { TokenCredential, NamedKeyCredential, SASCredential } from "@azure/core-
 import {
   ServiceBusClientOptions,
   createConnectionContextForConnectionString,
-  createConnectionContextForCredential
+  createConnectionContextForCredential,
 } from "./constructorHelpers";
 import { ConnectionContext } from "./connectionContext";
 import { ServiceBusReceiverOptions, ServiceBusSessionReceiverOptions, ReceiveMode } from "./models";
 import { ServiceBusReceiver, ServiceBusReceiverImpl } from "./receivers/receiver";
 import {
   ServiceBusSessionReceiver,
-  ServiceBusSessionReceiverImpl
+  ServiceBusSessionReceiverImpl,
 } from "./receivers/sessionReceiver";
+import { ServiceBusRuleManager, ServiceBusRuleManagerImpl } from "./serviceBusRuleManager";
 import { ServiceBusSender, ServiceBusSenderImpl } from "./sender";
 import { entityPathMisMatchError } from "./util/errors";
 import { MessageSession } from "./session/messageSession";
@@ -211,6 +212,26 @@ export class ServiceBusClient {
       entityPathWithSubQueue,
       receiveMode,
       maxLockAutoRenewDurationInMs,
+      options?.skipParsingBodyAsJson ?? false,
+      this._clientOptions.retryOptions
+    );
+  }
+
+  /**
+   * Creates an instance of {@link ServiceBusRuleManager} that is used to manage
+   * the rules for a subscription.
+   *
+   * @param topicName - the topic to create {@link ServiceBusRuleManager}
+   * @param subscriptionName - the subscription specific to the specified topic to create a {@link ServiceBusRuleManager} for.
+   * @returns a {@link ServiceBusRuleManager} scoped to the specified subscription and topic.
+   */
+  createRuleManager(topicName: string, subscriptionName: string): ServiceBusRuleManager {
+    validateEntityPath(this._connectionContext.config, topicName);
+
+    const { entityPath } = extractReceiverArguments(topicName, subscriptionName);
+    return new ServiceBusRuleManagerImpl(
+      this._connectionContext,
+      entityPath,
       this._clientOptions.retryOptions
     );
   }
@@ -321,7 +342,8 @@ export class ServiceBusClient {
         maxAutoLockRenewalDurationInMs: options?.maxAutoLockRenewalDurationInMs,
         receiveMode,
         abortSignal: options?.abortSignal,
-        retryOptions: this._clientOptions.retryOptions
+        retryOptions: this._clientOptions.retryOptions,
+        skipParsingBodyAsJson: options?.skipParsingBodyAsJson ?? false,
       }
     );
 
@@ -406,7 +428,8 @@ export class ServiceBusClient {
         maxAutoLockRenewalDurationInMs: options?.maxAutoLockRenewalDurationInMs,
         receiveMode,
         abortSignal: options?.abortSignal,
-        retryOptions: this._clientOptions.retryOptions
+        retryOptions: this._clientOptions.retryOptions,
+        skipParsingBodyAsJson: options?.skipParsingBodyAsJson ?? false,
       }
     );
 
@@ -490,7 +513,7 @@ export function extractReceiverArguments<OptionsT extends { receiveMode?: Receiv
   return {
     entityPath,
     receiveMode,
-    options
+    options,
   };
 }
 

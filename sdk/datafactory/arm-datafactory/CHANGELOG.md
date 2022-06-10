@@ -1,0 +1,129 @@
+# Release History
+
+## 10.6.1 (Unreleased)
+
+### Features Added
+
+### Breaking Changes
+
+### Bugs Fixed
+
+### Other Changes
+
+## 10.6.0 (2022-06-07)
+    
+**Features**
+
+  - Added operation group GlobalParameters
+  - Added Interface GlobalParameterListResponse
+  - Added Interface GlobalParametersCreateOrUpdateOptionalParams
+  - Added Interface GlobalParametersDeleteOptionalParams
+  - Added Interface GlobalParametersGetOptionalParams
+  - Added Interface GlobalParametersListByFactoryNextOptionalParams
+  - Added Interface GlobalParametersListByFactoryOptionalParams
+  - Added Interface PurviewConfiguration
+  - Added Type Alias GlobalParameterResource
+  - Added Type Alias GlobalParametersCreateOrUpdateResponse
+  - Added Type Alias GlobalParametersGetResponse
+  - Added Type Alias GlobalParametersListByFactoryNextResponse
+  - Added Type Alias GlobalParametersListByFactoryResponse
+  - Interface ExecuteDataFlowActivityTypeProperties has a new optional parameter sourceStagingConcurrency
+  - Class DataFactoryManagementClient has a new parameter globalParameters
+  - Type Alias ExecuteDataFlowActivity has a new parameter sourceStagingConcurrency
+  - Type Alias ExecuteWranglingDataflowActivity has a new parameter sourceStagingConcurrency
+  - Type Alias Factory has a new parameter purviewConfiguration
+  - Type Alias RestServiceLinkedService has a new parameter clientId
+  - Type Alias RestServiceLinkedService has a new parameter clientSecret
+  - Type Alias RestServiceLinkedService has a new parameter tokenEndpoint
+  - Type Alias RestServiceLinkedService has a new parameter resource
+  - Type Alias RestServiceLinkedService has a new parameter scope
+  - Enum KnownRestServiceAuthenticationType has a new value OAuth2ClientCredential
+    
+    
+## 10.5.0 (2022-05-09)
+    
+**Features**
+
+  - Added Interface PrivateEndpoint
+  - Interface PrivateLinkConnectionApprovalRequest has a new optional parameter privateEndpoint
+  - Type Alias DataFlowSink has a new parameter rejectedDataLinkedService
+    
+    
+## 10.4.0 (2022-04-20)
+    
+**Features**
+
+  - Added Type Alias AppFiguresLinkedService
+  - Added Type Alias AsanaLinkedService
+  - Added Type Alias DataworldLinkedService
+  - Added Type Alias TwilioLinkedService
+    
+    
+## 10.3.0 (2022-04-06)
+    
+**Features**
+
+  - Added Interface ExecutePipelineActivityPolicy
+  - Added Type Alias CredentialReferenceType
+  - Added Type Alias DataFlowReferenceType
+  - Added Type Alias ManagedVirtualNetworkReferenceType
+  - Added Type Alias TriggerReferenceType
+  - Type Alias ExecutePipelineActivity has a new parameter policy
+  - Type Alias SqlServerStoredProcedureActivity has a new parameter storedProcedureParameters
+  - Type Alias WebActivity has a new parameter disableCertValidation
+  - Added Enum KnownCredentialReferenceType
+  - Added Enum KnownDataFlowReferenceType
+  - Added Enum KnownManagedVirtualNetworkReferenceType
+  - Added Enum KnownTriggerReferenceType
+    
+    
+## 10.2.0 (2022-02-22)
+    
+**Features**
+
+  - Added Interface ScriptActivityParameter
+  - Added Interface ScriptActivityScriptBlock
+  - Added Interface ScriptActivityTypePropertiesLogSettings
+  - Added Type Alias QuickbaseLinkedService
+  - Added Type Alias ScriptActivity
+  - Added Type Alias ScriptActivityLogDestination
+  - Added Type Alias ScriptActivityParameterDirection
+  - Added Type Alias ScriptActivityParameterType
+  - Added Type Alias ScriptType
+  - Added Type Alias SmartsheetLinkedService
+  - Added Type Alias TeamDeskAuthenticationType
+  - Added Type Alias TeamDeskLinkedService
+  - Added Type Alias ZendeskAuthenticationType
+  - Added Type Alias ZendeskLinkedService
+  - Added Enum KnownScriptActivityLogDestination
+  - Added Enum KnownScriptActivityParameterDirection
+  - Added Enum KnownScriptActivityParameterType
+  - Added Enum KnownScriptType
+  - Added Enum KnownTeamDeskAuthenticationType
+  - Added Enum KnownZendeskAuthenticationType
+    
+    
+## 10.1.0 (2022-01-10)
+    
+**Features**
+
+  - Added Type Alias FailActivity
+  - Type Alias AzureBlobFSLinkedService has a new parameter servicePrincipalCredentialType
+  - Type Alias AzureBlobFSLinkedService has a new parameter servicePrincipalCredential
+  - Type Alias AzureDatabricksDeltaLakeLinkedService has a new parameter credential
+  - Type Alias AzureDatabricksDeltaLakeLinkedService has a new parameter workspaceResourceId
+  - Type Alias CosmosDbLinkedService has a new parameter credential
+  - Type Alias DynamicsLinkedService has a new parameter credential
+  - Type Alias GoogleAdWordsLinkedService has a new parameter connectionProperties
+  - Type Alias LinkedIntegrationRuntimeRbacAuthorization has a new parameter credential
+    
+    
+## 10.0.0 (2021-12-17)
+
+The package of @azure/arm-datafactory is using our next generation design principles since version 10.0.0, which contains breaking changes.
+
+To understand the detail of the change, please refer to [Changelog](https://aka.ms/js-track2-changelog).
+
+To migrate the existing applications to the latest version, please refer to [Migration Guide](https://aka.ms/js-track2-migration-guide).
+
+To learn more, please refer to our documentation [Quick Start](https://aka.ms/js-track2-quickstart).

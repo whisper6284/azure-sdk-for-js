@@ -158,6 +158,7 @@ export type AcsChatThreadWithUserDeletedEventData = AcsChatThreadEventBase & {
 // @public
 export interface AcsRecordingChunkInfo {
     contentLocation: string;
+    deleteLocation: string;
     documentId: string;
     endReason: string;
     index: number;
@@ -166,7 +167,10 @@ export interface AcsRecordingChunkInfo {
 
 // @public
 export interface AcsRecordingFileStatusUpdatedEventData {
+    recordingChannelType: RecordingChannelType;
+    recordingContentType: RecordingContentType;
     recordingDurationMs: number;
+    recordingFormatType: RecordingFormatType;
     recordingStartTime: string;
     recordingStorageInfo: AcsRecordingStorageInfo;
     sessionEndReason: string;
@@ -205,6 +209,86 @@ export type AcsSmsReceivedEventData = AcsSmsEventBase & {
     message: string;
     receivedTimestamp: string;
 };
+
+// @public
+export interface AcsUserDisconnectedEventData {
+    userCommunicationIdentifier: CommunicationIdentifierModel;
+}
+
+// @public
+export interface ApiManagementApiCreatedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementApiDeletedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementApiReleaseCreatedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementApiReleaseDeletedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementApiReleaseUpdatedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementApiUpdatedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementProductCreatedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementProductDeletedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementProductUpdatedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementSubscriptionCreatedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementSubscriptionDeletedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementSubscriptionUpdatedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementUserCreatedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementUserDeletedEventData {
+    resourceUri: string;
+}
+
+// @public
+export interface ApiManagementUserUpdatedEventData {
+    resourceUri: string;
+}
 
 // @public
 export type AppAction = string;
@@ -261,6 +345,11 @@ export interface CloudEvent<T> {
 }
 
 // @public
+export interface CloudEventSendOptions extends SendOptions {
+    channelName?: string;
+}
+
+// @public
 export type CommunicationCloudEnvironmentModel = string;
 
 // @public
@@ -279,7 +368,9 @@ export interface CommunicationUserIdentifierModel {
 // @public
 export interface ContainerRegistryArtifactEventData {
     action: string;
+    connectedRegistry: ContainerRegistryEventConnectedRegistry;
     id: string;
+    location: string;
     target: ContainerRegistryArtifactEventTarget;
     timestamp: string;
 }
@@ -307,10 +398,17 @@ export interface ContainerRegistryEventActor {
 }
 
 // @public
+export interface ContainerRegistryEventConnectedRegistry {
+    name: string;
+}
+
+// @public
 export interface ContainerRegistryEventData {
     action: string;
     actor: ContainerRegistryEventActor;
+    connectedRegistry: ContainerRegistryEventConnectedRegistry;
     id: string;
+    location: string;
     request: ContainerRegistryEventRequest;
     source: ContainerRegistryEventSource;
     target: ContainerRegistryEventTarget;
@@ -450,7 +548,7 @@ export class EventGridPublisherClient<T extends InputSchema> {
     constructor(endpointUrl: string, inputSchema: T, credential: KeyCredential | SASCredential | TokenCredential, options?: EventGridPublisherClientOptions);
     readonly apiVersion: string;
     readonly endpointUrl: string;
-    send(events: InputSchemaToInputTypeMap[T][], options?: SendOptions): Promise<void>;
+    send(events: InputSchemaToInputTypeMap[T][], options?: InputSchemaToOptionsTypeMap[T]): Promise<void>;
 }
 
 // @public
@@ -460,7 +558,7 @@ export type EventGridPublisherClientOptions = CommonClientOptions;
 export interface EventHubCaptureFileCreatedEventData {
     eventCount: number;
     fileType: string;
-    fileurl: string;
+    fileUrl: string;
     firstEnqueueTime: string;
     firstSequenceNumber: number;
     lastEnqueueTime: string;
@@ -478,6 +576,33 @@ export interface GenerateSharedAccessSignatureOptions {
 }
 
 // @public
+export interface HealthcareFhirResourceCreatedEventData {
+    resourceFhirAccount: string;
+    resourceFhirId: string;
+    resourceType: HealthcareFhirResourceType;
+    resourceVersionId: number;
+}
+
+// @public
+export interface HealthcareFhirResourceDeletedEventData {
+    resourceFhirAccount: string;
+    resourceFhirId: string;
+    resourceType: HealthcareFhirResourceType;
+    resourceVersionId: number;
+}
+
+// @public
+export type HealthcareFhirResourceType = string;
+
+// @public
+export interface HealthcareFhirResourceUpdatedEventData {
+    resourceFhirAccount: string;
+    resourceFhirId: string;
+    resourceType: HealthcareFhirResourceType;
+    resourceVersionId: number;
+}
+
+// @public
 export type InputSchema = keyof InputSchemaToInputTypeMap;
 
 // @public
@@ -485,6 +610,13 @@ export interface InputSchemaToInputTypeMap {
     CloudEvent: SendCloudEventInput<unknown>;
     Custom: Record<string, unknown>;
     EventGrid: SendEventGridEventInput<unknown>;
+}
+
+// @public
+export interface InputSchemaToOptionsTypeMap {
+    CloudEvent: CloudEventSendOptions;
+    Custom: SendOptions;
+    EventGrid: SendOptions;
 }
 
 // @public
@@ -745,10 +877,10 @@ export interface MediaJobError {
 }
 
 // @public
-export type MediaJobErrorCategory = "Service" | "Download" | "Upload" | "Configuration" | "Content";
+export type MediaJobErrorCategory = "Service" | "Download" | "Upload" | "Configuration" | "Content" | "Account";
 
 // @public
-export type MediaJobErrorCode = "ServiceError" | "ServiceTransientError" | "DownloadNotAccessible" | "DownloadTransientError" | "UploadNotAccessible" | "UploadTransientError" | "ConfigurationUnsupported" | "ContentMalformed" | "ContentUnsupported";
+export type MediaJobErrorCode = "ServiceError" | "ServiceTransientError" | "DownloadNotAccessible" | "DownloadTransientError" | "UploadNotAccessible" | "UploadTransientError" | "ConfigurationUnsupported" | "ContentMalformed" | "ContentUnsupported" | "IdentityUnsupported";
 
 // @public
 export interface MediaJobErrorDetail {
@@ -842,6 +974,12 @@ export interface MediaJobStateChangeEventData {
 }
 
 // @public
+export interface MediaLiveEventChannelArchiveHeartbeatEventData {
+    readonly channelLatencyMs: string;
+    readonly latencyResultCode: string;
+}
+
+// @public
 export interface MediaLiveEventConnectionRejectedEventData {
     readonly encoderIp: string;
     readonly encoderPort: string;
@@ -915,6 +1053,8 @@ export interface MediaLiveEventIngestHeartbeatEventData {
     readonly discontinuityCount: number;
     readonly healthy: boolean;
     readonly incomingBitrate: number;
+    readonly ingestDriftValue: string;
+    readonly lastFragmentArrivalTime: string;
     readonly lastTimestamp: string;
     readonly nonincreasingCount: number;
     readonly overlapCount: number;
@@ -922,6 +1062,8 @@ export interface MediaLiveEventIngestHeartbeatEventData {
     readonly timescale: string;
     readonly trackName: string;
     readonly trackType: string;
+    readonly transcriptionLanguage: string;
+    readonly transcriptionState: string;
     readonly unexpectedBitrate: boolean;
 }
 
@@ -982,11 +1124,22 @@ export interface PolicyInsightsPolicyStateDeletedEventData {
 }
 
 // @public
+export type RecordingChannelType = string;
+
+// @public
+export type RecordingContentType = string;
+
+// @public
+export type RecordingFormatType = string;
+
+// @public
 export interface ResourceActionCancelEventData {
-    authorization: string;
-    claims: string;
+    authorization: ResourceAuthorization;
+    claims: {
+        [propertyName: string]: string;
+    };
     correlationId: string;
-    httpRequest: string;
+    httpRequest: ResourceHttpRequest;
     operationName: string;
     resourceGroup: string;
     resourceProvider: string;
@@ -998,10 +1151,12 @@ export interface ResourceActionCancelEventData {
 
 // @public
 export interface ResourceActionFailureEventData {
-    authorization: string;
-    claims: string;
+    authorization: ResourceAuthorization;
+    claims: {
+        [propertyName: string]: string;
+    };
     correlationId: string;
-    httpRequest: string;
+    httpRequest: ResourceHttpRequest;
     operationName: string;
     resourceGroup: string;
     resourceProvider: string;
@@ -1013,10 +1168,12 @@ export interface ResourceActionFailureEventData {
 
 // @public
 export interface ResourceActionSuccessEventData {
-    authorization: string;
-    claims: string;
+    authorization: ResourceAuthorization;
+    claims: {
+        [propertyName: string]: string;
+    };
     correlationId: string;
-    httpRequest: string;
+    httpRequest: ResourceHttpRequest;
     operationName: string;
     resourceGroup: string;
     resourceProvider: string;
@@ -1027,11 +1184,22 @@ export interface ResourceActionSuccessEventData {
 }
 
 // @public
+export interface ResourceAuthorization {
+    action: string;
+    evidence: {
+        [propertyName: string]: string;
+    };
+    scope: string;
+}
+
+// @public
 export interface ResourceDeleteCancelEventData {
-    authorization: string;
-    claims: string;
+    authorization: ResourceAuthorization;
+    claims: {
+        [propertyName: string]: string;
+    };
     correlationId: string;
-    httpRequest: string;
+    httpRequest: ResourceHttpRequest;
     operationName: string;
     resourceGroup: string;
     resourceProvider: string;
@@ -1043,10 +1211,12 @@ export interface ResourceDeleteCancelEventData {
 
 // @public
 export interface ResourceDeleteFailureEventData {
-    authorization: string;
-    claims: string;
+    authorization: ResourceAuthorization;
+    claims: {
+        [propertyName: string]: string;
+    };
     correlationId: string;
-    httpRequest: string;
+    httpRequest: ResourceHttpRequest;
     operationName: string;
     resourceGroup: string;
     resourceProvider: string;
@@ -1058,10 +1228,12 @@ export interface ResourceDeleteFailureEventData {
 
 // @public
 export interface ResourceDeleteSuccessEventData {
-    authorization: string;
-    claims: string;
+    authorization: ResourceAuthorization;
+    claims: {
+        [propertyName: string]: string;
+    };
     correlationId: string;
-    httpRequest: string;
+    httpRequest: ResourceHttpRequest;
     operationName: string;
     resourceGroup: string;
     resourceProvider: string;
@@ -1072,11 +1244,21 @@ export interface ResourceDeleteSuccessEventData {
 }
 
 // @public
+export interface ResourceHttpRequest {
+    clientIpAddress: string;
+    clientRequestId: string;
+    method: string;
+    url: string;
+}
+
+// @public
 export interface ResourceWriteCancelEventData {
-    authorization: string;
-    claims: string;
+    authorization: ResourceAuthorization;
+    claims: {
+        [propertyName: string]: string;
+    };
     correlationId: string;
-    httpRequest: string;
+    httpRequest: ResourceHttpRequest;
     operationName: string;
     resourceGroup: string;
     resourceProvider: string;
@@ -1088,10 +1270,12 @@ export interface ResourceWriteCancelEventData {
 
 // @public
 export interface ResourceWriteFailureEventData {
-    authorization: string;
-    claims: string;
+    authorization: ResourceAuthorization;
+    claims: {
+        [propertyName: string]: string;
+    };
     correlationId: string;
-    httpRequest: string;
+    httpRequest: ResourceHttpRequest;
     operationName: string;
     resourceGroup: string;
     resourceProvider: string;
@@ -1103,10 +1287,12 @@ export interface ResourceWriteFailureEventData {
 
 // @public
 export interface ResourceWriteSuccessEventData {
-    authorization: string;
-    claims: string;
+    authorization: ResourceAuthorization;
+    claims: {
+        [propertyName: string]: string;
+    };
     correlationId: string;
-    httpRequest: string;
+    httpRequest: ResourceHttpRequest;
     operationName: string;
     resourceGroup: string;
     resourceProvider: string;
@@ -1263,7 +1449,7 @@ export interface StorageDirectoryDeletedEventData {
     api: string;
     clientRequestId: string;
     identity: string;
-    recursive: boolean;
+    recursive: string;
     requestId: string;
     sequencer: string;
     storageDiagnostics: any;
@@ -1310,6 +1496,21 @@ export interface SubscriptionValidationEventData {
 
 // @public
 export interface SystemEventNameToEventData {
+    "Microsoft.ApiManagement.APICreated": ApiManagementApiCreatedEventData;
+    "Microsoft.ApiManagement.APIDeleted": ApiManagementApiDeletedEventData;
+    "Microsoft.ApiManagement.APIReleaseCreated": ApiManagementApiReleaseCreatedEventData;
+    "Microsoft.ApiManagement.APIReleaseDeleted": ApiManagementApiReleaseDeletedEventData;
+    "Microsoft.ApiManagement.APIReleaseUpdated": ApiManagementApiReleaseUpdatedEventData;
+    "Microsoft.ApiManagement.APIUpdated": ApiManagementApiUpdatedEventData;
+    "Microsoft.ApiManagement.ProductCreated": ApiManagementProductCreatedEventData;
+    "Microsoft.ApiManagement.ProductDeleted": ApiManagementProductDeletedEventData;
+    "Microsoft.ApiManagement.ProductUpdated": ApiManagementProductUpdatedEventData;
+    "Microsoft.ApiManagement.SubscriptionCreated": ApiManagementSubscriptionCreatedEventData;
+    "Microsoft.ApiManagement.SubscriptionDeleted": ApiManagementSubscriptionDeletedEventData;
+    "Microsoft.ApiManagement.SubscriptionUpdated": ApiManagementSubscriptionUpdatedEventData;
+    "Microsoft.ApiManagement.UserCreated": ApiManagementUserCreatedEventData;
+    "Microsoft.ApiManagement.UserDeleted": ApiManagementUserDeletedEventData;
+    "Microsoft.ApiManagement.UserUpdated": ApiManagementUserUpdatedEventData;
     "Microsoft.AppConfiguration.KeyValueDeleted": AppConfigurationKeyValueDeletedEventData;
     "Microsoft.AppConfiguration.KeyValueModified": AppConfigurationKeyValueModifiedEventData;
     "Microsoft.Communication.ChatMessageDeleted": AcsChatMessageDeletedEventData;
@@ -1328,6 +1529,7 @@ export interface SystemEventNameToEventData {
     "Microsoft.Communication.RecordingFileStatusUpdated": AcsRecordingFileStatusUpdatedEventData;
     "Microsoft.Communication.SMSDeliveryReportReceived": AcsSmsDeliveryReportReceivedEventData;
     "Microsoft.Communication.SMSReceived": AcsSmsReceivedEventData;
+    "Microsoft.Communication.UserDisconnected": AcsUserDisconnectedEventData;
     "Microsoft.ContainerRegistry.ChartDeleted": ContainerRegistryChartDeletedEventData;
     "Microsoft.ContainerRegistry.ChartPushed": ContainerRegistryChartPushedEventData;
     "Microsoft.ContainerRegistry.ImageDeleted": ContainerRegistryImageDeletedEventData;
@@ -1341,6 +1543,9 @@ export interface SystemEventNameToEventData {
     "Microsoft.EventGrid.SubscriptionDeletedEvent": SubscriptionDeletedEventData;
     "Microsoft.EventGrid.SubscriptionValidationEvent": SubscriptionValidationEventData;
     "Microsoft.EventHub.CaptureFileCreated": EventHubCaptureFileCreatedEventData;
+    "Microsoft.HealthcareApis.FhirDeletedCreated": HealthcareFhirResourceDeletedEventData;
+    "Microsoft.HealthcareApis.FhirResourceCreated": HealthcareFhirResourceCreatedEventData;
+    "Microsoft.HealthcareApis.FhirUpdatedCreated": HealthcareFhirResourceUpdatedEventData;
     "Microsoft.KeyVault.CertificateExpired": KeyVaultCertificateExpiredEventData;
     "Microsoft.KeyVault.CertificateNearExpiry": KeyVaultCertificateNearExpiryEventData;
     "Microsoft.KeyVault.CertificateNewVersionCreated": KeyVaultCertificateNewVersionCreatedEventData;
@@ -1374,6 +1579,7 @@ export interface SystemEventNameToEventData {
     "Microsoft.Media.JobProcessing": MediaJobProcessingEventData;
     "Microsoft.Media.JobScheduled": MediaJobScheduledEventData;
     "Microsoft.Media.JobStateChange": MediaJobStateChangeEventData;
+    "Microsoft.Media.LiveEventChannelArchiveHeartbeat": MediaLiveEventChannelArchiveHeartbeatEventData;
     "Microsoft.Media.LiveEventConnectionRejected": MediaLiveEventConnectionRejectedEventData;
     "Microsoft.Media.LiveEventEncoderConnected": MediaLiveEventEncoderConnectedEventData;
     "Microsoft.Media.LiveEventEncoderDisconnected": MediaLiveEventEncoderDisconnectedEventData;
@@ -1574,7 +1780,6 @@ export interface WebSlotSwapWithPreviewStartedEventData {
     requestId: string;
     verb: string;
 }
-
 
 // (No @packageDocumentation comment for this package)
 

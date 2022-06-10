@@ -7,7 +7,7 @@ import { credentialLogger } from "../util/logging";
 import { MsalDeviceCode } from "../msal/nodeFlows/msalDeviceCode";
 import { MsalFlow } from "../msal/flows";
 import { AuthenticationRecord } from "../msal/types";
-import { trace } from "../util/tracing";
+import { tracingClient } from "../util/tracing";
 import { DeviceCodeCredentialOptions, DeviceCodeInfo } from "./deviceCodeCredentialOptions";
 
 const logger = credentialLogger("DeviceCodeCredential");
@@ -32,6 +32,20 @@ export class DeviceCodeCredential implements TokenCredential {
    * Creates an instance of DeviceCodeCredential with the details needed
    * to initiate the device code authorization flow with Azure Active Directory.
    *
+   * A message will be logged, giving users a code that they can use to authenticate once they go to https://microsoft.com/devicelogin
+   *
+   * Developers can configure how this message is shown by passing a custom `userPromptCallback`:
+   *
+   * ```js
+   * const credential = new DeviceCodeCredential({
+   *   tenantId: env.AZURE_TENANT_ID,
+   *   clientId: env.AZURE_CLIENT_ID,
+   *   userPromptCallback: (info) => {
+   *     console.log("CUSTOMIZED PROMPT CALLBACK", info.message);
+   *   }
+   * });
+   * ```
+   *
    * @param options - Options for configuring the client which makes the authentication requests.
    */
   constructor(options?: DeviceCodeCredentialOptions) {
@@ -39,7 +53,7 @@ export class DeviceCodeCredential implements TokenCredential {
       ...options,
       logger,
       userPromptCallback: options?.userPromptCallback || defaultDeviceCodePromptCallback,
-      tokenCredentialOptions: options || {}
+      tokenCredentialOptions: options || {},
     });
     this.disableAutomaticAuthentication = options?.disableAutomaticAuthentication;
   }
@@ -57,13 +71,17 @@ export class DeviceCodeCredential implements TokenCredential {
    *                TokenCredential implementation might make.
    */
   async getToken(scopes: string | string[], options: GetTokenOptions = {}): Promise<AccessToken> {
-    return trace(`${this.constructor.name}.getToken`, options, async (newOptions) => {
-      const arrayScopes = Array.isArray(scopes) ? scopes : [scopes];
-      return this.msalFlow.getToken(arrayScopes, {
-        ...newOptions,
-        disableAutomaticAuthentication: this.disableAutomaticAuthentication
-      });
-    });
+    return tracingClient.withSpan(
+      `${this.constructor.name}.getToken`,
+      options,
+      async (newOptions) => {
+        const arrayScopes = Array.isArray(scopes) ? scopes : [scopes];
+        return this.msalFlow.getToken(arrayScopes, {
+          ...newOptions,
+          disableAutomaticAuthentication: this.disableAutomaticAuthentication,
+        });
+      }
+    );
   }
 
   /**
@@ -80,10 +98,14 @@ export class DeviceCodeCredential implements TokenCredential {
     scopes: string | string[],
     options: GetTokenOptions = {}
   ): Promise<AuthenticationRecord | undefined> {
-    return trace(`${this.constructor.name}.authenticate`, options, async (newOptions) => {
-      const arrayScopes = Array.isArray(scopes) ? scopes : [scopes];
-      await this.msalFlow.getToken(arrayScopes, newOptions);
-      return this.msalFlow.getActiveAccount();
-    });
+    return tracingClient.withSpan(
+      `${this.constructor.name}.authenticate`,
+      options,
+      async (newOptions) => {
+        const arrayScopes = Array.isArray(scopes) ? scopes : [scopes];
+        await this.msalFlow.getToken(arrayScopes, newOptions);
+        return this.msalFlow.getActiveAccount();
+      }
+    );
   }
 }

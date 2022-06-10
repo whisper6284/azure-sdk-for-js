@@ -6,13 +6,12 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { DiskAccesses } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ComputeManagementClientContext } from "../computeManagementClientContext";
+import { ComputeManagementClient } from "../computeManagementClient";
 import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
 import { LroImpl } from "../lroImpl";
 import {
@@ -48,15 +47,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a DiskAccesses. */
+/** Class containing DiskAccesses operations. */
 export class DiskAccessesImpl implements DiskAccesses {
-  private readonly client: ComputeManagementClientContext;
+  private readonly client: ComputeManagementClient;
 
   /**
    * Initialize a new instance of the class DiskAccesses class.
    * @param client Reference to the service client
    */
-  constructor(client: ComputeManagementClientContext) {
+  constructor(client: ComputeManagementClient) {
     this.client = client;
   }
 
@@ -160,7 +159,7 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
+   *                       0-9, _ and -. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   public listPrivateEndpointConnections(
@@ -233,7 +232,7 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
+   *                       0-9, _ and -. The maximum name length is 80 characters.
    * @param diskAccess disk access object supplied in the body of the Put disk access operation.
    * @param options The options parameters.
    */
@@ -292,10 +291,12 @@ export class DiskAccessesImpl implements DiskAccesses {
       { resourceGroupName, diskAccessName, diskAccess, options },
       createOrUpdateOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -303,7 +304,7 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
+   *                       0-9, _ and -. The maximum name length is 80 characters.
    * @param diskAccess disk access object supplied in the body of the Put disk access operation.
    * @param options The options parameters.
    */
@@ -327,7 +328,7 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
+   *                       0-9, _ and -. The maximum name length is 80 characters.
    * @param diskAccess disk access object supplied in the body of the Patch disk access operation.
    * @param options The options parameters.
    */
@@ -386,10 +387,12 @@ export class DiskAccessesImpl implements DiskAccesses {
       { resourceGroupName, diskAccessName, diskAccess, options },
       updateOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -397,7 +400,7 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
+   *                       0-9, _ and -. The maximum name length is 80 characters.
    * @param diskAccess disk access object supplied in the body of the Patch disk access operation.
    * @param options The options parameters.
    */
@@ -421,7 +424,7 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
+   *                       0-9, _ and -. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   get(
@@ -440,7 +443,7 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
+   *                       0-9, _ and -. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   async beginDelete(
@@ -492,10 +495,12 @@ export class DiskAccessesImpl implements DiskAccesses {
       { resourceGroupName, diskAccessName, options },
       deleteOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -503,7 +508,7 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
+   *                       0-9, _ and -. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   async beginDeleteAndWait(
@@ -549,7 +554,7 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
+   *                       0-9, _ and -. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   getPrivateLinkResources(
@@ -569,8 +574,8 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
-   * @param privateEndpointConnectionName The name of the private endpoint connection
+   *                       0-9, _ and -. The maximum name length is 80 characters.
+   * @param privateEndpointConnectionName The name of the private endpoint connection.
    * @param privateEndpointConnection private endpoint connection object supplied in the body of the Put
    *                                  private endpoint connection operation.
    * @param options The options parameters.
@@ -637,10 +642,12 @@ export class DiskAccessesImpl implements DiskAccesses {
       },
       updateAPrivateEndpointConnectionOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -649,8 +656,8 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
-   * @param privateEndpointConnectionName The name of the private endpoint connection
+   *                       0-9, _ and -. The maximum name length is 80 characters.
+   * @param privateEndpointConnectionName The name of the private endpoint connection.
    * @param privateEndpointConnection private endpoint connection object supplied in the body of the Put
    *                                  private endpoint connection operation.
    * @param options The options parameters.
@@ -677,8 +684,8 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
-   * @param privateEndpointConnectionName The name of the private endpoint connection
+   *                       0-9, _ and -. The maximum name length is 80 characters.
+   * @param privateEndpointConnectionName The name of the private endpoint connection.
    * @param options The options parameters.
    */
   getAPrivateEndpointConnection(
@@ -703,8 +710,8 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
-   * @param privateEndpointConnectionName The name of the private endpoint connection
+   *                       0-9, _ and -. The maximum name length is 80 characters.
+   * @param privateEndpointConnectionName The name of the private endpoint connection.
    * @param options The options parameters.
    */
   async beginDeleteAPrivateEndpointConnection(
@@ -762,10 +769,12 @@ export class DiskAccessesImpl implements DiskAccesses {
       },
       deleteAPrivateEndpointConnectionOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -773,8 +782,8 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
-   * @param privateEndpointConnectionName The name of the private endpoint connection
+   *                       0-9, _ and -. The maximum name length is 80 characters.
+   * @param privateEndpointConnectionName The name of the private endpoint connection.
    * @param options The options parameters.
    */
   async beginDeleteAPrivateEndpointConnectionAndWait(
@@ -797,7 +806,7 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
+   *                       0-9, _ and -. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   private _listPrivateEndpointConnections(
@@ -848,7 +857,7 @@ export class DiskAccessesImpl implements DiskAccesses {
    * @param resourceGroupName The name of the resource group.
    * @param diskAccessName The name of the disk access resource that is being created. The name can't be
    *                       changed after the disk encryption set is created. Supported characters for the name are a-z, A-Z,
-   *                       0-9 and _. The maximum name length is 80 characters.
+   *                       0-9, _ and -. The maximum name length is 80 characters.
    * @param nextLink The nextLink from the previous successful call to the ListPrivateEndpointConnections
    *                 method.
    * @param options The options parameters.
@@ -890,11 +899,11 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.diskAccess,
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskAccessName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -923,11 +932,11 @@ const updateOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.diskAccess1,
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskAccessName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -946,11 +955,11 @@ const getOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskAccessName
   ],
   headerParameters: [Parameters.accept],
@@ -969,11 +978,11 @@ const deleteOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskAccessName
   ],
   headerParameters: [Parameters.accept],
@@ -991,11 +1000,11 @@ const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -1012,7 +1021,7 @@ const listOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
   serializer
@@ -1026,11 +1035,11 @@ const getPrivateLinkResourcesOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.PrivateLinkResourceListResult
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskAccessName
   ],
   headerParameters: [Parameters.accept],
@@ -1058,11 +1067,11 @@ const updateAPrivateEndpointConnectionOperationSpec: coreClient.OperationSpec = 
     }
   },
   requestBody: Parameters.privateEndpointConnection,
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskAccessName,
     Parameters.privateEndpointConnectionName
   ],
@@ -1082,11 +1091,11 @@ const getAPrivateEndpointConnectionOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskAccessName,
     Parameters.privateEndpointConnectionName
   ],
@@ -1106,11 +1115,11 @@ const deleteAPrivateEndpointConnectionOperationSpec: coreClient.OperationSpec = 
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskAccessName,
     Parameters.privateEndpointConnectionName
   ],
@@ -1129,11 +1138,11 @@ const listPrivateEndpointConnectionsOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskAccessName
   ],
   headerParameters: [Parameters.accept],
@@ -1150,12 +1159,12 @@ const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
+    Parameters.resourceGroupName
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -1171,7 +1180,7 @@ const listNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -1191,12 +1200,12 @@ const listPrivateEndpointConnectionsNextOperationSpec: coreClient.OperationSpec 
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.nextLink,
+    Parameters.resourceGroupName,
     Parameters.diskAccessName
   ],
   headerParameters: [Parameters.accept],

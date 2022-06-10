@@ -1,65 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-export * from "./extensions/consumer";
+export * from "./plugins/consumer";
 
-export { IdentityExtension } from "./extensions/provider";
+export { IdentityPlugin } from "./plugins/provider";
 
 import { TokenCredential } from "@azure/core-auth";
 import { DefaultAzureCredential } from "./credentials/defaultAzureCredential";
-
-export { AuthenticationRecord } from "./msal/types";
-export { AuthenticationRequiredError } from "./msal/errors";
-export { serializeAuthenticationRecord, deserializeAuthenticationRecord } from "./msal/utils";
-export { TokenCredentialOptions } from "./client/identityClient";
-export { RegionalAuthority } from "./regionalAuthority";
-export { InteractiveCredentialOptions } from "./credentials/interactiveCredentialOptions";
-
-export { ChainedTokenCredential } from "./credentials/chainedTokenCredential";
-export {
-  DefaultAzureCredential,
-  DefaultAzureCredentialOptions
-} from "./credentials/defaultAzureCredential";
-export {
-  EnvironmentCredential,
-  EnvironmentCredentialOptions
-} from "./credentials/environmentCredential";
-export { ClientSecretCredential } from "./credentials/clientSecretCredential";
-export { ClientSecretCredentialOptions } from "./credentials/clientSecretCredentialOptions";
-export { ClientCertificateCredential } from "./credentials/clientCertificateCredential";
-export { ClientCertificateCredentialOptions } from "./credentials/clientCertificateCredentialOptions";
-export { CredentialPersistenceOptions } from "./credentials/credentialPersistenceOptions";
-export { AzureCliCredential } from "./credentials/azureCliCredential";
-export { AzureCliCredentialOptions } from "./credentials/azureCliCredentialOptions";
-export { InteractiveBrowserCredential } from "./credentials/interactiveBrowserCredential";
-export {
-  InteractiveBrowserCredentialOptions,
-  InteractiveBrowserCredentialBrowserOptions,
-  BrowserLoginStyle
-} from "./credentials/interactiveBrowserCredentialOptions";
-export { ManagedIdentityCredential } from "./credentials/managedIdentityCredential";
-export { DeviceCodeCredential } from "./credentials/deviceCodeCredential";
-export {
-  DeviceCodePromptCallback,
-  DeviceCodeInfo
-} from "./credentials/deviceCodeCredentialOptions";
-export { DeviceCodeCredentialOptions } from "./credentials/deviceCodeCredentialOptions";
-export { UsernamePasswordCredential } from "./credentials/usernamePasswordCredential";
-export { UsernamePasswordCredentialOptions } from "./credentials/usernamePasswordCredentialOptions";
-export { AuthorizationCodeCredential } from "./credentials/authorizationCodeCredential";
-export { AzurePowerShellCredential } from "./credentials/azurePowerShellCredential";
-export { AzurePowerShellCredentialOptions } from "./credentials/azurePowerShellCredentialOptions";
-export {
-  ApplicationCredential,
-  ApplicationCredentialOptions
-} from "./credentials/applicationCredential";
-
-export {
-  VisualStudioCodeCredential,
-  VisualStudioCodeCredentialOptions
-} from "./credentials/visualStudioCodeCredential";
-
-export { TokenCachePersistenceOptions } from "./msal/nodeFlows/tokenCachePersistenceOptions";
 
 export {
   AuthenticationError,
@@ -68,8 +15,79 @@ export {
   AuthenticationErrorName,
   AggregateAuthenticationErrorName,
   CredentialUnavailableError,
-  CredentialUnavailableErrorName
-} from "./client/errors";
+  CredentialUnavailableErrorName,
+  AuthenticationRequiredError,
+  AuthenticationRequiredErrorOptions,
+} from "./errors";
+
+export { AuthenticationRecord } from "./msal/types";
+export { serializeAuthenticationRecord, deserializeAuthenticationRecord } from "./msal/utils";
+export { TokenCredentialOptions } from "./tokenCredentialOptions";
+
+// TODO: Export again once we're ready to release this feature.
+// export { RegionalAuthority } from "./regionalAuthority";
+
+export { InteractiveCredentialOptions } from "./credentials/interactiveCredentialOptions";
+
+export { ChainedTokenCredential } from "./credentials/chainedTokenCredential";
+export {
+  DefaultAzureCredential,
+  DefaultAzureCredentialOptions,
+  DefaultAzureCredentialClientIdOptions,
+  DefaultAzureCredentialResourceIdOptions,
+} from "./credentials/defaultAzureCredential";
+export {
+  EnvironmentCredential,
+  EnvironmentCredentialOptions,
+} from "./credentials/environmentCredential";
+export { ClientSecretCredential } from "./credentials/clientSecretCredential";
+export { ClientSecretCredentialOptions } from "./credentials/clientSecretCredentialOptions";
+export {
+  ClientCertificateCredential,
+  ClientCertificateCredentialPEMConfiguration,
+  ClientCertificatePEMCertificatePath,
+  ClientCertificatePEMCertificate,
+} from "./credentials/clientCertificateCredential";
+export { ClientCertificateCredentialOptions } from "./credentials/clientCertificateCredentialOptions";
+export { CredentialPersistenceOptions } from "./credentials/credentialPersistenceOptions";
+export { AzureCliCredential } from "./credentials/azureCliCredential";
+export { AzureCliCredentialOptions } from "./credentials/azureCliCredentialOptions";
+export { InteractiveBrowserCredential } from "./credentials/interactiveBrowserCredential";
+export {
+  InteractiveBrowserCredentialNodeOptions,
+  InteractiveBrowserCredentialInBrowserOptions,
+  BrowserLoginStyle,
+} from "./credentials/interactiveBrowserCredentialOptions";
+export {
+  ManagedIdentityCredential,
+  ManagedIdentityCredentialClientIdOptions,
+  ManagedIdentityCredentialResourceIdOptions,
+} from "./credentials/managedIdentityCredential";
+export { DeviceCodeCredential } from "./credentials/deviceCodeCredential";
+export {
+  DeviceCodePromptCallback,
+  DeviceCodeInfo,
+} from "./credentials/deviceCodeCredentialOptions";
+export { DeviceCodeCredentialOptions } from "./credentials/deviceCodeCredentialOptions";
+export { UsernamePasswordCredential } from "./credentials/usernamePasswordCredential";
+export { UsernamePasswordCredentialOptions } from "./credentials/usernamePasswordCredentialOptions";
+export { AuthorizationCodeCredential } from "./credentials/authorizationCodeCredential";
+export { AzurePowerShellCredential } from "./credentials/azurePowerShellCredential";
+export { AzurePowerShellCredentialOptions } from "./credentials/azurePowerShellCredentialOptions";
+
+export {
+  VisualStudioCodeCredential,
+  VisualStudioCodeCredentialOptions,
+} from "./credentials/visualStudioCodeCredential";
+
+export { OnBehalfOfCredential } from "./credentials/onBehalfOfCredential";
+export {
+  OnBehalfOfCredentialOptions,
+  OnBehalfOfCredentialSecretOptions,
+  OnBehalfOfCredentialCertificateOptions,
+} from "./credentials/onBehalfOfCredentialOptions";
+
+export { TokenCachePersistenceOptions } from "./msal/nodeFlows/tokenCachePersistenceOptions";
 
 export { TokenCredential, GetTokenOptions, AccessToken } from "@azure/core-auth";
 export { logger } from "./util/logging";

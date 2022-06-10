@@ -3,8 +3,6 @@
 
 import { replaceAll } from "./util/utils";
 
-export { URL } from "./util/url";
-
 type URLQueryParseState = "ParameterName" | "ParameterValue";
 
 /**
@@ -339,6 +337,10 @@ export class URLBuilder {
     }
   }
 
+  /**
+   * Serializes the URL as a string.
+   * @returns the URL as a string.
+   */
   public toString(): string {
     let result = "";
 
@@ -382,6 +384,9 @@ export class URLBuilder {
     }
   }
 
+  /**
+   * Parses a given string URL into a new {@link URLBuilder}.
+   */
   public static parse(text: string): URLBuilder {
     const result = new URLBuilder();
     result.set(text, "SCHEME_OR_HOST");

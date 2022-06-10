@@ -9,7 +9,7 @@ import {
   BlobServiceClient,
   ServiceGetPropertiesOptions,
   ServiceSetPropertiesOptions,
-  ServiceSetPropertiesResponse
+  ServiceSetPropertiesResponse,
 } from "@azure/storage-blob";
 
 import { AnonymousCredential } from "./credentials/AnonymousCredential";
@@ -23,14 +23,14 @@ import {
   ServiceListFileSystemsSegmentResponse,
   ServiceRenameFileSystemOptions,
   ServiceUndeleteFileSystemOptions,
-  FileSystemUndeleteResponse
+  FileSystemUndeleteResponse,
 } from "./models";
 import { Pipeline, StoragePipelineOptions, newPipeline } from "./Pipeline";
 import { StorageClient } from "./StorageClient";
 import {
   appendToURLPath,
   appendToURLQuery,
-  extractConnectionStringParts
+  extractConnectionStringParts,
 } from "./utils/utils.common";
 import { createSpan } from "./utils/tracing";
 import { toDfsEndpointUrl, toFileSystemPagedAsyncIterableIterator } from "./transforms";
@@ -66,7 +66,14 @@ export class DataLakeServiceClient extends StorageClient {
    *                                  `BlobEndpoint=https://myaccount.blob.core.windows.net/;QueueEndpoint=https://myaccount.queue.core.windows.net/;FileEndpoint=https://myaccount.file.core.windows.net/;TableEndpoint=https://myaccount.table.core.windows.net/;SharedAccessSignature=sasString`
    * @param options - Optional. Options to configure the HTTP pipeline.
    */
-  public static fromConnectionString(connectionString: string, options?: StoragePipelineOptions) {
+  // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+  /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
+  public static fromConnectionString(
+    connectionString: string,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
+    options?: StoragePipelineOptions
+  ): DataLakeServiceClient {
     options = options || {};
     const extractedCreds = extractConnectionStringParts(connectionString);
     if (extractedCreds.kind === "AccountConnString") {
@@ -75,7 +82,9 @@ export class DataLakeServiceClient extends StorageClient {
           extractedCreds.accountName!,
           extractedCreds.accountKey
         );
-        options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
+        if (!options.proxyOptions) {
+          options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
+        }
         const pipeline = newPipeline(sharedKeyCredential, options);
         return new DataLakeServiceClient(toDfsEndpointUrl(extractedCreds.url), pipeline);
       } else {
@@ -106,6 +115,8 @@ export class DataLakeServiceClient extends StorageClient {
   public constructor(
     url: string,
     credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   );
 
@@ -127,6 +138,8 @@ export class DataLakeServiceClient extends StorageClient {
       | AnonymousCredential
       | TokenCredential
       | Pipeline,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   ) {
     if (credentialOrPipeline instanceof Pipeline) {
@@ -152,6 +165,8 @@ export class DataLakeServiceClient extends StorageClient {
    *
    * @param fileSystemName - File system name.
    */
+  // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+  /* eslint-disable-next-line @azure/azure-sdk/ts-naming-subclients */
   public getFileSystemClient(fileSystemName: string): DataLakeFileSystemClient {
     return new DataLakeFileSystemClient(
       appendToURLPath(this.url, encodeURIComponent(fileSystemName)),
@@ -199,10 +214,10 @@ export class DataLakeServiceClient extends StorageClient {
     );
     try {
       return await this.blobServiceClient.getUserDelegationKey(startsOn, expiresOn, updatedOptions);
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -336,7 +351,7 @@ export class DataLakeServiceClient extends StorageClient {
         expiresOn,
         resourceTypes,
         services: AccountSASServices.parse("b").toString(),
-        ...options
+        ...options,
       },
       this.credential
     ).toString();
@@ -351,6 +366,7 @@ export class DataLakeServiceClient extends StorageClient {
    * @param destinationContainerName - The new name of the File System.
    * @param options - Options to configure File System Rename operation.
    */
+  /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
   // @ts-ignore Need to hide this interface for now. Make it public and turn on the live tests for it when the service is ready.
   private async renameFileSystem(
     sourceFileSystemName: string,
@@ -372,12 +388,12 @@ export class DataLakeServiceClient extends StorageClient {
       const fileSystemClient = this.getFileSystemClient(destinationFileSystemName);
       return {
         fileSystemClient,
-        fileSystemRenameResponse: res.containerRenameResponse
+        fileSystemRenameResponse: res.containerRenameResponse,
       };
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -412,7 +428,7 @@ export class DataLakeServiceClient extends StorageClient {
         {
           ...options,
           destinationContainerName: options.destinationFileSystemName,
-          tracingOptions: updatedOptions.tracingOptions
+          tracingOptions: updatedOptions.tracingOptions,
         }
       );
 
@@ -421,12 +437,12 @@ export class DataLakeServiceClient extends StorageClient {
       );
       return {
         fileSystemClient,
-        fileSystemUndeleteResponse: res.containerUndeleteResponse
+        fileSystemUndeleteResponse: res.containerUndeleteResponse,
       };
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -449,12 +465,12 @@ export class DataLakeServiceClient extends StorageClient {
     try {
       return await this.blobServiceClient.getProperties({
         abortSignal: options.abortSignal,
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -479,12 +495,12 @@ export class DataLakeServiceClient extends StorageClient {
     try {
       return await this.blobServiceClient.setProperties(properties, {
         abortSignal: options.abortSignal,
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {

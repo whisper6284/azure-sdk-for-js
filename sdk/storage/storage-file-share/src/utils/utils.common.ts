@@ -154,7 +154,7 @@ export function extractConnectionStringParts(connectionString: string): Connecti
       kind: "AccountConnString",
       url: fileEndpoint,
       accountName,
-      accountKey
+      accountKey,
     };
   } else {
     // SAS connection string
@@ -345,8 +345,13 @@ export function base64decode(encodedString: string): string {
  * @param aborter -
  * @param abortError -
  */
-export async function delay(timeInMs: number, aborter?: AbortSignalLike, abortError?: Error) {
+export async function delay(
+  timeInMs: number,
+  aborter?: AbortSignalLike,
+  abortError?: Error
+): Promise<void> {
   return new Promise<void>((resolve, reject) => {
+    /* eslint-disable-next-line prefer-const */
     let timeout: any;
 
     const abortHandler = () => {
@@ -363,41 +368,12 @@ export async function delay(timeInMs: number, aborter?: AbortSignalLike, abortEr
       resolve();
     };
 
+    /* eslint-disable-next-line prefer-const */
     timeout = setTimeout(resolveHandler, timeInMs);
     if (aborter !== undefined) {
       aborter.addEventListener("abort", abortHandler);
     }
   });
-}
-
-/**
- * String.prototype.padStart()
- *
- * @param currentString -
- * @param targetLength -
- * @param padString -
- */
-export function padStart(
-  currentString: string,
-  targetLength: number,
-  padString: string = " "
-): string {
-  // TS doesn't know this code needs to run downlevel sometimes.
-  // @ts-expect-error
-  if (String.prototype.padStart) {
-    return currentString.padStart(targetLength, padString);
-  }
-
-  padString = padString || " ";
-  if (currentString.length > targetLength) {
-    return currentString;
-  } else {
-    targetLength = targetLength - currentString.length;
-    if (targetLength > padString.length) {
-      padString += padString.repeat(targetLength / padString.length);
-    }
-    return padString.slice(0, targetLength) + currentString;
-  }
 }
 
 export function sanitizeURL(url: string): string {
@@ -449,18 +425,18 @@ export function getAccountNameFromUrl(url: string): string {
       accountName = "";
     }
     return accountName;
-  } catch (error) {
+  } catch (error: any) {
     throw new Error("Unable to extract accountName with provided information.");
   }
 }
 
 export function isIpEndpointStyle(parsedUrl: URLBuilder): boolean {
-  if (parsedUrl.getHost() == undefined) {
+  if (parsedUrl.getHost() === undefined) {
     return false;
   }
 
   const host =
-    parsedUrl.getHost()! + (parsedUrl.getPort() == undefined ? "" : ":" + parsedUrl.getPort());
+    parsedUrl.getHost()! + (parsedUrl.getPort() === undefined ? "" : ":" + parsedUrl.getPort());
 
   // Case 1: Ipv6, use a broad regex to find out candidates whose host contains two ':'.
   // Case 2: localhost(:port), use broad regex to match port part.
@@ -471,9 +447,11 @@ export function isIpEndpointStyle(parsedUrl: URLBuilder): boolean {
   );
 }
 
-export function getShareNameAndPathFromUrl(
-  url: string
-): { baseName: string; shareName: string; path: string } {
+export function getShareNameAndPathFromUrl(url: string): {
+  baseName: string;
+  shareName: string;
+  path: string;
+} {
   //  URL may look like the following
   // "https://myaccount.file.core.windows.net/myshare/mydirectory/file?sasString";
   // "https://myaccount.file.core.windows.net/myshare/mydirectory/file";
@@ -525,7 +503,7 @@ export function getShareNameAndPathFromUrl(
     } else {
       return { baseName, shareName, path };
     }
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(
       "Unable to extract shareName and filePath/directoryPath with provided information."
     );
@@ -535,7 +513,29 @@ export function getShareNameAndPathFromUrl(
 export function httpAuthorizationToString(
   httpAuthorization?: HttpAuthorization
 ): string | undefined {
-  return httpAuthorization
-    ? httpAuthorization.scheme + " " + httpAuthorization.parameter
-    : undefined;
+  return httpAuthorization ? httpAuthorization.scheme + " " + httpAuthorization.value : undefined;
+}
+
+/**
+ * Set URL path.
+ *
+ * @param url - URL to change path to.
+ * @param path - Path to set into the URL.
+ */
+export function setURLPath(url: string, path?: string): string {
+  const urlParsed = URLBuilder.parse(url);
+  urlParsed.setPath(path);
+  return urlParsed.toString();
+}
+
+/**
+ * Set URL query string.
+ *
+ * @param url - URL to set query string to.
+ * @param queryString - Query string to set to the URL.
+ */
+export function setURLQueries(url: string, queryString: string): string {
+  const urlParsed = URLBuilder.parse(url);
+  urlParsed.setQuery(queryString);
+  return urlParsed.toString();
 }

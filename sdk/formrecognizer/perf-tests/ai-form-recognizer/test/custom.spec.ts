@@ -1,17 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import {
-  PerfStressOptionDictionary,
-  PerfStressTest,
-  getEnvVar
-} from "@azure/test-utils-perfstress";
+import { PerfOptionDictionary, PerfTest, getEnvVar } from "@azure/test-utils-perf";
 import {
   AzureKeyCredential,
   BeginRecognizeCustomFormsOptions,
   CustomFormModel,
   FormRecognizerClient,
-  FormTrainingClient
+  FormTrainingClient,
 } from "@azure/ai-form-recognizer";
 import { DefaultAzureCredential, TokenCredential } from "@azure/identity";
 
@@ -19,15 +15,15 @@ function unreachable(message?: string): never {
   throw new Error(message ?? "Unreachable Exception.");
 }
 
-export class CustomModelRecognitionTest extends PerfStressTest<BeginRecognizeCustomFormsOptions> {
-  public options: PerfStressOptionDictionary<BeginRecognizeCustomFormsOptions> = {
+export class CustomModelRecognitionTest extends PerfTest<BeginRecognizeCustomFormsOptions> {
+  public options: PerfOptionDictionary<BeginRecognizeCustomFormsOptions> = {
     updateIntervalInMs: {
       required: false,
       description: "Polling interval in milliseconds",
       shortName: "u",
       longName: "update-interval",
-      defaultValue: 5000
-    }
+      defaultValue: 5000,
+    },
   };
 
   /**
@@ -69,7 +65,7 @@ export class CustomModelRecognitionTest extends PerfStressTest<BeginRecognizeCus
       CustomModelRecognitionTest.sessionModel = await poller.pollUntilDone();
 
       console.log(`Trained custom model: ${CustomModelRecognitionTest.sessionModel.modelId}`);
-    } catch (ex) {
+    } catch (ex: any) {
       console.trace(ex);
       throw ex;
     }
@@ -83,7 +79,7 @@ export class CustomModelRecognitionTest extends PerfStressTest<BeginRecognizeCus
     }
   }
 
-  async runAsync(): Promise<void> {
+  async run(): Promise<void> {
     const modelId = CustomModelRecognitionTest.sessionModel?.modelId;
     if (!modelId) {
       return unreachable("Failed to initialize model.");
@@ -93,7 +89,7 @@ export class CustomModelRecognitionTest extends PerfStressTest<BeginRecognizeCus
       modelId,
       this.documentUrl,
       {
-        updateIntervalInMs: this.parsedOptions.updateIntervalInMs?.value
+        updateIntervalInMs: this.parsedOptions.updateIntervalInMs?.value,
       }
     );
 

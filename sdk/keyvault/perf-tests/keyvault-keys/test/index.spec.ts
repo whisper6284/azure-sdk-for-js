@@ -1,13 +1,9 @@
-import { PerfStressProgram, selectPerfStressTest } from "@azure/test-utils-perfstress";
+import { createPerfProgram } from "@azure/test-utils-perf";
 import { GetKeyTest } from "./keys/get.spec";
 import { DecryptTest } from "./cryptography/decrypt.spec";
 import { SignTest } from "./cryptography/sign.spec";
 import { UnwrapKeyTest } from "./cryptography/unwrapKey.spec";
 
-console.log("=== Starting the perfStress test ===");
+const perfProgram = createPerfProgram(GetKeyTest, DecryptTest, SignTest, UnwrapKeyTest);
 
-const perfStressProgram = new PerfStressProgram(
-  selectPerfStressTest([GetKeyTest, DecryptTest, SignTest, UnwrapKeyTest])
-);
-
-perfStressProgram.run();
+perfProgram.run();

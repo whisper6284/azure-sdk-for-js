@@ -12,24 +12,24 @@ import * as coreClient from "@azure/core-client";
 import * as coreTracing from "@azure/core-tracing";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ArtifactsClientContext } from "../artifactsClientContext";
+import { ArtifactsClient } from "../artifactsClient";
 import {
-  TriggerRunOperationsRerunTriggerInstanceOptionalParams,
-  TriggerRunOperationsCancelTriggerInstanceOptionalParams,
+  TriggerRunRerunTriggerInstanceOptionalParams,
+  TriggerRunCancelTriggerInstanceOptionalParams,
   RunFilterParameters,
-  TriggerRunOperationsQueryTriggerRunsByWorkspaceOptionalParams,
-  TriggerRunOperationsQueryTriggerRunsByWorkspaceResponse
+  TriggerRunQueryTriggerRunsByWorkspaceOptionalParams,
+  TriggerRunQueryTriggerRunsByWorkspaceResponse
 } from "../models";
 
-/** Class representing a TriggerRunOperations. */
+/** Class containing TriggerRunOperations operations. */
 export class TriggerRunOperationsImpl implements TriggerRunOperations {
-  private readonly client: ArtifactsClientContext;
+  private readonly client: ArtifactsClient;
 
   /**
    * Initialize a new instance of the class TriggerRunOperations class.
    * @param client Reference to the service client
    */
-  constructor(client: ArtifactsClientContext) {
+  constructor(client: ArtifactsClient) {
     this.client = client;
   }
 
@@ -42,7 +42,7 @@ export class TriggerRunOperationsImpl implements TriggerRunOperations {
   async rerunTriggerInstance(
     triggerName: string,
     runId: string,
-    options?: TriggerRunOperationsRerunTriggerInstanceOptionalParams
+    options?: TriggerRunRerunTriggerInstanceOptionalParams
   ): Promise<void> {
     const { span } = createSpan(
       "ArtifactsClient-rerunTriggerInstance",
@@ -54,7 +54,7 @@ export class TriggerRunOperationsImpl implements TriggerRunOperations {
         rerunTriggerInstanceOperationSpec
       );
       return result as void;
-    } catch (error) {
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -74,7 +74,7 @@ export class TriggerRunOperationsImpl implements TriggerRunOperations {
   async cancelTriggerInstance(
     triggerName: string,
     runId: string,
-    options?: TriggerRunOperationsCancelTriggerInstanceOptionalParams
+    options?: TriggerRunCancelTriggerInstanceOptionalParams
   ): Promise<void> {
     const { span } = createSpan(
       "ArtifactsClient-cancelTriggerInstance",
@@ -86,7 +86,7 @@ export class TriggerRunOperationsImpl implements TriggerRunOperations {
         cancelTriggerInstanceOperationSpec
       );
       return result as void;
-    } catch (error) {
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -104,8 +104,8 @@ export class TriggerRunOperationsImpl implements TriggerRunOperations {
    */
   async queryTriggerRunsByWorkspace(
     filterParameters: RunFilterParameters,
-    options?: TriggerRunOperationsQueryTriggerRunsByWorkspaceOptionalParams
-  ): Promise<TriggerRunOperationsQueryTriggerRunsByWorkspaceResponse> {
+    options?: TriggerRunQueryTriggerRunsByWorkspaceOptionalParams
+  ): Promise<TriggerRunQueryTriggerRunsByWorkspaceResponse> {
     const { span } = createSpan(
       "ArtifactsClient-queryTriggerRunsByWorkspace",
       options || {}
@@ -115,8 +115,8 @@ export class TriggerRunOperationsImpl implements TriggerRunOperations {
         { filterParameters, options },
         queryTriggerRunsByWorkspaceOperationSpec
       );
-      return result as TriggerRunOperationsQueryTriggerRunsByWorkspaceResponse;
-    } catch (error) {
+      return result as TriggerRunQueryTriggerRunsByWorkspaceResponse;
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -139,7 +139,7 @@ const rerunTriggerInstanceOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.endpoint,
     Parameters.runId,
@@ -157,7 +157,7 @@ const cancelTriggerInstanceOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.endpoint,
     Parameters.runId,
@@ -178,7 +178,7 @@ const queryTriggerRunsByWorkspaceOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.filterParameters,
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",

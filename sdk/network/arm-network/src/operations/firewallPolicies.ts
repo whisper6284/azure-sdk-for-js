@@ -6,16 +6,14 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { FirewallPolicies } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { NetworkManagementClientContext } from "../networkManagementClientContext";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
-import { LroEngine } from "../lro";
-import { CoreClientLro, shouldDeserializeLro } from "../coreClientLro";
+import { NetworkManagementClient } from "../networkManagementClient";
+import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
+import { LroImpl } from "../lroImpl";
 import {
   FirewallPolicy,
   FirewallPoliciesListNextOptionalParams,
@@ -27,6 +25,9 @@ import {
   FirewallPoliciesGetResponse,
   FirewallPoliciesCreateOrUpdateOptionalParams,
   FirewallPoliciesCreateOrUpdateResponse,
+  TagsObject,
+  FirewallPoliciesUpdateTagsOptionalParams,
+  FirewallPoliciesUpdateTagsResponse,
   FirewallPoliciesListResponse,
   FirewallPoliciesListAllResponse,
   FirewallPoliciesListNextResponse,
@@ -34,15 +35,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a FirewallPolicies. */
+/** Class containing FirewallPolicies operations. */
 export class FirewallPoliciesImpl implements FirewallPolicies {
-  private readonly client: NetworkManagementClientContext;
+  private readonly client: NetworkManagementClient;
 
   /**
    * Initialize a new instance of the class FirewallPolicies class.
    * @param client Reference to the service client
    */
-  constructor(client: NetworkManagementClientContext) {
+  constructor(client: NetworkManagementClient) {
     this.client = client;
   }
 
@@ -188,13 +189,18 @@ export class FirewallPoliciesImpl implements FirewallPolicies {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       { resourceGroupName, firewallPolicyName, options },
-      deleteOperationSpec,
-      "location"
+      deleteOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "location"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -290,13 +296,18 @@ export class FirewallPoliciesImpl implements FirewallPolicies {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       { resourceGroupName, firewallPolicyName, parameters, options },
-      createOrUpdateOperationSpec,
-      "azure-async-operation"
+      createOrUpdateOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "azure-async-operation"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -319,6 +330,25 @@ export class FirewallPoliciesImpl implements FirewallPolicies {
       options
     );
     return poller.pollUntilDone();
+  }
+
+  /**
+   * Updates tags of a Azure Firewall Policy resource.
+   * @param resourceGroupName The name of the resource group.
+   * @param firewallPolicyName The name of the Firewall Policy.
+   * @param parameters Parameters supplied to update Azure Firewall Policy tags.
+   * @param options The options parameters.
+   */
+  updateTags(
+    resourceGroupName: string,
+    firewallPolicyName: string,
+    parameters: TagsObject,
+    options?: FirewallPoliciesUpdateTagsOptionalParams
+  ): Promise<FirewallPoliciesUpdateTagsResponse> {
+    return this.client.sendOperationRequest(
+      { resourceGroupName, firewallPolicyName, parameters, options },
+      updateTagsOperationSpec
+    );
   }
 
   /**
@@ -448,6 +478,30 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.parameters15,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.resourceGroupName,
+    Parameters.subscriptionId,
+    Parameters.firewallPolicyName
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer
+};
+const updateTagsOperationSpec: coreClient.OperationSpec = {
+  path:
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/firewallPolicies/{firewallPolicyName}",
+  httpMethod: "PATCH",
+  responses: {
+    200: {
+      bodyMapper: Mappers.FirewallPolicy
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
+    }
+  },
+  requestBody: Parameters.parameters1,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,

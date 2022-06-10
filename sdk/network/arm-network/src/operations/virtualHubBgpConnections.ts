@@ -6,16 +6,14 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { VirtualHubBgpConnections } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { NetworkManagementClientContext } from "../networkManagementClientContext";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
-import { LroEngine } from "../lro";
-import { CoreClientLro, shouldDeserializeLro } from "../coreClientLro";
+import { NetworkManagementClient } from "../networkManagementClient";
+import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
+import { LroImpl } from "../lroImpl";
 import {
   BgpConnection,
   VirtualHubBgpConnectionsListNextOptionalParams,
@@ -29,15 +27,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a VirtualHubBgpConnections. */
+/** Class containing VirtualHubBgpConnections operations. */
 export class VirtualHubBgpConnectionsImpl implements VirtualHubBgpConnections {
-  private readonly client: NetworkManagementClientContext;
+  private readonly client: NetworkManagementClient;
 
   /**
    * Initialize a new instance of the class VirtualHubBgpConnections class.
    * @param client Reference to the service client
    */
-  constructor(client: NetworkManagementClientContext) {
+  constructor(client: NetworkManagementClient) {
     this.client = client;
   }
 
@@ -174,13 +172,18 @@ export class VirtualHubBgpConnectionsImpl implements VirtualHubBgpConnections {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       { resourceGroupName, hubName, connectionName, options },
-      listLearnedRoutesOperationSpec,
-      "location"
+      listLearnedRoutesOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "location"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -262,13 +265,18 @@ export class VirtualHubBgpConnectionsImpl implements VirtualHubBgpConnections {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       { resourceGroupName, hubName, connectionName, options },
-      listAdvertisedRoutesOperationSpec,
-      "location"
+      listAdvertisedRoutesOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "location"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**

@@ -4,9 +4,11 @@
 
 ```ts
 
+/// <reference lib="esnext.asynciterable" />
+
+import { CommonClientOptions } from '@azure/core-client';
 import { KeyCredential } from '@azure/core-auth';
-import { OperationOptions } from '@azure/core-http';
-import { PipelineOptions } from '@azure/core-http';
+import { OperationOptions } from '@azure/core-client';
 import { TokenCredential } from '@azure/core-auth';
 
 // @public
@@ -18,7 +20,7 @@ export class SmsClient {
 }
 
 // @public
-export interface SmsClientOptions extends PipelineOptions {
+export interface SmsClientOptions extends CommonClientOptions {
 }
 
 // @public
@@ -42,7 +44,6 @@ export interface SmsSendResult {
     successful: boolean;
     to: string;
 }
-
 
 // (No @packageDocumentation comment for this package)
 

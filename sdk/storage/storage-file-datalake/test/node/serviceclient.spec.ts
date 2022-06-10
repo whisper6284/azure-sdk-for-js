@@ -1,23 +1,21 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { record, Recorder } from "@azure/test-utils-recorder";
-import * as assert from "assert";
-import * as dotenv from "dotenv";
+import { record, Recorder } from "@azure-tools/test-recorder";
+import { assert } from "chai";
+import { Context } from "mocha";
 
 import { DataLakeServiceClient } from "../../src";
 import { recorderEnvSetup, getConnectionStringFromEnvironment } from "../utils";
 
-dotenv.config();
-
 describe("DataLakeServiceClient", () => {
   let recorder: Recorder;
 
-  beforeEach(async function() {
+  beforeEach(async function (this: Context) {
     recorder = record(this, recorderEnvSetup);
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await recorder.stop();
   });
 
@@ -26,8 +24,8 @@ describe("DataLakeServiceClient", () => {
       getConnectionStringFromEnvironment(),
       {
         retryOptions: {
-          maxTries: 1
-        }
+          maxTries: 1,
+        },
       }
     );
 

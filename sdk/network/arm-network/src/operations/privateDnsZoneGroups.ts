@@ -6,16 +6,14 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { PrivateDnsZoneGroups } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { NetworkManagementClientContext } from "../networkManagementClientContext";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
-import { LroEngine } from "../lro";
-import { CoreClientLro, shouldDeserializeLro } from "../coreClientLro";
+import { NetworkManagementClient } from "../networkManagementClient";
+import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
+import { LroImpl } from "../lroImpl";
 import {
   PrivateDnsZoneGroup,
   PrivateDnsZoneGroupsListNextOptionalParams,
@@ -30,15 +28,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a PrivateDnsZoneGroups. */
+/** Class containing PrivateDnsZoneGroups operations. */
 export class PrivateDnsZoneGroupsImpl implements PrivateDnsZoneGroups {
-  private readonly client: NetworkManagementClientContext;
+  private readonly client: NetworkManagementClient;
 
   /**
    * Initialize a new instance of the class PrivateDnsZoneGroups class.
    * @param client Reference to the service client
    */
-  constructor(client: NetworkManagementClientContext) {
+  constructor(client: NetworkManagementClient) {
     this.client = client;
   }
 
@@ -165,7 +163,7 @@ export class PrivateDnsZoneGroupsImpl implements PrivateDnsZoneGroups {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       {
         resourceGroupName,
@@ -173,10 +171,15 @@ export class PrivateDnsZoneGroupsImpl implements PrivateDnsZoneGroups {
         privateDnsZoneGroupName,
         options
       },
-      deleteOperationSpec,
-      "location"
+      deleteOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "location"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -284,7 +287,7 @@ export class PrivateDnsZoneGroupsImpl implements PrivateDnsZoneGroups {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       {
         resourceGroupName,
@@ -293,10 +296,15 @@ export class PrivateDnsZoneGroupsImpl implements PrivateDnsZoneGroups {
         parameters,
         options
       },
-      createOrUpdateOperationSpec,
-      "azure-async-operation"
+      createOrUpdateOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "azure-async-operation"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -431,7 +439,7 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  requestBody: Parameters.parameters45,
+  requestBody: Parameters.parameters49,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,

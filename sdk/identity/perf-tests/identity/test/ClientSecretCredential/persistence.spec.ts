@@ -1,15 +1,15 @@
-import { PerfStressTest, getEnvVar } from "@azure/test-utils-perfstress";
-import { useIdentityExtension, ClientSecretCredential } from "@azure/identity";
+import { PerfTest, getEnvVar } from "@azure/test-utils-perf";
+import { useIdentityPlugin, ClientSecretCredential } from "@azure/identity";
 
-import { cachePersistenceExtension } from "@azure/identity-cache-persistence";
-useIdentityExtension(cachePersistenceExtension);
+import { cachePersistencePlugin } from "@azure/identity-cache-persistence";
+useIdentityPlugin(cachePersistencePlugin);
 
 const scope = `https://servicebus.azure.net/.default`;
 
 /**
  * This test does silent authentication with persistence enabled.
  */
-export class ClientSecretCredentialPersistenceTest extends PerfStressTest {
+export class ClientSecretCredentialPersistenceTest extends PerfTest {
   options = {};
   static credential: ClientSecretCredential;
 
@@ -24,8 +24,8 @@ export class ClientSecretCredentialPersistenceTest extends PerfStressTest {
       tokenCachePersistenceOptions: {
         enabled: true,
         name: "nodeTestSilent",
-        allowUnencryptedStorage: true
-      }
+        unsafeAllowUnencryptedStorage: true,
+      },
     });
 
     // This getToken call will cache the token.
@@ -34,7 +34,7 @@ export class ClientSecretCredentialPersistenceTest extends PerfStressTest {
     ClientSecretCredentialPersistenceTest.credential = credential;
   }
 
-  async runAsync(): Promise<void> {
+  async run(): Promise<void> {
     await ClientSecretCredentialPersistenceTest.credential.getToken(scope);
   }
 }

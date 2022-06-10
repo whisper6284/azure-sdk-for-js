@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { padStart } from "../../src/utils/utils.common";
-import { env, RecorderEnvironmentSetup } from "@azure/test-utils-recorder";
+import { env, RecorderEnvironmentSetup } from "@azure-tools/test-recorder";
 
 export function isBrowser(): boolean {
   return typeof self !== "undefined";
@@ -21,7 +20,7 @@ export const recorderEnvSetup: RecorderEnvironmentSetup = {
     STORAGE_CONNECTION_STRING: `DefaultEndpointsProtocol=https;AccountName=${mockAccountName};AccountKey=${mockAccountKey};EndpointSuffix=core.windows.net`,
     // Comment following line to skip user delegation key/SAS related cases in record and play
     // which depends on this environment variable
-    ACCOUNT_TOKEN: `${mockAccountKey}`
+    ACCOUNT_TOKEN: `${mockAccountKey}`,
   },
   customizationsOnRecordings: [
     // Used in record mode
@@ -31,7 +30,7 @@ export const recorderEnvSetup: RecorderEnvironmentSetup = {
       recording.replace(
         new RegExp(env.ACCOUNT_SAS.match("(.*)&sig=(.*)")[2], "g"),
         `${mockAccountKey}`
-      )
+      ),
   ],
   // SAS token may contain sensitive information
   queryParametersToSkip: [
@@ -43,16 +42,14 @@ export const recorderEnvSetup: RecorderEnvironmentSetup = {
     "srt",
     "ss",
     "st",
-    "sv"
-  ]
+    "sv",
+  ],
 };
 
 export function getUniqueName(prefix: string): string {
-  return `${prefix}${new Date().getTime()}${padStart(
-    Math.floor(Math.random() * 10000).toString(),
-    5,
-    "00000"
-  )}`;
+  return `${prefix}${new Date().getTime()}${Math.floor(Math.random() * 10000)
+    .toString()
+    .padStart(5, "00000")}`;
 }
 
 export function base64encode(content: string): string {

@@ -4,10 +4,16 @@
 
 ```ts
 
+/// <reference types="node" />
+/// <reference lib="esnext.asynciterable" />
+
+import { CommonClientOptions } from '@azure/core-client';
 import { OperationOptions } from '@azure/core-client';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PipelineOptions } from '@azure/core-rest-pipeline';
 import { TokenCredential } from '@azure/core-auth';
+
+// @public
+export type ArtifactManifestOrder = "LastUpdatedOnDescending" | "LastUpdatedOnAscending";
 
 // @public
 export interface ArtifactManifestPlatform {
@@ -30,9 +36,12 @@ export interface ArtifactManifestProperties {
     readonly registryLoginServer: string;
     readonly relatedArtifacts: ArtifactManifestPlatform[];
     readonly repositoryName: string;
-    readonly size?: number;
+    readonly sizeInBytes?: number;
     readonly tags: string[];
 }
+
+// @public
+export type ArtifactTagOrder = "LastUpdatedOnDescending" | "LastUpdatedOnAscending";
 
 // @public
 export interface ArtifactTagProperties {
@@ -49,6 +58,26 @@ export interface ArtifactTagProperties {
 }
 
 // @public
+export class ContainerRegistryBlobClient {
+    constructor(endpoint: string, repositoryName: string, credential: TokenCredential, options: ContainerRegistryBlobClientOptions);
+    deleteBlob(digest: string, options?: DeleteBlobOptions): Promise<void>;
+    deleteManifest(digest: string, options?: DeleteManifestOptions): Promise<void>;
+    downloadBlob(digest: string, options?: DownloadBlobOptions): Promise<DownloadBlobResult>;
+    downloadManifest(tagOrDigest: string, options?: DownloadManifestOptions): Promise<DownloadManifestResult>;
+    readonly endpoint: string;
+    readonly repositoryName: string;
+    uploadBlob(blobStreamFactory: () => NodeJS.ReadableStream): Promise<UploadBlobResult>;
+    uploadBlob(blobStream: NodeJS.ReadableStream): Promise<UploadBlobResult>;
+    uploadManifest(manifest: (() => NodeJS.ReadableStream) | NodeJS.ReadableStream | OciManifest, options?: UploadManifestOptions): Promise<UploadManifestResult>;
+}
+
+// @public
+export interface ContainerRegistryBlobClientOptions extends CommonClientOptions {
+    audience: string;
+    serviceVersion?: "2021-07-01";
+}
+
+// @public
 export class ContainerRegistryClient {
     constructor(endpoint: string, credential: TokenCredential, options?: ContainerRegistryClientOptions);
     constructor(endpoint: string, options?: ContainerRegistryClientOptions);
@@ -60,8 +89,9 @@ export class ContainerRegistryClient {
 }
 
 // @public
-export interface ContainerRegistryClientOptions extends PipelineOptions {
-    authenticationScope?: string;
+export interface ContainerRegistryClientOptions extends CommonClientOptions {
+    audience?: string;
+    serviceVersion?: "2021-07-01";
 }
 
 // @public
@@ -87,11 +117,18 @@ export interface ContainerRepositoryProperties {
     readonly name: string;
     readonly registryLoginServer: string;
     readonly tagCount: number;
-    teleportEnabled?: boolean;
 }
 
 // @public
 export interface DeleteArtifactOptions extends OperationOptions {
+}
+
+// @public
+export interface DeleteBlobOptions extends OperationOptions {
+}
+
+// @public
+export interface DeleteManifestOptions extends OperationOptions {
 }
 
 // @public
@@ -100,6 +137,32 @@ export interface DeleteRepositoryOptions extends OperationOptions {
 
 // @public
 export interface DeleteTagOptions extends OperationOptions {
+}
+
+// @public
+export class DigestMismatchError extends Error {
+    constructor(message: string);
+}
+
+// @public
+export interface DownloadBlobOptions extends OperationOptions {
+}
+
+// @public
+export interface DownloadBlobResult {
+    content: NodeJS.ReadableStream;
+    digest: string;
+}
+
+// @public
+export interface DownloadManifestOptions extends OperationOptions {
+}
+
+// @public
+export interface DownloadManifestResult {
+    digest: string;
+    manifest: OciManifest;
+    manifestStream: NodeJS.ReadableStream;
 }
 
 // @public
@@ -150,8 +213,16 @@ export enum KnownArtifactOperatingSystem {
 }
 
 // @public
+export enum KnownContainerRegistryAudience {
+    AzureResourceManagerChina = "https://management.chinacloudapi.cn",
+    AzureResourceManagerGermany = "https://management.microsoftazure.de",
+    AzureResourceManagerGovernment = "https://management.usgovcloudapi.net",
+    AzureResourceManagerPublicCloud = "https://management.azure.com"
+}
+
+// @public
 export interface ListManifestPropertiesOptions extends OperationOptions {
-    orderBy?: ManifestOrderBy;
+    order?: ArtifactManifestOrder;
 }
 
 // @public
@@ -160,15 +231,46 @@ export interface ListRepositoriesOptions extends OperationOptions {
 
 // @public
 export interface ListTagPropertiesOptions extends OperationOptions {
-    orderBy?: TagOrderBy;
+    order?: ArtifactTagOrder;
 }
-
-// @public
-export type ManifestOrderBy = "LastUpdatedOnDescending" | "LastUpdatedOnAscending";
 
 // @public
 export interface ManifestPageResponse extends Array<ArtifactManifestProperties> {
     continuationToken?: string;
+}
+
+// @public
+export interface OciAnnotations {
+    [additionalProperties: string]: unknown;
+    authors?: string;
+    createdOn?: Date;
+    description?: string;
+    documentation?: string;
+    licenses?: string;
+    name?: string;
+    revision?: string;
+    source?: string;
+    title?: string;
+    url?: string;
+    vendor?: string;
+    version?: string;
+}
+
+// @public
+export interface OciBlobDescriptor {
+    annotations?: OciAnnotations;
+    digest: string;
+    mediaType: string;
+    size: number;
+    urls?: string[];
+}
+
+// @public
+export interface OciManifest {
+    annotations?: OciAnnotations;
+    config?: OciBlobDescriptor;
+    layers?: OciBlobDescriptor[];
+    schemaVersion: number;
 }
 
 // @public
@@ -191,9 +293,6 @@ export interface RepositoryPageResponse extends Array<string> {
 }
 
 // @public
-export type TagOrderBy = "LastUpdatedOnDescending" | "LastUpdatedOnAscending";
-
-// @public
 export interface TagPageResponse extends Array<ArtifactTagProperties> {
     continuationToken?: string;
 }
@@ -212,7 +311,6 @@ export interface UpdateRepositoryPropertiesOptions extends OperationOptions {
     canList?: boolean;
     canRead?: boolean;
     canWrite?: boolean;
-    teleportEnabled?: boolean;
 }
 
 // @public
@@ -223,6 +321,20 @@ export interface UpdateTagPropertiesOptions extends OperationOptions {
     canWrite?: boolean;
 }
 
+// @public
+export interface UploadBlobResult {
+    digest: string;
+}
+
+// @public
+export interface UploadManifestOptions extends OperationOptions {
+    tag: string;
+}
+
+// @public
+export interface UploadManifestResult {
+    digest: string;
+}
 
 // (No @packageDocumentation comment for this package)
 

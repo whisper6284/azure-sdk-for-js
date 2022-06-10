@@ -6,13 +6,13 @@ import {
   DeletionRecoveryLevel,
   KeyUsageType,
   JsonWebKeyType as CertificateKeyType,
-  JsonWebKeyCurveName as CertificateKeyCurveName
+  JsonWebKeyCurveName as CertificateKeyCurveName,
 } from "./generated/models";
 
 /**
  * The latest supported KeyVault service API version
  */
-export const LATEST_API_VERSION = "7.2";
+export const LATEST_API_VERSION = "7.3";
 
 /**
  * The optional parameters accepted by the KeyVault's KeyClient
@@ -21,7 +21,7 @@ export interface CertificateClientOptions extends coreHttp.PipelineOptions {
   /**
    * The accepted versions of the KeyVault's service API.
    */
-  serviceVersion?: "7.0" | "7.1" | "7.2";
+  serviceVersion?: "7.0" | "7.1" | "7.2" | "7.3";
 }
 
 /**
@@ -192,7 +192,7 @@ export enum WellKnownIssuerNames {
   /**
    * For certificates whose issuer will be defined later
    */
-  Unknown = "Unknown"
+  Unknown = "Unknown",
 }
 
 /**
@@ -382,7 +382,7 @@ export type ImportCertificatePolicy = CertificatePolicyProperties &
  */
 export const DefaultCertificatePolicy = {
   issuerName: "Self",
-  subject: "cn=MyCert"
+  subject: "cn=MyCert",
 };
 
 /**
@@ -439,6 +439,7 @@ export interface CertificateProperties {
   readonly vaultUrl?: string;
   /**
    * The version of certificate. May be undefined.
+   * **NOTE: This property will not be serialized. It can only be populated by the server.**
    */
   readonly version?: string;
   /**
@@ -813,3 +814,91 @@ export type RequireAtLeastOne<T> = {
  * which are: emailAddress, name or phone.
  */
 export type CertificateContact = RequireAtLeastOne<CertificateContactAll> | undefined;
+
+/** Known values of {@link CertificateKeyCurveName} that the service accepts. */
+export enum KnownCertificateKeyCurveNames {
+  /**
+   * P-256 Key Curve.
+   */
+  P256 = "P-256",
+  /**
+   * P-384 Key Curve.
+   */
+  P384 = "P-384",
+  /**
+   * P-521 Key Curve.
+   */
+  P521 = "P-521",
+  /**
+   * P-256K Key Curve.
+   */
+  P256K = "P-256K",
+}
+
+/** Known values of {@link CertificateKeyType} that the service accepts. */
+export enum KnownCertificateKeyTypes {
+  /**
+   * EC Key Type.
+   */
+  EC = "EC",
+  /**
+   * EC-HSM Key Type.
+   */
+  ECHSM = "EC-HSM",
+  /**
+   * RSA Key Type.
+   */
+  RSA = "RSA",
+  /**
+   * RSA-HSM Key Type.
+   */
+  RSAHSM = "RSA-HSM",
+  /**
+   * oct Key Type
+   */
+  Oct = "oct",
+  /**
+   * oct-HSM Key Type
+   */
+  OctHSM = "oct-HSM",
+}
+
+/** Known values of {@link KeyUsageType} that the service accepts. */
+export enum KnownKeyUsageTypes {
+  /**
+   * DigitalSignature Usage Type.
+   */
+  DigitalSignature = "digitalSignature",
+  /**
+   * NonRepudiation Usage Type.
+   */
+  NonRepudiation = "nonRepudiation",
+  /**
+   * KeyEncipherment Usage Type.
+   */
+  KeyEncipherment = "keyEncipherment",
+  /**
+   * DataEncipherment Usage Type.
+   */
+  DataEncipherment = "dataEncipherment",
+  /**
+   * KeyAgreement Usage Type.
+   */
+  KeyAgreement = "keyAgreement",
+  /**
+   * KeyCertSign Usage Type.
+   */
+  KeyCertSign = "keyCertSign",
+  /**
+   * CRLSign Usage Type.
+   */
+  CRLSign = "cRLSign",
+  /**
+   * EncipherOnly Usage Type.
+   */
+  EncipherOnly = "encipherOnly",
+  /**
+   * DecipherOnly Usage Type.
+   */
+  DecipherOnly = "decipherOnly",
+}

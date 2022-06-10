@@ -1,4 +1,4 @@
-import { PerfStressTest } from "@azure/test-utils-perfstress";
+import { PerfTest } from "@azure/test-utils-perf";
 import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
 import {
   AuthorizeRequestOnChallengeOptions,
@@ -9,7 +9,7 @@ import {
   HttpClient,
   Pipeline,
   PipelineRequest,
-  PipelineResponse
+  PipelineResponse,
 } from "@azure/core-rest-pipeline";
 import { TextDecoder } from "util";
 
@@ -110,13 +110,13 @@ class MockRefreshAzureCredential implements TokenCredential {
     this.scopesAndClaims.push({
       scope,
       // Architects haven't decided about the claims property
-      challengeClaims: undefined // options.claims
+      challengeClaims: undefined, // options.claims
     });
     return Promise.resolve(this.getTokenResponse);
   }
 }
 
-export class BearerTokenAuthenticationPolicyChallengeTest extends PerfStressTest {
+export class BearerTokenAuthenticationPolicyChallengeTest extends PerfTest {
   options = {};
 
   constructor() {
@@ -130,23 +130,23 @@ export class BearerTokenAuthenticationPolicyChallengeTest extends PerfStressTest
   async globalSetup(): Promise<void> {
     const scope = "http://localhost/.default";
     const challengeClaims = JSON.stringify({
-      access_token: { foo: "bar" }
+      access_token: { foo: "bar" },
     });
 
     const request = createPipelineRequest({ url: "https://example.com" });
     const responses: PipelineResponse[] = [
       {
         headers: createHttpHeaders({
-          "WWW-Authenticate": `Bearer scope="${scope}", claims="${encodeString(challengeClaims)}"`
+          "WWW-Authenticate": `Bearer scope="${scope}", claims="${encodeString(challengeClaims)}"`,
         }),
         request,
-        status: 401
+        status: 401,
       },
       {
         headers: createHttpHeaders(),
         request,
-        status: 200
-      }
+        status: 200,
+      },
     ];
 
     const expiresOn = Date.now() + 5000;
@@ -166,8 +166,8 @@ export class BearerTokenAuthenticationPolicyChallengeTest extends PerfStressTest
             request.headers.set("Authorization", `Bearer ${cachedToken}`);
           }
         },
-        authorizeRequestOnChallenge
-      }
+        authorizeRequestOnChallenge,
+      },
     });
 
     pipeline.addPolicy(bearerPolicy);
@@ -189,11 +189,11 @@ export class BearerTokenAuthenticationPolicyChallengeTest extends PerfStressTest
         responsesCount++;
         response.request = req;
         return response;
-      }
+      },
     };
   }
 
-  async runAsync(): Promise<void> {
+  async run(): Promise<void> {
     const { pipeline, testHttpsClient, request } = BearerTokenAuthenticationPolicyChallengeTest;
     await pipeline!.sendRequest(testHttpsClient!, request!);
   }

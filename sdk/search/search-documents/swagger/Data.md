@@ -10,16 +10,18 @@ generate-metadata: false
 license-header: MICROSOFT_MIT_NO_VERSION
 output-folder: ../
 source-code-folder-path: ./src/generated/data
-input-file: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/d2183715d380084ff04313a73c8803d042fe91b9/specification/search/data-plane/Azure.Search/preview/2021-04-30-Preview/searchindex.json
+input-file: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/d850f41f89530917000d8e6bb463f42bb745b930/specification/search/data-plane/Azure.Search/preview/2021-04-30-Preview/searchindex.json
 add-credentials: false
 title: SearchClient
 use-extension:
-  "@autorest/typescript": "6.0.0-beta.4"
+  "@autorest/typescript": "6.0.0-alpha.17.20220318.1"
+core-http-compat-mode: true
+package-version: 11.3.0-beta.8
 disable-async-iterators: true
 api-version-parameter: choice
 v3: true
 hide-clients: true
-use-core-v2: false
+use-core-v2: true
 ```
 
 ## Customizations for Track 2 Generator

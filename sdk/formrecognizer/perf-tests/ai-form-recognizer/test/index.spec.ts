@@ -1,14 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { PerfStressProgram, selectPerfStressTest } from "@azure/test-utils-perfstress";
+import { createPerfProgram } from "@azure/test-utils-perf";
 import { CustomModelRecognitionTest } from "./custom.spec";
 
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("=== Starting the perfStress test ===");
+const perfProgram = createPerfProgram(CustomModelRecognitionTest);
 
-const perfStressProgram = new PerfStressProgram(selectPerfStressTest([CustomModelRecognitionTest]));
-
-perfStressProgram.run();
+perfProgram.run();

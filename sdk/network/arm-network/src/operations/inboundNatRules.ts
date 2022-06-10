@@ -6,16 +6,14 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { InboundNatRules } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { NetworkManagementClientContext } from "../networkManagementClientContext";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
-import { LroEngine } from "../lro";
-import { CoreClientLro, shouldDeserializeLro } from "../coreClientLro";
+import { NetworkManagementClient } from "../networkManagementClient";
+import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
+import { LroImpl } from "../lroImpl";
 import {
   InboundNatRule,
   InboundNatRulesListNextOptionalParams,
@@ -30,20 +28,20 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a InboundNatRules. */
+/** Class containing InboundNatRules operations. */
 export class InboundNatRulesImpl implements InboundNatRules {
-  private readonly client: NetworkManagementClientContext;
+  private readonly client: NetworkManagementClient;
 
   /**
    * Initialize a new instance of the class InboundNatRules class.
    * @param client Reference to the service client
    */
-  constructor(client: NetworkManagementClientContext) {
+  constructor(client: NetworkManagementClient) {
     this.client = client;
   }
 
   /**
-   * Gets all the inbound nat rules in a load balancer.
+   * Gets all the inbound NAT rules in a load balancer.
    * @param resourceGroupName The name of the resource group.
    * @param loadBalancerName The name of the load balancer.
    * @param options The options parameters.
@@ -110,7 +108,7 @@ export class InboundNatRulesImpl implements InboundNatRules {
   }
 
   /**
-   * Gets all the inbound nat rules in a load balancer.
+   * Gets all the inbound NAT rules in a load balancer.
    * @param resourceGroupName The name of the resource group.
    * @param loadBalancerName The name of the load balancer.
    * @param options The options parameters.
@@ -127,10 +125,10 @@ export class InboundNatRulesImpl implements InboundNatRules {
   }
 
   /**
-   * Deletes the specified load balancer inbound nat rule.
+   * Deletes the specified load balancer inbound NAT rule.
    * @param resourceGroupName The name of the resource group.
    * @param loadBalancerName The name of the load balancer.
-   * @param inboundNatRuleName The name of the inbound nat rule.
+   * @param inboundNatRuleName The name of the inbound NAT rule.
    * @param options The options parameters.
    */
   async beginDelete(
@@ -178,20 +176,25 @@ export class InboundNatRulesImpl implements InboundNatRules {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       { resourceGroupName, loadBalancerName, inboundNatRuleName, options },
-      deleteOperationSpec,
-      "location"
+      deleteOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "location"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
-   * Deletes the specified load balancer inbound nat rule.
+   * Deletes the specified load balancer inbound NAT rule.
    * @param resourceGroupName The name of the resource group.
    * @param loadBalancerName The name of the load balancer.
-   * @param inboundNatRuleName The name of the inbound nat rule.
+   * @param inboundNatRuleName The name of the inbound NAT rule.
    * @param options The options parameters.
    */
   async beginDeleteAndWait(
@@ -210,10 +213,10 @@ export class InboundNatRulesImpl implements InboundNatRules {
   }
 
   /**
-   * Gets the specified load balancer inbound nat rule.
+   * Gets the specified load balancer inbound NAT rule.
    * @param resourceGroupName The name of the resource group.
    * @param loadBalancerName The name of the load balancer.
-   * @param inboundNatRuleName The name of the inbound nat rule.
+   * @param inboundNatRuleName The name of the inbound NAT rule.
    * @param options The options parameters.
    */
   get(
@@ -229,11 +232,11 @@ export class InboundNatRulesImpl implements InboundNatRules {
   }
 
   /**
-   * Creates or updates a load balancer inbound nat rule.
+   * Creates or updates a load balancer inbound NAT rule.
    * @param resourceGroupName The name of the resource group.
    * @param loadBalancerName The name of the load balancer.
-   * @param inboundNatRuleName The name of the inbound nat rule.
-   * @param inboundNatRuleParameters Parameters supplied to the create or update inbound nat rule
+   * @param inboundNatRuleName The name of the inbound NAT rule.
+   * @param inboundNatRuleParameters Parameters supplied to the create or update inbound NAT rule
    *                                 operation.
    * @param options The options parameters.
    */
@@ -288,7 +291,7 @@ export class InboundNatRulesImpl implements InboundNatRules {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       {
         resourceGroupName,
@@ -297,18 +300,23 @@ export class InboundNatRulesImpl implements InboundNatRules {
         inboundNatRuleParameters,
         options
       },
-      createOrUpdateOperationSpec,
-      "azure-async-operation"
+      createOrUpdateOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "azure-async-operation"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
-   * Creates or updates a load balancer inbound nat rule.
+   * Creates or updates a load balancer inbound NAT rule.
    * @param resourceGroupName The name of the resource group.
    * @param loadBalancerName The name of the load balancer.
-   * @param inboundNatRuleName The name of the inbound nat rule.
-   * @param inboundNatRuleParameters Parameters supplied to the create or update inbound nat rule
+   * @param inboundNatRuleName The name of the inbound NAT rule.
+   * @param inboundNatRuleParameters Parameters supplied to the create or update inbound NAT rule
    *                                 operation.
    * @param options The options parameters.
    */

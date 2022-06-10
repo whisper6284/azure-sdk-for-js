@@ -1,28 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import {
-  PipelineRequest,
-  PipelineResponse,
-  HttpClient,
-  SendRequest,
-  ProxySettings
-} from "./interfaces";
-import { LogPolicyOptions, logPolicy } from "./policies/logPolicy";
-import { UserAgentPolicyOptions, userAgentPolicy } from "./policies/userAgentPolicy";
-import { RedirectPolicyOptions, redirectPolicy } from "./policies/redirectPolicy";
-import {
-  ExponentialRetryPolicyOptions,
-  exponentialRetryPolicy
-} from "./policies/exponentialRetryPolicy";
-import { tracingPolicy } from "./policies/tracingPolicy";
-import { setClientRequestIdPolicy } from "./policies/setClientRequestIdPolicy";
-import { throttlingRetryPolicy } from "./policies/throttlingRetryPolicy";
-import { systemErrorRetryPolicy } from "./policies/systemErrorRetryPolicy";
-import { decompressResponsePolicy } from "./policies/decompressResponsePolicy";
-import { proxyPolicy } from "./policies/proxyPolicy";
-import { isNode } from "./util/helpers";
-import { formDataPolicy } from "./policies/formDataPolicy";
+import { HttpClient, PipelineRequest, PipelineResponse, SendRequest } from "./interfaces";
 
 /**
  * Policies are executed in phases.
@@ -31,10 +10,11 @@ import { formDataPolicy } from "./policies/formDataPolicy";
  * 2. Policies not in a phase
  * 3. Deserialize Phase
  * 4. Retry Phase
+ * 5. Sign Phase
  */
-export type PipelinePhase = "Deserialize" | "Serialize" | "Retry";
+export type PipelinePhase = "Deserialize" | "Serialize" | "Retry" | "Sign";
 
-const ValidPhaseNames = new Set<PipelinePhase>(["Deserialize", "Serialize", "Retry"]);
+const ValidPhaseNames = new Set<PipelinePhase>(["Deserialize", "Serialize", "Retry", "Sign"]);
 
 /**
  * Options when adding a policy to the pipeline.
@@ -121,7 +101,13 @@ interface PolicyGraphNode {
   policy: PipelinePolicy;
   dependsOn: Set<PolicyGraphNode>;
   dependants: Set<PolicyGraphNode>;
-  afterPhase?: Set<PolicyGraphNode>;
+  afterPhase?: Phase;
+}
+
+interface Phase {
+  name: PipelinePhase | "None";
+  policies: Set<PolicyGraphNode>;
+  hasRun: boolean;
 }
 
 /**
@@ -150,7 +136,7 @@ class HttpPipeline implements Pipeline {
     }
     this._policies.push({
       policy,
-      options
+      options,
     });
     this._orderedPolicies = undefined;
   }
@@ -215,6 +201,7 @@ class HttpPipeline implements Pipeline {
      * 2. Policies not in a phase
      * 3. Deserialize Phase
      * 4. Retry Phase
+     * 5. Sign Phase
      *
      * Within each phase, policies are executed in the order
      * they were added unless they were specified to execute
@@ -244,23 +231,34 @@ class HttpPipeline implements Pipeline {
     // Track all policies we know about.
     const policyMap: Map<string, PolicyGraphNode> = new Map<string, PolicyGraphNode>();
 
+    function createPhase(name: PipelinePhase | "None"): Phase {
+      return {
+        name,
+        policies: new Set<PolicyGraphNode>(),
+        hasRun: false,
+      };
+    }
+
     // Track policies for each phase.
-    const serializePhase = new Set<PolicyGraphNode>();
-    const noPhase = new Set<PolicyGraphNode>();
-    const deserializePhase = new Set<PolicyGraphNode>();
-    const retryPhase = new Set<PolicyGraphNode>();
+    const serializePhase = createPhase("Serialize");
+    const noPhase = createPhase("None");
+    const deserializePhase = createPhase("Deserialize");
+    const retryPhase = createPhase("Retry");
+    const signPhase = createPhase("Sign");
 
     // a list of phases in order
-    const orderedPhases = [serializePhase, noPhase, deserializePhase, retryPhase];
+    const orderedPhases = [serializePhase, noPhase, deserializePhase, retryPhase, signPhase];
 
-    // Small helper function to map phase name to each Set bucket.
-    function getPhase(phase: PipelinePhase | undefined): Set<PolicyGraphNode> {
+    // Small helper function to map phase name to each Phase
+    function getPhase(phase: PipelinePhase | undefined): Phase {
       if (phase === "Retry") {
         return retryPhase;
       } else if (phase === "Serialize") {
         return serializePhase;
       } else if (phase === "Deserialize") {
         return deserializePhase;
+      } else if (phase === "Sign") {
+        return signPhase;
       } else {
         return noPhase;
       }
@@ -277,14 +275,14 @@ class HttpPipeline implements Pipeline {
       const node: PolicyGraphNode = {
         policy,
         dependsOn: new Set<PolicyGraphNode>(),
-        dependants: new Set<PolicyGraphNode>()
+        dependants: new Set<PolicyGraphNode>(),
       };
       if (options.afterPhase) {
         node.afterPhase = getPhase(options.afterPhase);
       }
       policyMap.set(policyName, node);
       const phase = getPhase(options.phase);
-      phase.add(node);
+      phase.policies.add(node);
     }
 
     // Now that each policy has a node, connect dependency references.
@@ -320,12 +318,15 @@ class HttpPipeline implements Pipeline {
       }
     }
 
-    function walkPhase(phase: Set<PolicyGraphNode>): void {
+    function walkPhase(phase: Phase): void {
+      phase.hasRun = true;
       // Sets iterate in insertion order
-      for (const node of phase) {
-        if (node.afterPhase && node.afterPhase.size) {
+      for (const node of phase.policies) {
+        if (node.afterPhase && (!node.afterPhase.hasRun || node.afterPhase.policies.size)) {
           // If this node is waiting on a phase to complete,
           // we need to skip it for now.
+          // Even if the phase is empty, we should wait for it
+          // to be walked to avoid re-ordering policies.
           continue;
         }
         if (node.dependsOn.size === 0) {
@@ -338,22 +339,17 @@ class HttpPipeline implements Pipeline {
             dependant.dependsOn.delete(node);
           }
           policyMap.delete(node.policy.name);
-          phase.delete(node);
+          phase.policies.delete(node);
         }
       }
     }
 
     function walkPhases(): void {
-      let noPhaseRan = false;
-
       for (const phase of orderedPhases) {
         walkPhase(phase);
-        if (phase === noPhase) {
-          noPhaseRan = true;
-        }
         // if the phase isn't complete
-        if (phase.size > 0 && phase !== noPhase) {
-          if (noPhaseRan === false) {
+        if (phase.policies.size > 0 && phase !== noPhase) {
+          if (!noPhase.hasRun) {
             // Try running noPhase to see if that unblocks this phase next tick.
             // This can happen if a phase that happens before noPhase
             // is waiting on a noPhase policy to complete.
@@ -366,13 +362,16 @@ class HttpPipeline implements Pipeline {
     }
 
     // Iterate until we've put every node in the result list.
+    let iteration = 0;
     while (policyMap.size > 0) {
+      iteration++;
       const initialResultLength = result.length;
       // Keep walking each phase in order until we can order every node.
       walkPhases();
-      // The result list *should* get at least one larger each time.
+      // The result list *should* get at least one larger each time
+      // after the first full pass.
       // Otherwise, we're going to loop forever.
-      if (result.length <= initialResultLength) {
+      if (result.length <= initialResultLength && iteration > 1) {
         throw new Error("Cannot satisfy policy dependencies due to requirements cycle.");
       }
     }
@@ -387,66 +386,4 @@ class HttpPipeline implements Pipeline {
  */
 export function createEmptyPipeline(): Pipeline {
   return HttpPipeline.create();
-}
-
-/**
- * Defines options that are used to configure the HTTP pipeline for
- * an SDK client.
- */
-export interface PipelineOptions {
-  /**
-   * Options that control how to retry failed requests.
-   */
-  retryOptions?: ExponentialRetryPolicyOptions;
-
-  /**
-   * Options to configure a proxy for outgoing requests.
-   */
-  proxyOptions?: ProxySettings;
-
-  /**
-   * Options for how redirect responses are handled.
-   */
-  redirectOptions?: RedirectPolicyOptions;
-
-  /**
-   * Options for adding user agent details to outgoing requests.
-   */
-  userAgentOptions?: UserAgentPolicyOptions;
-}
-
-/**
- * Defines options that are used to configure internal options of
- * the HTTP pipeline for an SDK client.
- */
-export interface InternalPipelineOptions extends PipelineOptions {
-  /**
-   * Options to configure request/response logging.
-   */
-  loggingOptions?: LogPolicyOptions;
-}
-
-/**
- * Create a new pipeline with a default set of customizable policies.
- * @param options - Options to configure a custom pipeline.
- */
-export function createPipelineFromOptions(options: InternalPipelineOptions): Pipeline {
-  const pipeline = HttpPipeline.create();
-
-  if (isNode) {
-    pipeline.addPolicy(proxyPolicy(options.proxyOptions));
-    pipeline.addPolicy(decompressResponsePolicy());
-  }
-
-  pipeline.addPolicy(formDataPolicy());
-  pipeline.addPolicy(tracingPolicy(options.userAgentOptions));
-  pipeline.addPolicy(userAgentPolicy(options.userAgentOptions));
-  pipeline.addPolicy(setClientRequestIdPolicy());
-  pipeline.addPolicy(throttlingRetryPolicy(), { phase: "Retry" });
-  pipeline.addPolicy(systemErrorRetryPolicy(options.retryOptions), { phase: "Retry" });
-  pipeline.addPolicy(exponentialRetryPolicy(options.retryOptions), { phase: "Retry" });
-  pipeline.addPolicy(redirectPolicy(options.redirectOptions), { afterPhase: "Retry" });
-  pipeline.addPolicy(logPolicy(options.loggingOptions), { afterPhase: "Retry" });
-
-  return pipeline;
 }

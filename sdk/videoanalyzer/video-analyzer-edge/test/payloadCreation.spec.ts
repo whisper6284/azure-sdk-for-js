@@ -7,8 +7,8 @@ import {
   RtspSource,
   UnsecuredEndpoint,
   NodeInput,
-  IotHubMessageSink,
-  createRequest
+  VideoSink,
+  createRequest,
 } from "../src";
 
 describe("test", () => {
@@ -21,21 +21,23 @@ describe("test", () => {
         credentials: {
           username: "${rtspUserName}",
           password: "${rtspPassword}",
-          "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials"
-        }
+          "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
+        },
       } as UnsecuredEndpoint,
-      "@type": "#Microsoft.VideoAnalyzer.RtspSource"
+      "@type": "#Microsoft.VideoAnalyzer.RtspSource",
     };
 
     const nodeInput: NodeInput = {
-      nodeName: "rtspSource"
+      nodeName: "rtspSource",
     };
 
-    const msgSink: IotHubMessageSink = {
-      name: "msgSink",
+    const videoSink: VideoSink = {
+      name: "videoSink",
       inputs: [nodeInput],
-      hubOutputName: "${hubSinkOutputName}",
-      "@type": "#Microsoft.VideoAnalyzer.IotHubMessageSink"
+      videoName: "video",
+      localMediaCachePath: "/var/lib/videoanalyzer/tmp/",
+      localMediaCacheMaximumSizeMiB: "1024",
+      "@type": "#Microsoft.VideoAnalyzer.VideoSink",
     };
 
     const pipelineTopology: PipelineTopology = {
@@ -46,14 +48,13 @@ describe("test", () => {
           { name: "rtspUserName", type: "String", default: "dummyUsername" },
           { name: "rtspPassword", type: "SecretString", default: "dummyPassword" },
           { name: "rtspUrl", type: "String" },
-          { name: "hubSinkOutputName", type: "String" }
         ],
         sources: [rtspSource],
-        sinks: [msgSink]
-      }
+        sinks: [videoSink],
+      },
     };
 
     const pipelineTopologySetRequest = createRequest("pipelineTopologySet", pipelineTopology);
-    assert.strictEqual(pipelineTopologySetRequest.payload["@apiVersion"], "1.0");
+    assert.strictEqual(pipelineTopologySetRequest.payload["@apiVersion"], "1.1");
   });
 });

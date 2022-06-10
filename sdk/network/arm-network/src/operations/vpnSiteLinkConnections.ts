@@ -10,21 +10,21 @@ import { VpnSiteLinkConnections } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { NetworkManagementClientContext } from "../networkManagementClientContext";
+import { NetworkManagementClient } from "../networkManagementClient";
 import {
   VpnSiteLinkConnectionsGetOptionalParams,
   VpnSiteLinkConnectionsGetResponse
 } from "../models";
 
-/** Class representing a VpnSiteLinkConnections. */
+/** Class containing VpnSiteLinkConnections operations. */
 export class VpnSiteLinkConnectionsImpl implements VpnSiteLinkConnections {
-  private readonly client: NetworkManagementClientContext;
+  private readonly client: NetworkManagementClient;
 
   /**
    * Initialize a new instance of the class VpnSiteLinkConnections class.
    * @param client Reference to the service client
    */
-  constructor(client: NetworkManagementClientContext) {
+  constructor(client: NetworkManagementClient) {
     this.client = client;
   }
 

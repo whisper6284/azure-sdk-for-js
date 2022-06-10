@@ -6,40 +6,39 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { DiskRestorePointOperations } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ComputeManagementClientContext } from "../computeManagementClientContext";
+import { ComputeManagementClient } from "../computeManagementClient";
 import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
 import { LroImpl } from "../lroImpl";
 import {
   DiskRestorePoint,
-  DiskRestorePointOperationsListByRestorePointNextOptionalParams,
-  DiskRestorePointOperationsListByRestorePointOptionalParams,
-  DiskRestorePointOperationsGetOptionalParams,
-  DiskRestorePointOperationsGetResponse,
-  DiskRestorePointOperationsListByRestorePointResponse,
+  DiskRestorePointListByRestorePointNextOptionalParams,
+  DiskRestorePointListByRestorePointOptionalParams,
+  DiskRestorePointGetOptionalParams,
+  DiskRestorePointGetResponse,
+  DiskRestorePointListByRestorePointResponse,
   GrantAccessData,
-  DiskRestorePointOperationsGrantAccessOptionalParams,
-  DiskRestorePointOperationsGrantAccessResponse,
-  DiskRestorePointOperationsRevokeAccessOptionalParams,
-  DiskRestorePointOperationsListByRestorePointNextResponse
+  DiskRestorePointGrantAccessOptionalParams,
+  DiskRestorePointGrantAccessResponse,
+  DiskRestorePointRevokeAccessOptionalParams,
+  DiskRestorePointListByRestorePointNextResponse
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a DiskRestorePointOperations. */
+/** Class containing DiskRestorePointOperations operations. */
 export class DiskRestorePointOperationsImpl
   implements DiskRestorePointOperations {
-  private readonly client: ComputeManagementClientContext;
+  private readonly client: ComputeManagementClient;
 
   /**
    * Initialize a new instance of the class DiskRestorePointOperations class.
    * @param client Reference to the service client
    */
-  constructor(client: ComputeManagementClientContext) {
+  constructor(client: ComputeManagementClient) {
     this.client = client;
   }
 
@@ -47,17 +46,15 @@ export class DiskRestorePointOperationsImpl
    * Lists diskRestorePoints under a vmRestorePoint.
    * @param resourceGroupName The name of the resource group.
    * @param restorePointCollectionName The name of the restore point collection that the disk restore
-   *                                   point belongs. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is
-   *                                   80 characters.
+   *                                   point belongs.
    * @param vmRestorePointName The name of the vm restore point that the disk disk restore point belongs.
-   *                           Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   public listByRestorePoint(
     resourceGroupName: string,
     restorePointCollectionName: string,
     vmRestorePointName: string,
-    options?: DiskRestorePointOperationsListByRestorePointOptionalParams
+    options?: DiskRestorePointListByRestorePointOptionalParams
   ): PagedAsyncIterableIterator<DiskRestorePoint> {
     const iter = this.listByRestorePointPagingAll(
       resourceGroupName,
@@ -87,7 +84,7 @@ export class DiskRestorePointOperationsImpl
     resourceGroupName: string,
     restorePointCollectionName: string,
     vmRestorePointName: string,
-    options?: DiskRestorePointOperationsListByRestorePointOptionalParams
+    options?: DiskRestorePointListByRestorePointOptionalParams
   ): AsyncIterableIterator<DiskRestorePoint[]> {
     let result = await this._listByRestorePoint(
       resourceGroupName,
@@ -114,7 +111,7 @@ export class DiskRestorePointOperationsImpl
     resourceGroupName: string,
     restorePointCollectionName: string,
     vmRestorePointName: string,
-    options?: DiskRestorePointOperationsListByRestorePointOptionalParams
+    options?: DiskRestorePointListByRestorePointOptionalParams
   ): AsyncIterableIterator<DiskRestorePoint> {
     for await (const page of this.listByRestorePointPagingPage(
       resourceGroupName,
@@ -130,12 +127,9 @@ export class DiskRestorePointOperationsImpl
    * Get disk restorePoint resource
    * @param resourceGroupName The name of the resource group.
    * @param restorePointCollectionName The name of the restore point collection that the disk restore
-   *                                   point belongs. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is
-   *                                   80 characters.
+   *                                   point belongs.
    * @param vmRestorePointName The name of the vm restore point that the disk disk restore point belongs.
-   *                           Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
-   * @param diskRestorePointName The name of the disk restore point created. Supported characters for the
-   *                             name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   * @param diskRestorePointName The name of the disk restore point created.
    * @param options The options parameters.
    */
   get(
@@ -143,8 +137,8 @@ export class DiskRestorePointOperationsImpl
     restorePointCollectionName: string,
     vmRestorePointName: string,
     diskRestorePointName: string,
-    options?: DiskRestorePointOperationsGetOptionalParams
-  ): Promise<DiskRestorePointOperationsGetResponse> {
+    options?: DiskRestorePointGetOptionalParams
+  ): Promise<DiskRestorePointGetResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
@@ -161,18 +155,16 @@ export class DiskRestorePointOperationsImpl
    * Lists diskRestorePoints under a vmRestorePoint.
    * @param resourceGroupName The name of the resource group.
    * @param restorePointCollectionName The name of the restore point collection that the disk restore
-   *                                   point belongs. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is
-   *                                   80 characters.
+   *                                   point belongs.
    * @param vmRestorePointName The name of the vm restore point that the disk disk restore point belongs.
-   *                           Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   private _listByRestorePoint(
     resourceGroupName: string,
     restorePointCollectionName: string,
     vmRestorePointName: string,
-    options?: DiskRestorePointOperationsListByRestorePointOptionalParams
-  ): Promise<DiskRestorePointOperationsListByRestorePointResponse> {
+    options?: DiskRestorePointListByRestorePointOptionalParams
+  ): Promise<DiskRestorePointListByRestorePointResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
@@ -188,12 +180,9 @@ export class DiskRestorePointOperationsImpl
    * Grants access to a diskRestorePoint.
    * @param resourceGroupName The name of the resource group.
    * @param restorePointCollectionName The name of the restore point collection that the disk restore
-   *                                   point belongs. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is
-   *                                   80 characters.
+   *                                   point belongs.
    * @param vmRestorePointName The name of the vm restore point that the disk disk restore point belongs.
-   *                           Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
-   * @param diskRestorePointName The name of the disk restore point created. Supported characters for the
-   *                             name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   * @param diskRestorePointName The name of the disk restore point created.
    * @param grantAccessData Access data object supplied in the body of the get disk access operation.
    * @param options The options parameters.
    */
@@ -203,17 +192,17 @@ export class DiskRestorePointOperationsImpl
     vmRestorePointName: string,
     diskRestorePointName: string,
     grantAccessData: GrantAccessData,
-    options?: DiskRestorePointOperationsGrantAccessOptionalParams
+    options?: DiskRestorePointGrantAccessOptionalParams
   ): Promise<
     PollerLike<
-      PollOperationState<DiskRestorePointOperationsGrantAccessResponse>,
-      DiskRestorePointOperationsGrantAccessResponse
+      PollOperationState<DiskRestorePointGrantAccessResponse>,
+      DiskRestorePointGrantAccessResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
-    ): Promise<DiskRestorePointOperationsGrantAccessResponse> => {
+    ): Promise<DiskRestorePointGrantAccessResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
     const sendOperation = async (
@@ -261,23 +250,22 @@ export class DiskRestorePointOperationsImpl
       },
       grantAccessOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
       lroResourceLocationConfig: "location"
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
    * Grants access to a diskRestorePoint.
    * @param resourceGroupName The name of the resource group.
    * @param restorePointCollectionName The name of the restore point collection that the disk restore
-   *                                   point belongs. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is
-   *                                   80 characters.
+   *                                   point belongs.
    * @param vmRestorePointName The name of the vm restore point that the disk disk restore point belongs.
-   *                           Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
-   * @param diskRestorePointName The name of the disk restore point created. Supported characters for the
-   *                             name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   * @param diskRestorePointName The name of the disk restore point created.
    * @param grantAccessData Access data object supplied in the body of the get disk access operation.
    * @param options The options parameters.
    */
@@ -287,8 +275,8 @@ export class DiskRestorePointOperationsImpl
     vmRestorePointName: string,
     diskRestorePointName: string,
     grantAccessData: GrantAccessData,
-    options?: DiskRestorePointOperationsGrantAccessOptionalParams
-  ): Promise<DiskRestorePointOperationsGrantAccessResponse> {
+    options?: DiskRestorePointGrantAccessOptionalParams
+  ): Promise<DiskRestorePointGrantAccessResponse> {
     const poller = await this.beginGrantAccess(
       resourceGroupName,
       restorePointCollectionName,
@@ -304,12 +292,9 @@ export class DiskRestorePointOperationsImpl
    * Revokes access to a diskRestorePoint.
    * @param resourceGroupName The name of the resource group.
    * @param restorePointCollectionName The name of the restore point collection that the disk restore
-   *                                   point belongs. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is
-   *                                   80 characters.
+   *                                   point belongs.
    * @param vmRestorePointName The name of the vm restore point that the disk disk restore point belongs.
-   *                           Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
-   * @param diskRestorePointName The name of the disk restore point created. Supported characters for the
-   *                             name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   * @param diskRestorePointName The name of the disk restore point created.
    * @param options The options parameters.
    */
   async beginRevokeAccess(
@@ -317,7 +302,7 @@ export class DiskRestorePointOperationsImpl
     restorePointCollectionName: string,
     vmRestorePointName: string,
     diskRestorePointName: string,
-    options?: DiskRestorePointOperationsRevokeAccessOptionalParams
+    options?: DiskRestorePointRevokeAccessOptionalParams
   ): Promise<PollerLike<PollOperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
@@ -369,23 +354,22 @@ export class DiskRestorePointOperationsImpl
       },
       revokeAccessOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
       lroResourceLocationConfig: "location"
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
    * Revokes access to a diskRestorePoint.
    * @param resourceGroupName The name of the resource group.
    * @param restorePointCollectionName The name of the restore point collection that the disk restore
-   *                                   point belongs. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is
-   *                                   80 characters.
+   *                                   point belongs.
    * @param vmRestorePointName The name of the vm restore point that the disk disk restore point belongs.
-   *                           Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
-   * @param diskRestorePointName The name of the disk restore point created. Supported characters for the
-   *                             name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   * @param diskRestorePointName The name of the disk restore point created.
    * @param options The options parameters.
    */
   async beginRevokeAccessAndWait(
@@ -393,7 +377,7 @@ export class DiskRestorePointOperationsImpl
     restorePointCollectionName: string,
     vmRestorePointName: string,
     diskRestorePointName: string,
-    options?: DiskRestorePointOperationsRevokeAccessOptionalParams
+    options?: DiskRestorePointRevokeAccessOptionalParams
   ): Promise<void> {
     const poller = await this.beginRevokeAccess(
       resourceGroupName,
@@ -409,10 +393,8 @@ export class DiskRestorePointOperationsImpl
    * ListByRestorePointNext
    * @param resourceGroupName The name of the resource group.
    * @param restorePointCollectionName The name of the restore point collection that the disk restore
-   *                                   point belongs. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is
-   *                                   80 characters.
+   *                                   point belongs.
    * @param vmRestorePointName The name of the vm restore point that the disk disk restore point belongs.
-   *                           Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
    * @param nextLink The nextLink from the previous successful call to the ListByRestorePoint method.
    * @param options The options parameters.
    */
@@ -421,8 +403,8 @@ export class DiskRestorePointOperationsImpl
     restorePointCollectionName: string,
     vmRestorePointName: string,
     nextLink: string,
-    options?: DiskRestorePointOperationsListByRestorePointNextOptionalParams
-  ): Promise<DiskRestorePointOperationsListByRestorePointNextResponse> {
+    options?: DiskRestorePointListByRestorePointNextOptionalParams
+  ): Promise<DiskRestorePointListByRestorePointNextResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
@@ -450,11 +432,11 @@ const getOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.restorePointCollectionName,
     Parameters.vmRestorePointName,
     Parameters.diskRestorePointName
@@ -474,11 +456,11 @@ const listByRestorePointOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.restorePointCollectionName,
     Parameters.vmRestorePointName
   ],
@@ -507,11 +489,11 @@ const grantAccessOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.grantAccessData,
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.restorePointCollectionName,
     Parameters.vmRestorePointName,
     Parameters.diskRestorePointName
@@ -533,11 +515,11 @@ const revokeAccessOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.restorePointCollectionName,
     Parameters.vmRestorePointName,
     Parameters.diskRestorePointName
@@ -556,12 +538,12 @@ const listByRestorePointNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.nextLink,
+    Parameters.resourceGroupName,
     Parameters.restorePointCollectionName,
     Parameters.vmRestorePointName
   ],

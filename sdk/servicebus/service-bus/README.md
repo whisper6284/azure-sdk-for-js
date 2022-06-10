@@ -37,7 +37,7 @@ Install the latest version for the Azure Service Bus client library using npm.
 - An [Azure subscription](https://azure.microsoft.com/free/)
 - A [Service Bus Namespace](https://docs.microsoft.com/azure/service-bus-messaging/) 
 
-### Configure Typescript
+### Configure TypeScript
 
 TypeScript users need to have Node type definitions installed:
 
@@ -50,6 +50,49 @@ You also need to enable `compilerOptions.allowSyntheticDefaultImports` in your t
 ### JavaScript Bundle
 
 To use this client library in the browser, first you need to use a bundler. For details on how to do this, please refer to our [bundling documentation](https://aka.ms/AzureSDKBundling).
+
+In addition to what is described there, this library also needs additional polyfills for the following NodeJS core built-in modules in order to work properly in the browsers:
+
+- `buffer`
+- `os`
+- `path`
+- `process`
+
+For example, if you are using Webpack v5, you can install the following dev dependencies
+
+- `npm install --save-dev buffer os-browserify path-browserify process`
+
+then add the following into your webpack.config.js
+
+```diff
+ const path = require("path");
++const webpack = require("webpack");
+
+ module.exports = {
+   entry: "./src/index.ts",
+@@ -12,8 +13,21 @@ module.exports = {
+       },
+     ],
+   },
++  plugins: [
++    new webpack.ProvidePlugin({
++      process: "process/browser",
++    }),
++    new webpack.ProvidePlugin({
++      Buffer: ["buffer", "Buffer"],
++    }),
++  ],
+   resolve: {
+     extensions: [".ts", ".js"],
++    fallback: {
++      buffer: require.resolve("buffer/"),
++      os: require.resolve("os-browserify"),
++      path: require.resolve("path-browserify"),
++    },
+   },
+```
+
+Please consult the documentation of your favorite bundler for more information on using polyfills.
 
 ### Authenticate the client
 

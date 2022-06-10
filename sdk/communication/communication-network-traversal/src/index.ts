@@ -3,4 +3,9 @@
 
 export * from "./communicationRelayClient";
 export * from "./models";
-export { CommunicationIceServer, CommunicationRelayConfiguration } from "./generated/src/models";
+export {
+  CommunicationIceServer,
+  CommunicationRelayConfiguration,
+  RouteType,
+  KnownRouteType,
+} from "./generated/src/models";

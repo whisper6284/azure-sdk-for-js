@@ -1,5 +1,5 @@
 {
-  "name": "azure-digital-twins-core-samples-ts",
+  "name": "@azure-samples/digital-twins-core-ts",
   "private": true,
   "version": "1.0.0",
   "description": "Azure Digital Twins client library samples for TypeScript",
@@ -35,7 +35,7 @@
   "dependencies": {
     "@azure/digital-twins-core": "latest",
     "dotenv": "latest",
-    "@azure/identity": "^1.1.0",
+    "@azure/identity": "^2.0.1",
     "uuid": "^8.3.0"
   },
   "devDependencies": {

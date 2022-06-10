@@ -6,13 +6,12 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { VirtualMachineRunCommands } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ComputeManagementClientContext } from "../computeManagementClientContext";
+import { ComputeManagementClient } from "../computeManagementClient";
 import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
 import { LroImpl } from "../lroImpl";
 import {
@@ -39,16 +38,16 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a VirtualMachineRunCommands. */
+/** Class containing VirtualMachineRunCommands operations. */
 export class VirtualMachineRunCommandsImpl
   implements VirtualMachineRunCommands {
-  private readonly client: ComputeManagementClientContext;
+  private readonly client: ComputeManagementClient;
 
   /**
    * Initialize a new instance of the class VirtualMachineRunCommands class.
    * @param client Reference to the service client
    */
-  constructor(client: ComputeManagementClientContext) {
+  constructor(client: ComputeManagementClient) {
     this.client = client;
   }
 
@@ -265,10 +264,12 @@ export class VirtualMachineRunCommandsImpl
       { resourceGroupName, vmName, runCommandName, runCommand, options },
       createOrUpdateOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -360,10 +361,12 @@ export class VirtualMachineRunCommandsImpl
       { resourceGroupName, vmName, runCommandName, runCommand, options },
       updateOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -448,10 +451,12 @@ export class VirtualMachineRunCommandsImpl
       { resourceGroupName, vmName, runCommandName, options },
       deleteOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -563,8 +568,8 @@ const listOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.location1
+    Parameters.location,
+    Parameters.subscriptionId
   ],
   headerParameters: [Parameters.accept1],
   serializer
@@ -581,8 +586,8 @@ const getOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
+    Parameters.location,
     Parameters.subscriptionId,
-    Parameters.location1,
     Parameters.commandId
   ],
   headerParameters: [Parameters.accept1],
@@ -613,8 +618,8 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.vmName,
     Parameters.runCommandName
   ],
@@ -647,8 +652,8 @@ const updateOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.vmName,
     Parameters.runCommandName
   ],
@@ -672,8 +677,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.vmName,
     Parameters.runCommandName
   ],
@@ -692,11 +697,11 @@ const getByVirtualMachineOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion, Parameters.expand],
+  queryParameters: [Parameters.apiVersion, Parameters.expand1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.vmName,
     Parameters.runCommandName
   ],
@@ -715,11 +720,11 @@ const listByVirtualMachineOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion, Parameters.expand],
+  queryParameters: [Parameters.apiVersion, Parameters.expand1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.vmName
   ],
   headerParameters: [Parameters.accept1],
@@ -736,9 +741,9 @@ const listNextOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
+    Parameters.location,
     Parameters.subscriptionId,
-    Parameters.nextLink,
-    Parameters.location1
+    Parameters.nextLink
   ],
   headerParameters: [Parameters.accept1],
   serializer
@@ -754,12 +759,12 @@ const listByVirtualMachineNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion, Parameters.expand],
+  queryParameters: [Parameters.apiVersion, Parameters.expand1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.nextLink,
+    Parameters.resourceGroupName,
     Parameters.vmName
   ],
   headerParameters: [Parameters.accept1],

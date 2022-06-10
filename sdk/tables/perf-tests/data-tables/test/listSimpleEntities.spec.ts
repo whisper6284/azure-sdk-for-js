@@ -1,4 +1,4 @@
-import { PerfStressOptionDictionary } from "@azure/test-utils-perfstress";
+import { PerfOptionDictionary } from "@azure/test-utils-perf";
 import { TablesTest } from "./tables.spec";
 import { TableEntityResult, TransactionAction } from "@azure/data-tables";
 import { createBatch } from "./utils/createBaseEntity";
@@ -8,13 +8,13 @@ interface ListSimpleEntitiesTestOptions {
 }
 
 export class ListSimpleEntitiesTest extends TablesTest<ListSimpleEntitiesTestOptions> {
-  public options: PerfStressOptionDictionary<ListSimpleEntitiesTestOptions> = {
+  public options: PerfOptionDictionary<ListSimpleEntitiesTestOptions> = {
     entityCount: {
       defaultValue: 100,
       longName: "entityCount",
       shortName: "ec",
-      description: "Number of entities to list. Defaults to 100"
-    }
+      description: "Number of entities to list. Defaults to 100",
+    },
   };
 
   constructor() {
@@ -37,7 +37,7 @@ export class ListSimpleEntitiesTest extends TablesTest<ListSimpleEntitiesTestOpt
     await super.globalCleanup();
   }
 
-  async runAsync(): Promise<void> {
+  async run(): Promise<void> {
     const iter = this.client.listEntities();
     const entities: TableEntityResult<Record<string, unknown>>[] = [];
 

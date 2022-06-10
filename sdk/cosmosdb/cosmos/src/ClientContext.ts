@@ -2,11 +2,15 @@
 // Licensed under the MIT license.
 import { v4 } from "uuid";
 const uuid = v4;
+import {
+  bearerTokenAuthenticationPolicy,
+  createEmptyPipeline,
+  Pipeline,
+} from "@azure/core-rest-pipeline";
 import { PartitionKeyRange } from "./client/Container/PartitionKeyRange";
 import { Resource } from "./client/Resource";
 import { Constants, HTTPMethod, OperationType, ResourceType } from "./common/constants";
 import { getIdFromLink, getPathFromLink, parseLink } from "./common/helper";
-import { logger } from "./common/logger";
 import { StatusCodes, SubStatusCodes } from "./common/statusCodes";
 import { CosmosClientOptions } from "./CosmosClientOptions";
 import { ConnectionPolicy, ConsistencyLevel, DatabaseAccount, PartitionKey } from "./documents";
@@ -24,9 +28,10 @@ import { request as executeRequest } from "./request/RequestHandler";
 import { SessionContainer } from "./session/sessionContainer";
 import { SessionContext } from "./session/SessionContext";
 import { BulkOptions } from "./utils/batch";
+import { sanitizeEndpoint } from "./utils/checkURL";
+import { AzureLogger, createClientLogger } from "@azure/logger";
 
-/** @hidden */
-const log = logger("ClientContext");
+const logger: AzureLogger = createClientLogger("ClientContext");
 
 const QueryJsonContentType = "application/query+json";
 
@@ -37,7 +42,7 @@ const QueryJsonContentType = "application/query+json";
 export class ClientContext {
   private readonly sessionContainer: SessionContainer;
   private connectionPolicy: ConnectionPolicy;
-
+  private pipeline: Pipeline;
   public partitionKeyDefinitionCache: { [containerUrl: string]: any }; // TODO: PartitionKeyDefinitionCache
   public constructor(
     private cosmosClientOptions: CosmosClientOptions,
@@ -46,6 +51,26 @@ export class ClientContext {
     this.connectionPolicy = cosmosClientOptions.connectionPolicy;
     this.sessionContainer = new SessionContainer();
     this.partitionKeyDefinitionCache = {};
+    this.pipeline = null;
+    if (cosmosClientOptions.aadCredentials) {
+      this.pipeline = createEmptyPipeline();
+      const hrefEndpoint = sanitizeEndpoint(cosmosClientOptions.endpoint);
+      const scope = `${hrefEndpoint}/.default`;
+      this.pipeline.addPolicy(
+        bearerTokenAuthenticationPolicy({
+          credential: cosmosClientOptions.aadCredentials,
+          scopes: scope,
+          challengeCallbacks: {
+            async authorizeRequest({ request, getAccessToken }) {
+              const tokenResponse = await getAccessToken([scope], {});
+              const AUTH_PREFIX = `type=aad&ver=1.0&sig=`;
+              const authorizationToken = `${AUTH_PREFIX}${tokenResponse.token}`;
+              request.headers.set("Authorization", authorizationToken);
+            },
+          },
+        })
+      );
+    }
   }
   /** @hidden */
   public async read<T>({
@@ -53,7 +78,7 @@ export class ClientContext {
     resourceType,
     resourceId,
     options = {},
-    partitionKey
+    partitionKey,
   }: {
     path: string;
     resourceType: ResourceType;
@@ -74,7 +99,8 @@ export class ClientContext {
         options,
         resourceType,
         plugins: this.cosmosClientOptions.plugins,
-        partitionKey
+        partitionKey,
+        pipeline: this.pipeline,
       };
 
       request.headers = await this.buildHeaders(request);
@@ -88,7 +114,7 @@ export class ClientContext {
       const response = await executePlugins(request, executeRequest, PluginOn.operation);
       this.captureSessionToken(undefined, path, OperationType.Read, response.headers);
       return response;
-    } catch (err) {
+    } catch (err: any) {
       this.captureSessionToken(err, path, OperationType.Upsert, (err as ErrorResponse).headers);
       throw err;
     }
@@ -102,7 +128,7 @@ export class ClientContext {
     query,
     options,
     partitionKeyRangeId,
-    partitionKey
+    partitionKey,
   }: {
     path: string;
     resourceType: ResourceType;
@@ -130,7 +156,8 @@ export class ClientContext {
       options,
       body: query,
       plugins: this.cosmosClientOptions.plugins,
-      partitionKey
+      partitionKey,
+      pipeline: this.pipeline,
     };
     const requestId = uuid();
     if (query !== undefined) {
@@ -149,16 +176,16 @@ export class ClientContext {
       }
     }
     this.applySessionToken(request);
-    log.info(
+    logger.info(
       "query " +
         requestId +
         " started" +
         (request.partitionKeyRangeId ? " pkrid: " + request.partitionKeyRangeId : "")
     );
-    log.silly(request);
+    logger.verbose(request);
     const start = Date.now();
     const response = await executeRequest(request);
-    log.info("query " + requestId + " finished - " + (Date.now() - start) + "ms");
+    logger.info("query " + requestId + " finished - " + (Date.now() - start) + "ms");
     this.captureSessionToken(undefined, path, OperationType.Query, response.headers);
     return this.processQueryFeedResponse(response, !!query, resultFn);
   }
@@ -182,7 +209,8 @@ export class ClientContext {
       resourceType,
       options,
       body: query,
-      plugins: this.cosmosClientOptions.plugins
+      plugins: this.cosmosClientOptions.plugins,
+      pipeline: this.pipeline,
     };
 
     request.endpoint = await this.globalEndpointManager.resolveServiceEndpoint(
@@ -219,7 +247,7 @@ export class ClientContext {
         resourceId: id,
         resultFn: (result) => result.PartitionKeyRanges,
         query,
-        options: innerOptions
+        options: innerOptions,
       });
     };
     return new QueryIterator<PartitionKeyRange>(this, query, options, cb);
@@ -230,7 +258,7 @@ export class ClientContext {
     resourceType,
     resourceId,
     options = {},
-    partitionKey
+    partitionKey,
   }: {
     path: string;
     resourceType: ResourceType;
@@ -251,7 +279,8 @@ export class ClientContext {
         options,
         resourceId,
         plugins: this.cosmosClientOptions.plugins,
-        partitionKey
+        partitionKey,
+        pipeline: this.pipeline,
       };
 
       request.headers = await this.buildHeaders(request);
@@ -268,7 +297,56 @@ export class ClientContext {
         this.clearSessionToken(path);
       }
       return response;
-    } catch (err) {
+    } catch (err: any) {
+      this.captureSessionToken(err, path, OperationType.Upsert, (err as ErrorResponse).headers);
+      throw err;
+    }
+  }
+
+  public async patch<T>({
+    body,
+    path,
+    resourceType,
+    resourceId,
+    options = {},
+    partitionKey,
+  }: {
+    body: any;
+    path: string;
+    resourceType: ResourceType;
+    resourceId: string;
+    options?: RequestOptions;
+    partitionKey?: PartitionKey;
+  }): Promise<Response<T & Resource>> {
+    try {
+      const request: RequestContext = {
+        globalEndpointManager: this.globalEndpointManager,
+        requestAgent: this.cosmosClientOptions.agent,
+        connectionPolicy: this.connectionPolicy,
+        method: HTTPMethod.patch,
+        client: this,
+        operationType: OperationType.Patch,
+        path,
+        resourceType,
+        body,
+        resourceId,
+        options,
+        plugins: this.cosmosClientOptions.plugins,
+        partitionKey,
+      };
+
+      request.headers = await this.buildHeaders(request);
+      this.applySessionToken(request);
+
+      // patch will use WriteEndpoint
+      request.endpoint = await this.globalEndpointManager.resolveServiceEndpoint(
+        request.resourceType,
+        request.operationType
+      );
+      const response = await executePlugins(request, executeRequest, PluginOn.operation);
+      this.captureSessionToken(undefined, path, OperationType.Patch, response.headers);
+      return response;
+    } catch (err: any) {
       this.captureSessionToken(err, path, OperationType.Upsert, (err as ErrorResponse).headers);
       throw err;
     }
@@ -280,7 +358,7 @@ export class ClientContext {
     resourceType,
     resourceId,
     options = {},
-    partitionKey
+    partitionKey,
   }: {
     body: T;
     path: string;
@@ -303,7 +381,8 @@ export class ClientContext {
         body,
         options,
         plugins: this.cosmosClientOptions.plugins,
-        partitionKey
+        partitionKey,
+        pipeline: this.pipeline,
       };
 
       request.headers = await this.buildHeaders(request);
@@ -317,7 +396,7 @@ export class ClientContext {
       const response = await executePlugins(request, executeRequest, PluginOn.operation);
       this.captureSessionToken(undefined, path, OperationType.Create, response.headers);
       return response;
-    } catch (err) {
+    } catch (err: any) {
       this.captureSessionToken(err, path, OperationType.Upsert, (err as ErrorResponse).headers);
       throw err;
     }
@@ -368,7 +447,7 @@ export class ClientContext {
     resourceType,
     resourceId,
     options = {},
-    partitionKey
+    partitionKey,
   }: {
     body: any;
     path: string;
@@ -391,7 +470,8 @@ export class ClientContext {
         resourceId,
         options,
         plugins: this.cosmosClientOptions.plugins,
-        partitionKey
+        partitionKey,
+        pipeline: this.pipeline,
       };
 
       request.headers = await this.buildHeaders(request);
@@ -405,7 +485,7 @@ export class ClientContext {
       const response = await executePlugins(request, executeRequest, PluginOn.operation);
       this.captureSessionToken(undefined, path, OperationType.Replace, response.headers);
       return response;
-    } catch (err) {
+    } catch (err: any) {
       this.captureSessionToken(err, path, OperationType.Upsert, (err as ErrorResponse).headers);
       throw err;
     }
@@ -417,7 +497,7 @@ export class ClientContext {
     resourceType,
     resourceId,
     options = {},
-    partitionKey
+    partitionKey,
   }: {
     body: T;
     path: string;
@@ -440,7 +520,8 @@ export class ClientContext {
         resourceId,
         options,
         plugins: this.cosmosClientOptions.plugins,
-        partitionKey
+        partitionKey,
+        pipeline: this.pipeline,
       };
 
       request.headers = await this.buildHeaders(request);
@@ -455,7 +536,7 @@ export class ClientContext {
       const response = await executePlugins(request, executeRequest, PluginOn.operation);
       this.captureSessionToken(undefined, path, OperationType.Upsert, response.headers);
       return response;
-    } catch (err) {
+    } catch (err: any) {
       this.captureSessionToken(err, path, OperationType.Upsert, (err as ErrorResponse).headers);
       throw err;
     }
@@ -465,7 +546,7 @@ export class ClientContext {
     sprocLink,
     params,
     options = {},
-    partitionKey
+    partitionKey,
   }: {
     sprocLink: string;
     params?: any[];
@@ -493,7 +574,8 @@ export class ClientContext {
       resourceId: id,
       body: params,
       plugins: this.cosmosClientOptions.plugins,
-      partitionKey
+      partitionKey,
+      pipeline: this.pipeline,
     };
 
     request.headers = await this.buildHeaders(request);
@@ -525,7 +607,8 @@ export class ClientContext {
       path: "",
       resourceType: ResourceType.none,
       options,
-      plugins: this.cosmosClientOptions.plugins
+      plugins: this.cosmosClientOptions.plugins,
+      pipeline: this.pipeline,
     };
 
     request.headers = await this.buildHeaders(request);
@@ -558,7 +641,7 @@ export class ClientContext {
     path,
     partitionKey,
     resourceId,
-    options = {}
+    options = {},
   }: {
     body: T;
     path: string;
@@ -579,12 +662,13 @@ export class ClientContext {
         resourceType: ResourceType.item,
         resourceId,
         plugins: this.cosmosClientOptions.plugins,
-        options
+        options,
+        pipeline: this.pipeline,
+        partitionKey,
       };
 
       request.headers = await this.buildHeaders(request);
       request.headers[Constants.HttpHeaders.IsBatchRequest] = true;
-      request.headers[Constants.HttpHeaders.PartitionKey] = partitionKey;
       request.headers[Constants.HttpHeaders.IsBatchAtomic] = true;
 
       this.applySessionToken(request);
@@ -596,7 +680,7 @@ export class ClientContext {
       const response = await executePlugins(request, executeRequest, PluginOn.operation);
       this.captureSessionToken(undefined, path, OperationType.Batch, response.headers);
       return response;
-    } catch (err) {
+    } catch (err: any) {
       this.captureSessionToken(err, path, OperationType.Upsert, (err as ErrorResponse).headers);
       throw err;
     }
@@ -608,7 +692,7 @@ export class ClientContext {
     partitionKeyRangeId,
     resourceId,
     bulkOptions = {},
-    options = {}
+    options = {},
   }: {
     body: T;
     path: string;
@@ -630,7 +714,8 @@ export class ClientContext {
         resourceType: ResourceType.item,
         resourceId,
         plugins: this.cosmosClientOptions.plugins,
-        options
+        options,
+        pipeline: this.pipeline,
       };
 
       request.headers = await this.buildHeaders(request);
@@ -649,7 +734,7 @@ export class ClientContext {
       const response = await executePlugins(request, executeRequest, PluginOn.operation);
       this.captureSessionToken(undefined, path, OperationType.Batch, response.headers);
       return response;
-    } catch (err) {
+    } catch (err: any) {
       this.captureSessionToken(err, path, OperationType.Upsert, (err as ErrorResponse).headers);
       throw err;
     }
@@ -692,7 +777,7 @@ export class ClientContext {
       resourceId,
       resourceAddress,
       resourceType,
-      isNameBased: true
+      isNameBased: true,
     };
   }
 
@@ -718,7 +803,7 @@ export class ClientContext {
       clientOptions: this.cosmosClientOptions,
       defaultHeaders: {
         ...this.cosmosClientOptions.defaultHeaders,
-        ...requestContext.options.initialHeaders
+        ...requestContext.options.initialHeaders,
       },
       verb: requestContext.method,
       path: requestContext.path,
@@ -727,7 +812,7 @@ export class ClientContext {
       options: requestContext.options,
       partitionKeyRangeId: requestContext.partitionKeyRangeId,
       useMultipleWriteLocations: this.connectionPolicy.useMultipleWriteLocations,
-      partitionKey: requestContext.partitionKey
+      partitionKey: requestContext.partitionKey,
     });
   }
 }

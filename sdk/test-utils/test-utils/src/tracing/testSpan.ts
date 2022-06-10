@@ -2,17 +2,16 @@
 // Licensed under the MIT license.
 
 import {
-  TimeInput,
-  Tracer,
-  SpanKind,
-  SpanStatus,
-  SpanContext,
-  SpanAttributes,
-  SpanStatusCode,
+  Span,
   SpanAttributeValue,
-  Span
-} from "@azure/core-tracing";
-
+  SpanAttributes,
+  SpanContext,
+  SpanKind,
+  Tracer,
+  TimeInput,
+  SpanStatus,
+  SpanStatusCode,
+} from "@opentelemetry/api";
 /**
  * A mock span useful for testing.
  */
@@ -70,19 +69,18 @@ export class TestSpan implements Span {
     context: SpanContext,
     kind: SpanKind,
     parentSpanId?: string,
-    startTime: TimeInput = Date.now()
+    startTime: TimeInput = Date.now(),
+    attributes: SpanAttributes = {}
   ) {
     this._tracer = parentTracer;
     this.name = name;
     this.kind = kind;
     this.startTime = startTime;
     this.parentSpanId = parentSpanId;
-    this.status = {
-      code: SpanStatusCode.OK
-    };
+    this.status = { code: SpanStatusCode.OK };
     this.endCalled = false;
     this._context = context;
-    this.attributes = {};
+    this.attributes = attributes;
   }
 
   /**

@@ -11,8 +11,7 @@ const { SecretClient } = require("@azure/keyvault-secrets");
 const { DefaultAzureCredential } = require("@azure/identity");
 
 // Load the .env file if it exists
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 
 function writeFile(filename, text) {
   return new Promise((resolve, reject) => {
@@ -80,8 +79,9 @@ async function main() {
   await client.beginDeleteSecret(secretName);
 }
 
-main().catch((err) => {
-  console.log("error code: ", err.code);
-  console.log("error message: ", err.message);
-  console.log("error stack: ", err.stack);
+main().catch((error) => {
+  console.error("An error occurred:", error);
+  process.exit(1);
 });
+
+module.exports = { main };

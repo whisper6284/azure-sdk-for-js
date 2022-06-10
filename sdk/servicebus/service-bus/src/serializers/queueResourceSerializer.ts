@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { HttpOperationResponse, OperationOptions } from "@azure/core-http";
+import { FullOperationResponse, OperationOptions } from "@azure/core-client";
 import {
   AtomXmlSerializer,
   deserializeAtomXmlResponse,
-  serializeToAtomXmlRequest
+  serializeToAtomXmlRequest,
 } from "../util/atomXmlHelper";
 import * as Constants from "../util/constants";
 import {
@@ -20,7 +20,7 @@ import {
   getStringOrUndefined,
   getDate,
   EntityStatus,
-  EntityAvailabilityStatus
+  EntityAvailabilityStatus,
 } from "../util/utils";
 
 /**
@@ -55,7 +55,8 @@ export function buildQueueOptions(queue: CreateQueueOptions): InternalQueueOptio
     EnablePartitioning: getStringOrUndefined(queue.enablePartitioning),
     ForwardDeadLetteredMessagesTo: getStringOrUndefined(queue.forwardDeadLetteredMessagesTo),
     EntityAvailabilityStatus: getStringOrUndefined(queue.availabilityStatus),
-    EnableExpress: getStringOrUndefined(queue.enableExpress)
+    EnableExpress: getStringOrUndefined(queue.enableExpress),
+    MaxMessageSizeInKilobytes: getStringOrUndefined(queue.maxMessageSizeInKilobytes),
   };
 }
 
@@ -111,7 +112,11 @@ export function buildQueue(rawQueue: Record<string, any>): QueueProperties {
 
     enableExpress: getBoolean(rawQueue[Constants.ENABLE_EXPRESS], "enableExpress"),
 
-    availabilityStatus: rawQueue[Constants.ENTITY_AVAILABILITY_STATUS]
+    availabilityStatus: rawQueue[Constants.ENTITY_AVAILABILITY_STATUS],
+
+    maxMessageSizeInKilobytes: getIntegerOrUndefined(
+      rawQueue[Constants.MAX_MESSAGE_SIZE_IN_KILOBYTES]
+    ),
   };
 }
 
@@ -129,7 +134,7 @@ export function buildQueueRuntimeProperties(rawQueue: Record<string, any>): Queu
     ...messageCountDetails,
     createdAt: getDate(rawQueue[Constants.CREATED_AT], "createdAt"),
     modifiedAt: getDate(rawQueue[Constants.UPDATED_AT], "modifiedAt"),
-    accessedAt: getDate(rawQueue[Constants.ACCESSED_AT], "accessedAt")
+    accessedAt: getDate(rawQueue[Constants.ACCESSED_AT], "accessedAt"),
   };
 }
 
@@ -155,6 +160,13 @@ export interface CreateQueueOptions extends OperationOptions {
    * will cause the queue to exceed this value will fail.
    */
   maxSizeInMegabytes?: number;
+
+  /**
+   * The maximum message size in kilobytes for messages sent to this queue.
+   *
+   * (Configurable only for Premium Tier Service Bus namespace.)
+   */
+  maxMessageSizeInKilobytes?: number;
 
   /**
    * If enabled, the topic will detect duplicate messages within the time
@@ -300,6 +312,13 @@ export interface QueueProperties {
   maxSizeInMegabytes: number;
 
   /**
+   * The maximum message size in kilobytes for messages sent to this queue.
+   *
+   * Not applicable if service version "2017-04" is chosen when creating the `ServiceBusAdministrationClient`.
+   */
+  maxMessageSizeInKilobytes?: number;
+
+  /**
    * If enabled, the topic will detect duplicate messages within the time
    * span specified by the DuplicateDetectionHistoryTimeWindow property.
    * Settable only at queue creation time.
@@ -435,6 +454,11 @@ export interface InternalQueueOptions {
    *
    */
   MaxSizeInMegabytes?: string;
+
+  /**
+   * The maximum message size in kilobytes for messages sent to this queue/topic.
+   */
+  MaxMessageSizeInKilobytes?: string;
 
   /**
    *  If enabled, the topic will detect duplicate messages within the time
@@ -617,11 +641,11 @@ export interface QueueRuntimeProperties {
  * Atom XML Serializer for Queues.
  */
 export class QueueResourceSerializer implements AtomXmlSerializer {
-  serialize(resource: InternalQueueOptions): object {
+  serialize(resource: InternalQueueOptions): Record<string, unknown> {
     return serializeToAtomXmlRequest("QueueDescription", resource);
   }
 
-  async deserialize(response: HttpOperationResponse): Promise<HttpOperationResponse> {
+  async deserialize(response: FullOperationResponse): Promise<FullOperationResponse> {
     return deserializeAtomXmlResponse(["QueueName"], response);
   }
 }

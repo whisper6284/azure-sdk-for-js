@@ -2,8 +2,14 @@
 // Licensed under the MIT license.
 import { AbortSignalLike } from "@azure/abort-controller";
 import { HttpHeaders, isNode, URLBuilder } from "@azure/core-http";
+import { CpkInfo } from "../models";
 
-import { DevelopmentConnectionString, HeaderConstants, UrlConstants } from "./constants";
+import {
+  DevelopmentConnectionString,
+  EncryptionAlgorithmAES25,
+  HeaderConstants,
+  UrlConstants,
+} from "./constants";
 
 /**
  * Reserved URL characters must be properly escaped for Storage services like Blob or File.
@@ -103,7 +109,7 @@ export function getValueInConnString(
     | "DefaultEndpointsProtocol"
     | "EndpointSuffix"
     | "SharedAccessSignature"
-) {
+): string {
   const elements = connectionString.split(";");
   for (const element of elements) {
     if (element.trim().startsWith(argument)) {
@@ -179,7 +185,7 @@ export function extractConnectionStringParts(connectionString: string): Connecti
       url: blobEndpoint,
       accountName,
       accountKey,
-      proxyUri
+      proxyUri,
     };
   } else {
     // SAS connection string
@@ -333,7 +339,7 @@ export function getURLPathAndQuery(url: string): string | undefined {
 
   let queryString = urlParsed.getQuery() || "";
   queryString = queryString.trim();
-  if (queryString != "") {
+  if (queryString !== "") {
     queryString = queryString.startsWith("?") ? queryString : `?${queryString}`; // Ensure query string start with '?'
   }
 
@@ -450,7 +456,7 @@ export function generateBlockID(blockIDPrefix: string, blockIndex: number): stri
   }
   const res =
     blockIDPrefix +
-    padStart(blockIndex.toString(), maxSourceStringLength - blockIDPrefix.length, "0");
+    blockIndex.toString().padStart(maxSourceStringLength - blockIDPrefix.length, "0");
   return base64encode(res);
 }
 
@@ -461,8 +467,13 @@ export function generateBlockID(blockIDPrefix: string, blockIndex: number): stri
  * @param aborter -
  * @param abortError -
  */
-export async function delay(timeInMs: number, aborter?: AbortSignalLike, abortError?: Error) {
+export async function delay(
+  timeInMs: number,
+  aborter?: AbortSignalLike,
+  abortError?: Error
+): Promise<void> {
   return new Promise<void>((resolve, reject) => {
+    /* eslint-disable-next-line prefer-const*/
     let timeout: any;
 
     const abortHandler = () => {
@@ -484,36 +495,6 @@ export async function delay(timeInMs: number, aborter?: AbortSignalLike, abortEr
       aborter.addEventListener("abort", abortHandler);
     }
   });
-}
-
-/**
- * String.prototype.padStart()
- *
- * @param currentString -
- * @param targetLength -
- * @param padString -
- */
-export function padStart(
-  currentString: string,
-  targetLength: number,
-  padString: string = " "
-): string {
-  // TS doesn't know this code needs to run downlevel sometimes.
-  // @ts-expect-error
-  if (String.prototype.padStart) {
-    return currentString.padStart(targetLength, padString);
-  }
-
-  padString = padString || " ";
-  if (currentString.length > targetLength) {
-    return currentString;
-  } else {
-    targetLength = targetLength - currentString.length;
-    if (targetLength > padString.length) {
-      padString += padString.repeat(targetLength / padString.length);
-    }
-    return padString.slice(0, targetLength) + currentString;
-  }
 }
 
 export function sanitizeURL(url: string): string {
@@ -572,18 +553,18 @@ export function getAccountNameFromUrl(blobEndpointUrl: string): string {
     }
 
     return accountName;
-  } catch (error) {
+  } catch (error: any) {
     throw new Error("Unable to extract accountName with provided information.");
   }
 }
 
 export function isIpEndpointStyle(parsedUrl: URLBuilder): boolean {
-  if (parsedUrl.getHost() == undefined) {
+  if (parsedUrl.getHost() === undefined) {
     return false;
   }
 
   const host =
-    parsedUrl.getHost()! + (parsedUrl.getPort() == undefined ? "" : ":" + parsedUrl.getPort());
+    parsedUrl.getHost()! + (parsedUrl.getPort() === undefined ? "" : ":" + parsedUrl.getPort());
 
   // Case 1: Ipv6, use a broad regex to find out candidates whose host contains two ':'.
   // Case 2: localhost(:port), use broad regex to match port part.
@@ -592,4 +573,32 @@ export function isIpEndpointStyle(parsedUrl: URLBuilder): boolean {
   return /^.*:.*:.*$|^localhost(:[0-9]+)?$|^(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])){3}(:[0-9]+)?$/.test(
     host
   );
+}
+
+/**
+ * This is to convert a Windows File Time ticks to a Date object.
+ */
+export function windowsFileTimeTicksToTime(timeNumber: string | undefined): Date | undefined {
+  if (!timeNumber) return undefined;
+  const timeNumberInternal = parseInt(timeNumber!);
+
+  if (timeNumberInternal === 0) return undefined;
+
+  // A windows file time is a 64-bit value that represents the number of 100-nanosecond intervals that have elapsed
+  // since 12:00 A.M. January 1, 1601 Coordinated Universal Time (UTC).
+  // Date accepts a value that represents miliseconds from 12:00 A.M. January 1, 1970
+  // Here should correct the year number after converting.
+  const date = new Date(timeNumberInternal / 10000);
+  date.setUTCFullYear(date.getUTCFullYear() - 369);
+  return date;
+}
+
+export function ensureCpkIfSpecified(cpk: CpkInfo | undefined, isHttps: boolean): void {
+  if (cpk && !isHttps) {
+    throw new RangeError("Customer-provided encryption key must be used over HTTPS.");
+  }
+
+  if (cpk && !cpk.encryptionAlgorithm) {
+    cpk.encryptionAlgorithm = EncryptionAlgorithmAES25;
+  }
 }

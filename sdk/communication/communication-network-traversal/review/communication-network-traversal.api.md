@@ -4,15 +4,15 @@
 
 ```ts
 
-import { CommunicationUserIdentifier } from '@azure/communication-common';
+import { CommonClientOptions } from '@azure/core-client';
 import { KeyCredential } from '@azure/core-auth';
-import { OperationOptions } from '@azure/core-http';
-import { PipelineOptions } from '@azure/core-http';
+import { OperationOptions } from '@azure/core-client';
 import { TokenCredential } from '@azure/core-auth';
 
 // @public
 export interface CommunicationIceServer {
     credential: string;
+    routeType: RouteType;
     urls: string[];
     username: string;
 }
@@ -22,11 +22,11 @@ export class CommunicationRelayClient {
     constructor(connectionString: string, options?: CommunicationRelayClientOptions);
     constructor(endpoint: string, credential: KeyCredential, options?: CommunicationRelayClientOptions);
     constructor(endpoint: string, credential: TokenCredential, options?: CommunicationRelayClientOptions);
-    getRelayConfiguration(user: CommunicationUserIdentifier, options?: OperationOptions): Promise<CommunicationRelayConfiguration>;
+    getRelayConfiguration(options?: GetRelayConfigurationOptions): Promise<CommunicationRelayConfiguration>;
 }
 
 // @public
-export interface CommunicationRelayClientOptions extends PipelineOptions {
+export interface CommunicationRelayClientOptions extends CommonClientOptions {
 }
 
 // @public
@@ -35,6 +35,25 @@ export interface CommunicationRelayConfiguration {
     iceServers: CommunicationIceServer[];
 }
 
+// @public
+export interface GetRelayConfigurationOptions extends OperationOptions {
+    id?: string;
+    // (undocumented)
+    routeType?: RouteType;
+    // (undocumented)
+    ttl?: number;
+}
+
+// @public
+export enum KnownRouteType {
+    // (undocumented)
+    Any = "any",
+    // (undocumented)
+    Nearest = "nearest"
+}
+
+// @public
+export type RouteType = string;
 
 // (No @packageDocumentation comment for this package)
 

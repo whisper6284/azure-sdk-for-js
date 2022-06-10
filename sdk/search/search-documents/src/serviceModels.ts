@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { OperationOptions } from "@azure/core-http";
+import { OperationOptions } from "@azure/core-client";
 import {
   LuceneStandardAnalyzer,
   StopAnalyzer,
@@ -62,6 +62,7 @@ import {
   DocumentExtractionSkill,
   TextTranslationSkill,
   WebApiSkill,
+  AzureMachineLearningSkill,
   DefaultCognitiveServicesAccount,
   CognitiveServicesAccountKey,
   HighWaterMarkChangeDetectionPolicy,
@@ -83,7 +84,9 @@ import {
   LexicalNormalizerName,
   CustomNormalizer,
   SearchIndexerKnowledgeStore,
-  SearchIndexerCache
+  SearchIndexerCache,
+  SemanticSettings,
+  SearchAlias,
 } from "./generated/service/models";
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
@@ -206,6 +209,46 @@ export type CreateIndexOptions = OperationOptions;
 export type CreateSkillsetOptions = OperationOptions;
 
 /**
+ * Options for create alias operation.
+ */
+export type CreateAliasOptions = OperationOptions;
+
+/**
+ * Options for create or update alias operation.
+ */
+export interface CreateOrUpdateAliasOptions extends OperationOptions {
+  /**
+   * If set to true, Resource will be deleted only if the etag matches.
+   */
+  onlyIfUnchanged?: boolean;
+}
+
+/**
+ * Options for delete alias operation.
+ */
+export interface DeleteAliasOptions extends OperationOptions {
+  /**
+   * If set to true, Resource will be deleted only if the etag matches.
+   */
+  onlyIfUnchanged?: boolean;
+}
+
+/**
+ * Options for get alias operation.
+ */
+export type GetAliasOptions = OperationOptions;
+
+/**
+ * Options for list aliases operation.
+ */
+export type ListAliasesOptions = OperationOptions;
+
+/**
+ * Search Alias object.
+ */
+export type SearchIndexAlias = SearchAlias;
+
+/**
  * Options for create synonymmap operation.
  */
 export type CreateSynonymMapOptions = OperationOptions;
@@ -238,17 +281,37 @@ export interface CreateOrUpdateIndexOptions extends OperationOptions {
 }
 
 /**
+ * Options for reset docs operation.
+ */
+export interface ResetDocumentsOptions extends OperationOptions {
+  /** document keys to be reset */
+  documentKeys?: string[];
+  /** datasource document identifiers to be reset */
+  datasourceDocumentIds?: string[];
+  /** If false, keys or ids will be appended to existing ones. If true, only the keys or ids in this payload will be queued to be re-ingested. */
+  overwrite?: boolean;
+}
+
+/**
+ * Options for reset skills operation.
+ */
+export interface ResetSkillsOptions extends OperationOptions {
+  /** the names of skills to be reset. */
+  skillNames?: string[];
+}
+
+/**
  * Options for create/update skillset operation.
  */
 export interface CreateOrUpdateSkillsetOptions extends OperationOptions {
   /**
-   * If set to true, Resource will be deleted only if the etag matches.
+   * If set to true, Resource will be updated only if the etag matches.
    */
   onlyIfUnchanged?: boolean;
   /**
    * Ignores cache reset requirements.
    */
-  ignoreResetRequirements?: boolean;
+  skipIndexerResetRequirementForCache?: boolean;
   /**
    * Disables cache reprocessing change detection.
    */
@@ -260,7 +323,7 @@ export interface CreateOrUpdateSkillsetOptions extends OperationOptions {
  */
 export interface CreateOrUpdateSynonymMapOptions extends OperationOptions {
   /**
-   * If set to true, Resource will be deleted only if the etag matches.
+   * If set to true, Resource will be updated only if the etag matches.
    */
   onlyIfUnchanged?: boolean;
 }
@@ -270,11 +333,11 @@ export interface CreateOrUpdateSynonymMapOptions extends OperationOptions {
  */
 export interface CreateorUpdateIndexerOptions extends OperationOptions {
   /**
-   * If set to true, Resource will be deleted only if the etag matches.
+   * If set to true, Resource will be updated only if the etag matches.
    */
   onlyIfUnchanged?: boolean;
   /** Ignores cache reset requirements. */
-  ignoreResetRequirements?: boolean;
+  skipIndexerResetRequirementForCache?: boolean;
   /** Disables cache reprocessing change detection. */
   disableCacheReprocessingChangeDetection?: boolean;
 }
@@ -284,13 +347,13 @@ export interface CreateorUpdateIndexerOptions extends OperationOptions {
  */
 export interface CreateorUpdateDataSourceConnectionOptions extends OperationOptions {
   /**
-   * If set to true, Resource will be deleted only if the etag matches.
+   * If set to true, Resource will be updated only if the etag matches.
    */
   onlyIfUnchanged?: boolean;
   /**
    * Ignores cache reset requirements.
    */
-  ignoreResetRequirements?: boolean;
+  skipIndexerResetRequirementForCache?: boolean;
 }
 
 /**
@@ -365,6 +428,10 @@ export interface AnalyzeRequest {
    * NOTE: Either analyzerName or tokenizerName is required in an AnalyzeRequest.
    */
   tokenizerName?: string;
+  /**
+   * The name of the normalizer to use to normalize the given text.
+   */
+  normalizerName?: LexicalNormalizerName;
   /**
    * An optional list of token filters to use when breaking the given text. This parameter can only
    * be set when using the tokenizer parameter.
@@ -488,7 +555,8 @@ export type SearchIndexerSkill =
   | CustomEntityLookupSkill
   | TextTranslationSkill
   | DocumentExtractionSkill
-  | WebApiSkill;
+  | WebApiSkill
+  | AzureMachineLearningSkill;
 
 /**
  * Contains the possible cases for CognitiveServicesAccount.
@@ -909,6 +977,14 @@ export interface SynonymMap {
 export type IndexIterator = PagedAsyncIterableIterator<SearchIndex, SearchIndex[], {}>;
 
 /**
+ * An iterator for listing the aliases that exist in the Search service. Will make requests
+ * as needed during iteration. Use .byPage() to make one request to the server
+ * per iteration.
+ */
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type AliasIterator = PagedAsyncIterableIterator<SearchIndexAlias, SearchIndexAlias[], {}>;
+
+/**
  * An iterator for listing the indexes that exist in the Search service. Will make requests
  * as needed during iteration. Use .byPage() to make one request to the server
  * per iteration.
@@ -984,6 +1060,10 @@ export interface SearchIndex {
    * be modified on existing indexes. If null, the ClassicSimilarity algorithm is used.
    */
   similarity?: SimilarityAlgorithm;
+  /**
+   * Defines parameters for a search index that influence semantic capabilities.
+   */
+  semanticSettings?: SemanticSettings;
   /**
    * The ETag of the index.
    */
@@ -1232,7 +1312,7 @@ export enum KnownTokenizerNames {
    * Divides text at whitespace. See
    * http://lucene.apache.org/core/4_10_3/analyzers-common/org/apache/lucene/analysis/core/WhitespaceTokenizer.html
    */
-  Whitespace = "whitespace"
+  Whitespace = "whitespace",
 }
 
 /**
@@ -1415,7 +1495,7 @@ export enum KnownTokenFilterNames {
   /**
    * Splits words into subwords and performs optional transformations on subword groups.
    */
-  WordDelimiter = "word_delimiter"
+  WordDelimiter = "word_delimiter",
 }
 
 /**
@@ -1427,7 +1507,7 @@ export enum KnownCharFilterNames {
    * A character filter that attempts to strip out HTML constructs. See
    * https://lucene.apache.org/core/4_10_3/analyzers-common/org/apache/lucene/analysis/charfilter/HTMLStripCharFilter.html
    */
-  HtmlStrip = "html_strip"
+  HtmlStrip = "html_strip",
 }
 
 /**
@@ -1806,7 +1886,7 @@ export enum KnownAnalyzerNames {
   /**
    * An analyzer that uses the whitespace tokenizer.
    */
-  Whitespace = "whitespace"
+  Whitespace = "whitespace",
 }
 
 /**

@@ -12,8 +12,11 @@ Measures the maximum throughput of `sender.send()` in package `azure-sb`.
  */
 
 import { createServiceBusService, ServiceBusService } from "azure-sb";
-import delay from "delay";
 import moment from "moment";
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const _payload = JSON.stringify(Buffer.alloc(1024));
 const _start = moment();
@@ -50,7 +53,7 @@ function RunTest(
   function sendMessages(): void {
     while (_sent < messages && inflight() < maxInflight) {
       _sent++;
-      sbService.sendQueueMessage(entityPath, { body: _payload }, function(err: any) {
+      sbService.sendQueueMessage(entityPath, { body: _payload }, function (err: any) {
         if (err) {
           _rejected++;
           console.log(err.message);

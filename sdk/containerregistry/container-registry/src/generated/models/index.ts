@@ -22,13 +22,7 @@ export interface AcrErrorInfo {
   /** Error message */
   message?: string;
   /** Error details */
-  detail?: any;
-}
-
-/** Returns the requested manifest file */
-export interface Manifest {
-  /** Schema version */
-  schemaVersion?: number;
+  detail?: Record<string, unknown>;
 }
 
 /** List of repositories */
@@ -41,7 +35,7 @@ export interface Repositories {
 /** Properties of this repository. */
 export interface ContainerRepositoryProperties {
   /**
-   * Registry login server name.  This is likely to be similar to {registry-name}.azurecr.io
+   * Registry login server name. This is likely to be similar to {registry-name}.azurecr.io.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly registryLoginServer: string;
@@ -78,8 +72,6 @@ export interface ContainerRepositoryProperties {
   canList?: boolean;
   /** Read enabled */
   canRead?: boolean;
-  /** Enables Teleport functionality on new images in the repository improving Container startup performance */
-  teleportEnabled?: boolean;
 }
 
 /** Changeable attributes for Repository */
@@ -92,13 +84,11 @@ export interface RepositoryWriteableProperties {
   canList?: boolean;
   /** Read enabled */
   canRead?: boolean;
-  /** Enables Teleport functionality on new images in the repository improving Container startup performance */
-  teleportEnabled?: boolean;
 }
 
 /** List of tag details */
 export interface TagList {
-  /** Registry login server name.  This is likely to be similar to {registry-name}.azurecr.io */
+  /** Registry login server name. This is likely to be similar to {registry-name}.azurecr.io. */
   registryLoginServer: string;
   /** Image name */
   repository: string;
@@ -154,7 +144,7 @@ export interface TagWriteableProperties {
 /** Tag attributes */
 export interface ArtifactTagProperties {
   /**
-   * Registry login server name.  This is likely to be similar to {registry-name}.azurecr.io
+   * Registry login server name. This is likely to be similar to {registry-name}.azurecr.io.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly registryLoginServer: string;
@@ -195,7 +185,7 @@ export interface ArtifactTagProperties {
 
 /** Manifest attributes */
 export interface AcrManifests {
-  /** Registry login server name.  This is likely to be similar to {registry-name}.azurecr.io */
+  /** Registry login server name. This is likely to be similar to {registry-name}.azurecr.io. */
   registryLoginServer?: string;
   /** Image name */
   repository?: string;
@@ -254,13 +244,9 @@ export interface ManifestAttributesBase {
   canList?: boolean;
   /** Read enabled */
   canRead?: boolean;
-  /** Quarantine state */
-  quarantineState?: string;
-  /** Quarantine details */
-  quarantineDetails?: string;
 }
 
-/** Manifest attributes details */
+/** The artifact's platform, consisting of operating system and architecture. */
 export interface ArtifactManifestPlatform {
   /**
    * Manifest digest
@@ -289,16 +275,12 @@ export interface ManifestWriteableProperties {
   canList?: boolean;
   /** Read enabled */
   canRead?: boolean;
-  /** Quarantine state */
-  quarantineState?: string;
-  /** Quarantine details */
-  quarantineDetails?: string;
 }
 
 /** Manifest attributes details */
 export interface ArtifactManifestProperties {
   /**
-   * Registry login server name.  This is likely to be similar to {registry-name}.azurecr.io
+   * Registry login server name. This is likely to be similar to {registry-name}.azurecr.io.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly registryLoginServer?: string;
@@ -355,35 +337,11 @@ export interface ArtifactManifestProperties {
   canList?: boolean;
   /** Read enabled */
   canRead?: boolean;
-  /** Quarantine state */
-  quarantineState?: string;
-  /** Quarantine details */
-  quarantineDetails?: string;
-}
-
-export interface Paths108HwamOauth2ExchangePostRequestbodyContentApplicationXWwwFormUrlencodedSchema {
-  /** Can take a value of access_token */
-  grantType: "access_token";
-  /** Indicates the name of your Azure container registry. */
-  service: string;
-  /** AAD access token, mandatory when grant_type is access_token_refresh_token or access_token. */
-  aadAccessToken: string;
 }
 
 export interface AcrRefreshToken {
   /** The refresh token to be used for generating access tokens */
   refreshToken?: string;
-}
-
-export interface PathsV3R3RxOauth2TokenPostRequestbodyContentApplicationXWwwFormUrlencodedSchema {
-  /** Indicates the name of your Azure container registry. */
-  service: string;
-  /** Which is expected to be a valid scope, and can be specified more than once for multiple scope requests. You obtained this from the Www-Authenticate response header from the challenge. */
-  scope: string;
-  /** Must be a valid ACR refresh token */
-  acrRefreshToken: string;
-  /** Grant type is expected to be refresh_token */
-  grantType: TokenGrantType;
 }
 
 export interface AcrAccessToken {
@@ -476,7 +434,7 @@ export interface Annotations {
   /** Describes unknown properties. The value of an unknown property can be of "any" type. */
   [property: string]: any;
   /** Date and time on which the image was built (string, date-time as defined by https://tools.ietf.org/html/rfc3339#section-5.6) */
-  created?: Date;
+  createdOn?: Date;
   /** Contact details of the people or organization responsible for the image. */
   authors?: string;
   /** URL to find more information on the image. */
@@ -511,8 +469,12 @@ export interface TagAttributesTag {
 export interface ManifestAttributesManifest {
   /** List of manifest attributes details */
   references?: ArtifactManifestPlatform[];
-  /** Quarantine tag name */
-  quarantineTag?: string;
+}
+
+/** Returns the requested manifest file */
+export interface Manifest {
+  /** Schema version */
+  schemaVersion?: number;
 }
 
 export interface ManifestListAttributes {
@@ -540,6 +502,42 @@ export interface Platform {
   variant?: string;
   /** The optional features field specifies an array of strings, each listing a required CPU feature (for example sse4 or aes */
   features?: string[];
+}
+
+/** Returns the requested OCI Manifest file */
+export interface OCIManifest {
+  /** V2 image config descriptor */
+  config?: Descriptor;
+  /** List of V2 image layer information */
+  layers?: Descriptor[];
+  /** Additional information provided through arbitrary metadata. */
+  annotations?: Annotations;
+  /** Schema version */
+  schemaVersion?: number;
+}
+
+export interface Paths108HwamOauth2ExchangePostRequestbodyContentApplicationXWwwFormUrlencodedSchema {
+  /** Can take a value of access_token_refresh_token, or access_token, or refresh_token */
+  grantType: PostContentSchemaGrantType;
+  /** Indicates the name of your Azure container registry. */
+  service: string;
+  /** AAD tenant associated to the AAD credentials. */
+  tenant?: string;
+  /** AAD refresh token, mandatory when grant_type is access_token_refresh_token or refresh_token */
+  refreshToken?: string;
+  /** AAD access token, mandatory when grant_type is access_token_refresh_token or access_token. */
+  aadAccessToken?: string;
+}
+
+export interface PathsV3R3RxOauth2TokenPostRequestbodyContentApplicationXWwwFormUrlencodedSchema {
+  /** Indicates the name of your Azure container registry. */
+  service: string;
+  /** Which is expected to be a valid scope, and can be specified more than once for multiple scope requests. You obtained this from the Www-Authenticate response header from the challenge. */
+  scope: string;
+  /** Must be a valid ACR refresh token */
+  acrRefreshToken: string;
+  /** Grant type is expected to be refresh_token */
+  grantType: TokenGrantType;
 }
 
 /** Returns the requested manifest file */
@@ -586,16 +584,6 @@ export type V2Manifest = Manifest & {
   layers?: Descriptor[];
 };
 
-/** Returns the requested OCI Manifest file */
-export type OCIManifest = Manifest & {
-  /** V2 image config descriptor */
-  config?: Descriptor;
-  /** List of V2 image layer information */
-  layers?: Descriptor[];
-  /** Additional information provided through arbitrary metadata. */
-  annotations?: Annotations;
-};
-
 /** Returns the requested OCI index file */
 export type OCIIndex = Manifest & {
   /** List of OCI image layer information */
@@ -619,6 +607,12 @@ export type V1Manifest = Manifest & {
   /** Image signature */
   signatures?: ImageSignature[];
 };
+
+/** Defines headers for ContainerRegistry_getManifest operation. */
+export interface ContainerRegistryGetManifestHeaders {
+  /** Identifies the docker upload uuid for the current request. */
+  dockerContentDigest?: string;
+}
 
 /** Defines headers for ContainerRegistry_createManifest operation. */
 export interface ContainerRegistryCreateManifestHeaders {
@@ -752,20 +746,48 @@ export interface ContainerRegistryBlobCheckChunkExistsHeaders {
   contentRange?: string;
 }
 
+/** Known values of {@link ApiVersion20210701} that the service accepts. */
+export enum KnownApiVersion20210701 {
+  /** Api Version '2021-07-01' */
+  TwoThousandTwentyOne0701 = "2021-07-01"
+}
+
+/**
+ * Defines values for ApiVersion20210701. \
+ * {@link KnownApiVersion20210701} can be used interchangeably with ApiVersion20210701,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **2021-07-01**: Api Version '2021-07-01'
+ */
+export type ApiVersion20210701 = string;
+
 /** Known values of {@link ArtifactArchitecture} that the service accepts. */
-export const enum KnownArtifactArchitecture {
+export enum KnownArtifactArchitecture {
+  /** i386 */
   I386 = "386",
+  /** AMD64 */
   Amd64 = "amd64",
+  /** ARM */
   Arm = "arm",
+  /** ARM64 */
   Arm64 = "arm64",
+  /** MIPS */
   Mips = "mips",
+  /** MIPSLE */
   MipsLe = "mipsle",
+  /** MIPS64 */
   Mips64 = "mips64",
+  /** MIPS64LE */
   Mips64Le = "mips64le",
+  /** PPC64 */
   Ppc64 = "ppc64",
+  /** PPC64LE */
   Ppc64Le = "ppc64le",
+  /** RISCv64 */
   RiscV64 = "riscv64",
+  /** s390x */
   S390X = "s390x",
+  /** Wasm */
   Wasm = "wasm"
 }
 
@@ -774,24 +796,24 @@ export const enum KnownArtifactArchitecture {
  * {@link KnownArtifactArchitecture} can be used interchangeably with ArtifactArchitecture,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
- * **386** \
- * **amd64** \
- * **arm** \
- * **arm64** \
- * **mips** \
- * **mipsle** \
- * **mips64** \
- * **mips64le** \
- * **ppc64** \
- * **ppc64le** \
- * **riscv64** \
- * **s390x** \
- * **wasm**
+ * **386**: i386 \
+ * **amd64**: AMD64 \
+ * **arm**: ARM \
+ * **arm64**: ARM64 \
+ * **mips**: MIPS \
+ * **mipsle**: MIPSLE \
+ * **mips64**: MIPS64 \
+ * **mips64le**: MIPS64LE \
+ * **ppc64**: PPC64 \
+ * **ppc64le**: PPC64LE \
+ * **riscv64**: RISCv64 \
+ * **s390x**: s390x \
+ * **wasm**: Wasm
  */
 export type ArtifactArchitecture = string;
 
 /** Known values of {@link ArtifactOperatingSystem} that the service accepts. */
-export const enum KnownArtifactOperatingSystem {
+export enum KnownArtifactOperatingSystem {
   Aix = "aix",
   Android = "android",
   Darwin = "darwin",
@@ -829,6 +851,24 @@ export const enum KnownArtifactOperatingSystem {
  * **windows**
  */
 export type ArtifactOperatingSystem = string;
+
+/** Known values of {@link PostContentSchemaGrantType} that the service accepts. */
+export enum KnownPostContentSchemaGrantType {
+  AccessTokenRefreshToken = "access_token_refresh_token",
+  AccessToken = "access_token",
+  RefreshToken = "refresh_token"
+}
+
+/**
+ * Defines values for PostContentSchemaGrantType. \
+ * {@link KnownPostContentSchemaGrantType} can be used interchangeably with PostContentSchemaGrantType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **access_token_refresh_token** \
+ * **access_token** \
+ * **refresh_token**
+ */
+export type PostContentSchemaGrantType = string;
 /** Defines values for TokenGrantType. */
 export type TokenGrantType = "refresh_token" | "password";
 /** Defines values for ArtifactTagOrderBy. */
@@ -848,17 +888,32 @@ export interface ContainerRegistryGetManifestOptionalParams
 }
 
 /** Contains response data for the getManifest operation. */
-export type ContainerRegistryGetManifestResponse = Manifest;
+export type ContainerRegistryGetManifestResponse = ContainerRegistryGetManifestHeaders & {
+  /**
+   * BROWSER ONLY
+   *
+   * The response body as a browser Blob.
+   * Always `undefined` in node.js.
+   */
+  blobBody?: Promise<Blob>;
+  /**
+   * NODEJS ONLY
+   *
+   * The response body as a node.js Readable stream.
+   * Always `undefined` in the browser.
+   */
+  readableStreamBody?: NodeJS.ReadableStream;
+};
 
 /** Optional parameters. */
 export interface ContainerRegistryCreateManifestOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions {
+  /** The manifest's Content-Type. */
+  contentType?: string;
+}
 
 /** Contains response data for the createManifest operation. */
-export type ContainerRegistryCreateManifestResponse = ContainerRegistryCreateManifestHeaders & {
-  /** The parsed response body. */
-  body: any;
-};
+export type ContainerRegistryCreateManifestResponse = ContainerRegistryCreateManifestHeaders;
 
 /** Optional parameters. */
 export interface ContainerRegistryDeleteManifestOptionalParams
@@ -1138,7 +1193,12 @@ export type ContainerRegistryBlobCheckChunkExistsResponse = ContainerRegistryBlo
 /** Optional parameters. */
 export interface AuthenticationExchangeAadAccessTokenForAcrRefreshTokenOptionalParams
   extends coreClient.OperationOptions {
-  aadAccessToken?: Paths108HwamOauth2ExchangePostRequestbodyContentApplicationXWwwFormUrlencodedSchema;
+  /** AAD tenant associated to the AAD credentials. */
+  tenant?: string;
+  /** AAD refresh token, mandatory when grant_type is access_token_refresh_token or refresh_token */
+  refreshToken?: string;
+  /** AAD access token, mandatory when grant_type is access_token_refresh_token or access_token. */
+  accessToken?: string;
 }
 
 /** Contains response data for the exchangeAadAccessTokenForAcrRefreshToken operation. */
@@ -1146,9 +1206,7 @@ export type AuthenticationExchangeAadAccessTokenForAcrRefreshTokenResponse = Acr
 
 /** Optional parameters. */
 export interface AuthenticationExchangeAcrRefreshTokenForAcrAccessTokenOptionalParams
-  extends coreClient.OperationOptions {
-  acrRefreshToken?: PathsV3R3RxOauth2TokenPostRequestbodyContentApplicationXWwwFormUrlencodedSchema;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the exchangeAcrRefreshTokenForAcrAccessToken operation. */
 export type AuthenticationExchangeAcrRefreshTokenForAcrAccessTokenResponse = AcrAccessToken;

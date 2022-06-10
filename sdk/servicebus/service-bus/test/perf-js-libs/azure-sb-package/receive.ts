@@ -12,8 +12,11 @@ Measures the maximum throughput of `receiver.receive()` in package `azure-sb`.
  */
 
 import { createServiceBusService, ServiceBusService } from "azure-sb";
-import delay from "delay";
 import moment from "moment";
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const _start = moment();
 
@@ -47,7 +50,7 @@ function RunTest(
   function receiveMessages(): void {
     while (_messages < messages && credits > 0) {
       credits--;
-      sbService.receiveQueueMessage(entityPath, { isPeekLock: false }, function(err) {
+      sbService.receiveQueueMessage(entityPath, { isPeekLock: false }, function (err) {
         if (err) {
           console.log(err.message);
         } else {

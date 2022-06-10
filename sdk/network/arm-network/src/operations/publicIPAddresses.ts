@@ -6,16 +6,14 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { PublicIPAddresses } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { NetworkManagementClientContext } from "../networkManagementClientContext";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
-import { LroEngine } from "../lro";
-import { CoreClientLro, shouldDeserializeLro } from "../coreClientLro";
+import { NetworkManagementClient } from "../networkManagementClient";
+import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
+import { LroImpl } from "../lroImpl";
 import {
   PublicIPAddress,
   PublicIPAddressesListCloudServicePublicIPAddressesNextOptionalParams,
@@ -57,15 +55,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a PublicIPAddresses. */
+/** Class containing PublicIPAddresses operations. */
 export class PublicIPAddressesImpl implements PublicIPAddresses {
-  private readonly client: NetworkManagementClientContext;
+  private readonly client: NetworkManagementClient;
 
   /**
    * Initialize a new instance of the class PublicIPAddresses class.
    * @param client Reference to the service client
    */
-  constructor(client: NetworkManagementClientContext) {
+  constructor(client: NetworkManagementClient) {
     this.client = client;
   }
 
@@ -634,13 +632,18 @@ export class PublicIPAddressesImpl implements PublicIPAddresses {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       { resourceGroupName, publicIpAddressName, options },
-      deleteOperationSpec,
-      "location"
+      deleteOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "location"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -736,13 +739,18 @@ export class PublicIPAddressesImpl implements PublicIPAddresses {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       { resourceGroupName, publicIpAddressName, parameters, options },
-      createOrUpdateOperationSpec,
-      "azure-async-operation"
+      createOrUpdateOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "azure-async-operation"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -1272,7 +1280,7 @@ const listVirtualMachineScaleSetPublicIPAddressesOperationSpec: coreClient.Opera
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion1],
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
@@ -1294,7 +1302,7 @@ const listVirtualMachineScaleSetVMPublicIPAddressesOperationSpec: coreClient.Ope
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion1],
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
@@ -1319,7 +1327,7 @@ const getVirtualMachineScaleSetPublicIPAddressOperationSpec: coreClient.Operatio
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.expand, Parameters.apiVersion1],
+  queryParameters: [Parameters.apiVersion, Parameters.expand],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
@@ -1432,7 +1440,7 @@ const listVirtualMachineScaleSetPublicIPAddressesNextOperationSpec: coreClient.O
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion1],
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
@@ -1454,7 +1462,7 @@ const listVirtualMachineScaleSetVMPublicIPAddressesNextOperationSpec: coreClient
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion1],
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,

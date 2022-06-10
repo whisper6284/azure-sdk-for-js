@@ -7,14 +7,13 @@
  */
 
 import { createSpan } from "../tracing";
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { DataFlowDebugSession } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as coreTracing from "@azure/core-tracing";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ArtifactsClientContext } from "../artifactsClientContext";
+import { ArtifactsClient } from "../artifactsClient";
 import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
 import { LroImpl } from "../lroImpl";
 import {
@@ -37,15 +36,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a DataFlowDebugSession. */
+/** Class containing DataFlowDebugSession operations. */
 export class DataFlowDebugSessionImpl implements DataFlowDebugSession {
-  private readonly client: ArtifactsClientContext;
+  private readonly client: ArtifactsClient;
 
   /**
    * Initialize a new instance of the class DataFlowDebugSession class.
    * @param client Reference to the service client
    */
-  constructor(client: ArtifactsClientContext) {
+  constructor(client: ArtifactsClient) {
     this.client = client;
   }
 
@@ -123,7 +122,7 @@ export class DataFlowDebugSessionImpl implements DataFlowDebugSession {
       try {
         const result = await this.client.sendOperationRequest(args, spec);
         return result as DataFlowDebugSessionCreateDataFlowDebugSessionResponse;
-      } catch (error) {
+      } catch (error: any) {
         span.setStatus({
           code: coreTracing.SpanStatusCode.UNSET,
           message: error.message
@@ -171,10 +170,12 @@ export class DataFlowDebugSessionImpl implements DataFlowDebugSession {
       { request, options },
       createDataFlowDebugSessionOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -209,7 +210,7 @@ export class DataFlowDebugSessionImpl implements DataFlowDebugSession {
         queryDataFlowDebugSessionsByWorkspaceOperationSpec
       );
       return result as DataFlowDebugSessionQueryDataFlowDebugSessionsByWorkspaceResponse;
-    } catch (error) {
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -236,7 +237,7 @@ export class DataFlowDebugSessionImpl implements DataFlowDebugSession {
         addDataFlowOperationSpec
       );
       return result as DataFlowDebugSessionAddDataFlowResponse;
-    } catch (error) {
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -266,7 +267,7 @@ export class DataFlowDebugSessionImpl implements DataFlowDebugSession {
         deleteDataFlowDebugSessionOperationSpec
       );
       return result as void;
-    } catch (error) {
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -302,7 +303,7 @@ export class DataFlowDebugSessionImpl implements DataFlowDebugSession {
       try {
         const result = await this.client.sendOperationRequest(args, spec);
         return result as DataFlowDebugSessionExecuteCommandResponse;
-      } catch (error) {
+      } catch (error: any) {
         span.setStatus({
           code: coreTracing.SpanStatusCode.UNSET,
           message: error.message
@@ -350,10 +351,12 @@ export class DataFlowDebugSessionImpl implements DataFlowDebugSession {
       { request, options },
       executeCommandOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -391,7 +394,7 @@ export class DataFlowDebugSessionImpl implements DataFlowDebugSession {
         queryDataFlowDebugSessionsByWorkspaceNextOperationSpec
       );
       return result as DataFlowDebugSessionQueryDataFlowDebugSessionsByWorkspaceNextResponse;
-    } catch (error) {
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -426,7 +429,7 @@ const createDataFlowDebugSessionOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.request1,
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
@@ -443,7 +446,7 @@ const queryDataFlowDebugSessionsByWorkspaceOperationSpec: coreClient.OperationSp
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept],
   serializer
@@ -460,7 +463,7 @@ const addDataFlowOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.request2,
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
@@ -476,7 +479,7 @@ const deleteDataFlowDebugSessionOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.request3,
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
@@ -503,7 +506,7 @@ const executeCommandOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.request4,
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
@@ -520,7 +523,7 @@ const queryDataFlowDebugSessionsByWorkspaceNextOperationSpec: coreClient.Operati
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept],
   serializer

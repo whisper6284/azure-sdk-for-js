@@ -2,10 +2,12 @@
 
 This package contains an isomorphic SDK for ManagementLockClient.
 
+> Please note, this package is deprecated and not functional as it uses an older version of the Javascript SDK generator. As of April 2022, you can instead use [@azure/arm-locks-profile-2020-09-01-hybrid](https://www.npmjs.com/package/@azure/arm-locks-profile-2020-09-01-hybrid).
+
 ### Currently supported environments
 
-- Node.js version 6.x.x or higher
-- Browser JavaScript
+- [LTS versions of Node.js](https://nodejs.org/about/releases/)
+- Latest versions of Safari, Chrome, Edge, and Firefox.
 
 ### How to Install
 

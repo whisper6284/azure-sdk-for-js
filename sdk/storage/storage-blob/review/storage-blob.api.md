@@ -4,7 +4,10 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import { AbortSignalLike } from '@azure/abort-controller';
+import { AzureLogger } from '@azure/logger';
 import { BaseRequestPolicy } from '@azure/core-http';
 import * as coreHttp from '@azure/core-http';
 import { deserializationPolicy } from '@azure/core-http';
@@ -53,6 +56,7 @@ export class AccountSASPermissions {
     static from(permissionLike: AccountSASPermissionsLike): AccountSASPermissions;
     list: boolean;
     static parse(permissions: string): AccountSASPermissions;
+    permanentDelete: boolean;
     process: boolean;
     read: boolean;
     setImmutabilityPolicy: boolean;
@@ -70,6 +74,7 @@ export interface AccountSASPermissionsLike {
     deleteVersion?: boolean;
     filter?: boolean;
     list?: boolean;
+    permanentDelete?: boolean;
     process?: boolean;
     read?: boolean;
     setImmutabilityPolicy?: boolean;
@@ -99,6 +104,7 @@ export class AccountSASServices {
 
 // @public
 export interface AccountSASSignatureValues {
+    encryptionScope?: string;
     expiresOn: Date;
     ipRange?: SasIPRange;
     permissions: AccountSASPermissions;
@@ -110,7 +116,7 @@ export interface AccountSASSignatureValues {
 }
 
 // @public
-export class AnonymousCredential extends Credential {
+export class AnonymousCredential extends Credential_2 {
     create(nextPolicy: RequestPolicy, options: RequestPolicyOptions): AnonymousCredentialPolicy;
 }
 
@@ -440,6 +446,7 @@ export interface BlobCopyFromURLHeaders {
     copyId?: string;
     copyStatus?: SyncCopyStatusType;
     date?: Date;
+    encryptionScope?: string;
     errorCode?: string;
     etag?: string;
     lastModified?: Date;
@@ -455,6 +462,9 @@ export type BlobCopyFromURLResponse = BlobCopyFromURLHeaders & {
         parsedHeaders: BlobCopyFromURLHeaders;
     };
 };
+
+// @public
+export type BlobCopySourceTags = "REPLACE" | "COPY";
 
 // @public
 export interface BlobCreateSnapshotHeaders {
@@ -863,7 +873,7 @@ export class BlobLeaseClient {
     releaseLease(options?: LeaseOperationOptions): Promise<LeaseOperationResponse>;
     renewLease(options?: LeaseOperationOptions): Promise<Lease>;
     get url(): string;
-    }
+}
 
 // @public (undocumented)
 export interface BlobPrefix {
@@ -1071,6 +1081,7 @@ export class BlobSASPermissions {
     static from(permissionLike: BlobSASPermissionsLike): BlobSASPermissions;
     move: boolean;
     static parse(permissions: string): BlobSASPermissions;
+    permanentDelete: boolean;
     read: boolean;
     setImmutabilityPolicy: boolean;
     tag: boolean;
@@ -1086,6 +1097,7 @@ export interface BlobSASPermissionsLike {
     deleteVersion?: boolean;
     execute?: boolean;
     move?: boolean;
+    permanentDelete?: boolean;
     read?: boolean;
     setImmutabilityPolicy?: boolean;
     tag?: boolean;
@@ -1102,6 +1114,7 @@ export interface BlobSASSignatureValues {
     contentLanguage?: string;
     contentType?: string;
     correlationId?: string;
+    encryptionScope?: string;
     expiresOn?: Date;
     identifier?: string;
     ipRange?: SasIPRange;
@@ -1340,6 +1353,8 @@ export type BlobStartCopyFromURLResponse = BlobStartCopyFromURLHeaders & {
 export interface BlobSyncCopyFromURLOptions extends CommonOptions {
     abortSignal?: AbortSignalLike;
     conditions?: BlobRequestConditions;
+    copySourceTags?: BlobCopySourceTags;
+    encryptionScope?: string;
     immutabilityPolicy?: BlobImmutabilityPolicy;
     legalHold?: boolean;
     metadata?: Metadata;
@@ -1556,7 +1571,7 @@ export interface BlockBlobStageBlockFromURLOptions extends CommonOptions {
     conditions?: LeaseAccessConditions;
     customerProvidedKey?: CpkInfo;
     encryptionScope?: string;
-    range?: Range;
+    range?: Range_2;
     sourceAuthorization?: HttpAuthorization;
     sourceContentCrc64?: Uint8Array;
     sourceContentMD5?: Uint8Array;
@@ -1607,6 +1622,7 @@ export interface BlockBlobSyncUploadFromURLOptions extends CommonOptions {
     blobHTTPHeaders?: BlobHTTPHeaders;
     conditions?: BlobRequestConditions;
     copySourceBlobProperties?: boolean;
+    copySourceTags?: BlobCopySourceTags;
     customerProvidedKey?: CpkInfo;
     encryptionScope?: string;
     metadata?: Metadata;
@@ -1695,6 +1711,7 @@ export interface CommonGenerateSasUrlOptions {
     contentEncoding?: string;
     contentLanguage?: string;
     contentType?: string;
+    encryptionScope?: string;
     expiresOn?: Date;
     identifier?: string;
     ipRange?: SasIPRange;
@@ -1746,6 +1763,7 @@ export class ContainerClient extends StorageClient {
     deleteBlob(blobName: string, options?: ContainerDeleteBlobOptions): Promise<BlobDeleteResponse>;
     deleteIfExists(options?: ContainerDeleteMethodOptions): Promise<ContainerDeleteIfExistsResponse>;
     exists(options?: ContainerExistsOptions): Promise<boolean>;
+    findBlobsByTags(tagFilterSqlExpression: string, options?: ContainerFindBlobByTagsOptions): PagedAsyncIterableIterator<FilterBlobItem, ContainerFindBlobsByTagsSegmentResponse>;
     generateSasUrl(options: ContainerGenerateSasUrlOptions): Promise<string>;
     getAccessPolicy(options?: ContainerGetAccessPolicyOptions): Promise<ContainerGetAccessPolicyResponse>;
     getAppendBlobClient(blobName: string): AppendBlobClient;
@@ -1842,6 +1860,28 @@ export interface ContainerEncryptionScope {
 export interface ContainerExistsOptions extends CommonOptions {
     abortSignal?: AbortSignalLike;
 }
+
+// @public
+export interface ContainerFilterBlobsHeaders {
+    clientRequestId?: string;
+    date?: Date;
+    requestId?: string;
+    version?: string;
+}
+
+// @public
+export interface ContainerFindBlobByTagsOptions extends CommonOptions {
+    abortSignal?: AbortSignalLike;
+}
+
+// @public
+export type ContainerFindBlobsByTagsSegmentResponse = FilterBlobSegment & ContainerFilterBlobsHeaders & {
+    _response: HttpResponse & {
+        parsedHeaders: ContainerFilterBlobsHeaders;
+        bodyAsText: string;
+        parsedBody: FilterBlobSegmentModel;
+    };
+};
 
 // @public
 export interface ContainerGenerateSasUrlOptions extends CommonGenerateSasUrlOptions {
@@ -1971,7 +2011,7 @@ export interface ContainerListBlobsOptions extends CommonOptions {
     abortSignal?: AbortSignalLike;
     includeCopy?: boolean;
     includeDeleted?: boolean;
-    includeDeletedwithVersions?: boolean;
+    includeDeletedWithVersions?: boolean;
     includeImmutabilityPolicy?: boolean;
     includeLegalHold?: boolean;
     includeMetadata?: boolean;
@@ -2050,10 +2090,12 @@ export class ContainerSASPermissions {
     delete: boolean;
     deleteVersion: boolean;
     execute: boolean;
+    filterByTags: boolean;
     static from(permissionLike: ContainerSASPermissionsLike): ContainerSASPermissions;
     list: boolean;
     move: boolean;
     static parse(permissions: string): ContainerSASPermissions;
+    permanentDelete: boolean;
     read: boolean;
     setImmutabilityPolicy: boolean;
     tag: boolean;
@@ -2068,8 +2110,10 @@ export interface ContainerSASPermissionsLike {
     delete?: boolean;
     deleteVersion?: boolean;
     execute?: boolean;
+    filterByTags?: boolean;
     list?: boolean;
     move?: boolean;
+    permanentDelete?: boolean;
     read?: boolean;
     setImmutabilityPolicy?: boolean;
     tag?: boolean;
@@ -2165,9 +2209,10 @@ export interface CpkInfo {
 }
 
 // @public
-export abstract class Credential implements RequestPolicyFactory {
+abstract class Credential_2 implements RequestPolicyFactory {
     create(_nextPolicy: RequestPolicy, _options: RequestPolicyOptions): RequestPolicy;
 }
+export { Credential_2 as Credential }
 
 // @public
 export abstract class CredentialPolicy extends BaseRequestPolicy {
@@ -2248,8 +2293,8 @@ export type GeoReplicationStatusType = "live" | "bootstrap" | "unavailable";
 
 // @public
 export interface HttpAuthorization {
-    parameter: string;
     scheme: string;
+    value: string;
 }
 
 export { HttpHeaders }
@@ -2379,12 +2424,6 @@ export interface ListBlobsHierarchySegmentResponseModel {
 }
 
 // @public
-export type ListBlobsIncludeItem = "copy" | "deleted" | "metadata" | "snapshots" | "uncommittedblobs" | "versions" | "tags" | "immutabilitypolicy" | "legalhold" | "deletedwithversions";
-
-// @public
-export type ListContainersIncludeType = "metadata" | "deleted";
-
-// @public
 export interface ListContainersSegmentResponse {
     // (undocumented)
     containerItems: ContainerItem[];
@@ -2401,7 +2440,7 @@ export interface ListContainersSegmentResponse {
 }
 
 // @public
-export const logger: import("@azure/logger").AzureLogger;
+export const logger: AzureLogger;
 
 // @public
 export interface Logging {
@@ -2508,6 +2547,8 @@ export class PageBlobClient extends BlobClient {
     getPageRanges(offset?: number, count?: number, options?: PageBlobGetPageRangesOptions): Promise<PageBlobGetPageRangesResponse>;
     getPageRangesDiff(offset: number, count: number, prevSnapshot: string, options?: PageBlobGetPageRangesDiffOptions): Promise<PageBlobGetPageRangesDiffResponse>;
     getPageRangesDiffForManagedDisks(offset: number, count: number, prevSnapshotUrl: string, options?: PageBlobGetPageRangesDiffOptions): Promise<PageBlobGetPageRangesDiffResponse>;
+    listPageRanges(offset?: number, count?: number, options?: PageBlobListPageRangesOptions): PagedAsyncIterableIterator<PageRangeInfo, PageBlobGetPageRangesResponseModel>;
+    listPageRangesDiff(offset: number, count: number, prevSnapshot: string, options?: PageBlobListPageRangesDiffOptions): PagedAsyncIterableIterator<PageRangeInfo, PageBlobGetPageRangesDiffResponseModel>;
     resize(size: number, options?: PageBlobResizeOptions): Promise<PageBlobResizeResponse>;
     startCopyIncremental(copySource: string, options?: PageBlobStartCopyIncrementalOptions): Promise<PageBlobCopyIncrementalResponse>;
     updateSequenceNumber(sequenceNumberAction: SequenceNumberActionType, sequenceNumber?: number, options?: PageBlobUpdateSequenceNumberOptions): Promise<PageBlobUpdateSequenceNumberResponse>;
@@ -2620,6 +2661,17 @@ export interface PageBlobGetPageRangesDiffResponse extends PageList, PageBlobGet
     };
 }
 
+// Warning: (ae-forgotten-export) The symbol "PageList" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type PageBlobGetPageRangesDiffResponseModel = PageBlobGetPageRangesDiffHeaders & PageList_2 & {
+    _response: coreHttp.HttpResponse & {
+        bodyAsText: string;
+        parsedBody: PageList_2;
+        parsedHeaders: PageBlobGetPageRangesDiffHeaders;
+    };
+};
+
 // @public
 export interface PageBlobGetPageRangesHeaders {
     blobContentLength?: number;
@@ -2645,6 +2697,27 @@ export interface PageBlobGetPageRangesResponse extends PageList, PageBlobGetPage
         bodyAsText: string;
         parsedBody: PageList;
     };
+}
+
+// @public
+export type PageBlobGetPageRangesResponseModel = PageBlobGetPageRangesHeaders & PageList_2 & {
+    _response: coreHttp.HttpResponse & {
+        bodyAsText: string;
+        parsedBody: PageList_2;
+        parsedHeaders: PageBlobGetPageRangesHeaders;
+    };
+};
+
+// @public
+export interface PageBlobListPageRangesDiffOptions extends CommonOptions {
+    abortSignal?: AbortSignalLike;
+    conditions?: BlobRequestConditions;
+}
+
+// @public
+export interface PageBlobListPageRangesOptions extends CommonOptions {
+    abortSignal?: AbortSignalLike;
+    conditions?: BlobRequestConditions;
 }
 
 // @public
@@ -2780,8 +2853,18 @@ export type PageBlobUploadPagesResponse = PageBlobUploadPagesHeaders & {
 
 // @public
 export interface PageList {
-    clearRange?: Range[];
-    pageRange?: Range[];
+    clearRange?: Range_2[];
+    pageRange?: Range_2[];
+}
+
+// @public (undocumented)
+export interface PageRangeInfo {
+    // (undocumented)
+    end: number;
+    // (undocumented)
+    isClear: boolean;
+    // (undocumented)
+    start: number;
 }
 
 // @public
@@ -2834,10 +2917,11 @@ export enum PremiumPageBlobTier {
 export type PublicAccessType = "container" | "blob";
 
 // @public
-export interface Range {
+interface Range_2 {
     count?: number;
     offset: number;
 }
+export { Range_2 as Range }
 
 // @public
 export type RehydratePriority = "High" | "Standard";
@@ -2870,7 +2954,7 @@ export enum SASProtocol {
 
 // @public
 export class SASQueryParameters {
-    constructor(version: string, signature: string, permissions?: string, services?: string, resourceTypes?: string, protocol?: SASProtocol, startsOn?: Date, expiresOn?: Date, ipRange?: SasIPRange, identifier?: string, resource?: string, cacheControl?: string, contentDisposition?: string, contentEncoding?: string, contentLanguage?: string, contentType?: string, userDelegationKey?: UserDelegationKey, preauthorizedAgentObjectId?: string, correlationId?: string);
+    constructor(version: string, signature: string, permissions?: string, services?: string, resourceTypes?: string, protocol?: SASProtocol, startsOn?: Date, expiresOn?: Date, ipRange?: SasIPRange, identifier?: string, resource?: string, cacheControl?: string, contentDisposition?: string, contentEncoding?: string, contentLanguage?: string, contentType?: string, userDelegationKey?: UserDelegationKey, preauthorizedAgentObjectId?: string, correlationId?: string, encryptionScope?: string);
     constructor(version: string, signature: string, options?: SASQueryParametersOptions);
     readonly cacheControl?: string;
     readonly contentDisposition?: string;
@@ -2878,6 +2962,7 @@ export class SASQueryParameters {
     readonly contentLanguage?: string;
     readonly contentType?: string;
     readonly correlationId?: string;
+    readonly encryptionScope?: string;
     readonly expiresOn?: Date;
     readonly identifier?: string;
     get ipRange(): SasIPRange | undefined;
@@ -2901,6 +2986,7 @@ export interface SASQueryParametersOptions {
     contentLanguage?: string;
     contentType?: string;
     correlationId?: string;
+    encryptionScope?: string;
     expiresOn?: Date;
     identifier?: string;
     ipRange?: SasIPRange;
@@ -2949,6 +3035,7 @@ export type ServiceFindBlobsByTagsSegmentResponse = FilterBlobSegment & ServiceF
 
 // @public
 export interface ServiceGenerateAccountSasUrlOptions {
+    encryptionScope?: string;
     ipRange?: SasIPRange;
     protocol?: SASProtocol;
     startsOn?: Date;
@@ -3052,6 +3139,7 @@ export interface ServiceListContainersOptions extends CommonOptions {
     abortSignal?: AbortSignalLike;
     includeDeleted?: boolean;
     includeMetadata?: boolean;
+    includeSystem?: boolean;
     prefix?: string;
 }
 
@@ -3157,6 +3245,12 @@ export interface StaticWebsite {
 }
 
 // @public
+export enum StorageBlobAudience {
+    DiskComputeOAuthScopes = "https://disk.compute.azure.com/.default",
+    StorageOAuthScopes = "https://storage.azure.com/.default"
+}
+
+// @public
 export class StorageBrowserPolicy extends BaseRequestPolicy {
     constructor(nextPolicy: RequestPolicy, options: RequestPolicyOptions);
     sendRequest(request: WebResource): Promise<HttpOperationResponse>;
@@ -3172,6 +3266,7 @@ export const StorageOAuthScopes: string | string[];
 
 // @public
 export interface StoragePipelineOptions {
+    audience?: string | string[];
     httpClient?: IHttpClient;
     keepAliveOptions?: KeepAliveOptions;
     proxyOptions?: ProxyOptions;
@@ -3201,7 +3296,7 @@ export class StorageRetryPolicy extends BaseRequestPolicy {
 export class StorageRetryPolicyFactory implements RequestPolicyFactory {
     constructor(retryOptions?: StorageRetryOptions);
     create(nextPolicy: RequestPolicy, options: RequestPolicyOptions): StorageRetryPolicy;
-    }
+}
 
 // @public
 export enum StorageRetryPolicyType {
@@ -3210,7 +3305,7 @@ export enum StorageRetryPolicyType {
 }
 
 // @public
-export class StorageSharedKeyCredential extends Credential {
+export class StorageSharedKeyCredential extends Credential_2 {
     constructor(accountName: string, accountKey: string);
     readonly accountName: string;
     computeHMACSHA256(stringToSign: string): string;
@@ -3257,7 +3352,6 @@ export interface UserDelegationKeyModel {
 }
 
 export { WebResource }
-
 
 // (No @packageDocumentation comment for this package)
 

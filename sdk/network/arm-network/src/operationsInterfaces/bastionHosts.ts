@@ -6,7 +6,6 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { PollerLike, PollOperationState } from "@azure/core-lro";
 import {
@@ -17,7 +16,10 @@ import {
   BastionHostsGetOptionalParams,
   BastionHostsGetResponse,
   BastionHostsCreateOrUpdateOptionalParams,
-  BastionHostsCreateOrUpdateResponse
+  BastionHostsCreateOrUpdateResponse,
+  TagsObject,
+  BastionHostsUpdateTagsOptionalParams,
+  BastionHostsUpdateTagsResponse
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -103,4 +105,35 @@ export interface BastionHosts {
     parameters: BastionHost,
     options?: BastionHostsCreateOrUpdateOptionalParams
   ): Promise<BastionHostsCreateOrUpdateResponse>;
+  /**
+   * Updates Tags for BastionHost resource
+   * @param resourceGroupName The name of the resource group.
+   * @param bastionHostName The name of the Bastion Host.
+   * @param parameters Parameters supplied to update BastionHost tags.
+   * @param options The options parameters.
+   */
+  beginUpdateTags(
+    resourceGroupName: string,
+    bastionHostName: string,
+    parameters: TagsObject,
+    options?: BastionHostsUpdateTagsOptionalParams
+  ): Promise<
+    PollerLike<
+      PollOperationState<BastionHostsUpdateTagsResponse>,
+      BastionHostsUpdateTagsResponse
+    >
+  >;
+  /**
+   * Updates Tags for BastionHost resource
+   * @param resourceGroupName The name of the resource group.
+   * @param bastionHostName The name of the Bastion Host.
+   * @param parameters Parameters supplied to update BastionHost tags.
+   * @param options The options parameters.
+   */
+  beginUpdateTagsAndWait(
+    resourceGroupName: string,
+    bastionHostName: string,
+    parameters: TagsObject,
+    options?: BastionHostsUpdateTagsOptionalParams
+  ): Promise<BastionHostsUpdateTagsResponse>;
 }

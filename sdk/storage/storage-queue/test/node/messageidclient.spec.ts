@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as assert from "assert";
+import { assert } from "chai";
 import { newPipeline } from "../../src";
 import { getQSU, getConnectionStringFromEnvironment } from "../utils";
-import { record, Recorder } from "@azure/test-utils-recorder";
+import { record, Recorder } from "@azure-tools/test-recorder";
 import { QueueClient } from "../../src/QueueClient";
 import { StorageSharedKeyCredential } from "../../src/credentials/StorageSharedKeyCredential";
 import { recorderEnvSetup } from "../utils/index.browser";
+import { Context } from "mocha";
 
 describe("QueueClient messageId methods, Node.js only", () => {
   let queueName: string;
@@ -16,7 +17,7 @@ describe("QueueClient messageId methods, Node.js only", () => {
 
   let recorder: Recorder;
 
-  beforeEach(async function() {
+  beforeEach(async function (this: Context) {
     recorder = record(this, recorderEnvSetup);
     const queueServiceClient = getQSU();
     queueName = recorder.getUniqueName("queue");
@@ -24,7 +25,7 @@ describe("QueueClient messageId methods, Node.js only", () => {
     await queueClient.create();
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await queueClient.delete();
     await recorder.stop();
   });
@@ -85,7 +86,7 @@ describe("QueueClient messageId methods, Node.js only", () => {
     let error;
     try {
       await queueClient.updateMessage(eResult.messageId, eResult.popReceipt, newMessage);
-    } catch (err) {
+    } catch (err: any) {
       error = err;
     }
     assert.ok(error);
@@ -127,8 +128,8 @@ describe("QueueClient messageId methods, Node.js only", () => {
 
     const newClient = new QueueClient(queueClient.url, credential, {
       retryOptions: {
-        maxTries: 5
-      }
+        maxTries: 5,
+      },
     });
     await newClient.updateMessage(
       eResult.messageId,
@@ -189,8 +190,8 @@ describe("QueueClient messageId methods, Node.js only", () => {
 
     const newClient = new QueueClient(getConnectionStringFromEnvironment(), queueClient.name, {
       retryOptions: {
-        maxTries: 5
-      }
+        maxTries: 5,
+      },
     });
     await newClient.updateMessage(
       eResult.messageId,
@@ -206,10 +207,9 @@ describe("QueueClient messageId methods, Node.js only", () => {
 
   it("throws error if constructor queueName parameter is empty", async () => {
     try {
-      // tslint:disable-next-line: no-unused-expression
       new QueueClient(getConnectionStringFromEnvironment(), "");
       assert.fail("Expecting an thrown error but didn't get one.");
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(
         "Expecting non-empty strings for queueName parameter",
         error.message,

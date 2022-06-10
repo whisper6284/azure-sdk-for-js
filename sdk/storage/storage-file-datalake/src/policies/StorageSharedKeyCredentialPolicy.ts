@@ -39,7 +39,11 @@ export class StorageSharedKeyCredentialPolicy extends CredentialPolicy {
   protected signRequest(request: WebResource): WebResource {
     request.headers.set(HeaderConstants.X_MS_DATE, new Date().toUTCString());
 
-    if (request.body && typeof request.body === "string" && request.body.length > 0) {
+    if (
+      request.body &&
+      (typeof request.body === "string" || (request.body as Buffer) !== undefined) &&
+      request.body.length > 0
+    ) {
       request.headers.set(HeaderConstants.CONTENT_LENGTH, Buffer.byteLength(request.body));
     }
 
@@ -56,7 +60,7 @@ export class StorageSharedKeyCredentialPolicy extends CredentialPolicy {
         this.getHeaderValueToSign(request, HeaderConstants.IF_MATCH),
         this.getHeaderValueToSign(request, HeaderConstants.IF_NONE_MATCH),
         this.getHeaderValueToSign(request, HeaderConstants.IF_UNMODIFIED_SINCE),
-        this.getHeaderValueToSign(request, HeaderConstants.RANGE)
+        this.getHeaderValueToSign(request, HeaderConstants.RANGE),
       ].join("\n") +
       "\n" +
       this.getCanonicalizedHeadersString(request) +
@@ -160,7 +164,7 @@ export class StorageSharedKeyCredentialPolicy extends CredentialPolicy {
     if (queries) {
       const queryKeys: string[] = [];
       for (const key in queries) {
-        if (queries.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(queries, key)) {
           const lowercaseKey = key.toLowerCase();
           lowercaseQueries[lowercaseKey] = queries[key];
           queryKeys.push(lowercaseKey);

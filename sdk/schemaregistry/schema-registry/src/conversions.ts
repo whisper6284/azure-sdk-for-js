@@ -1,43 +1,41 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { SchemaId, Schema } from "./models";
+import { SchemaProperties, Schema } from "./models";
 
 import {
   SchemaGetByIdResponse,
   SchemaRegisterResponse,
-  SchemaQueryIdByContentResponse
+  SchemaQueryIdByContentResponse as SchemaQueryIdByDefinitionResponse,
 } from "./generated/models";
-import { FullOperationResponse } from "@azure/core-client";
+import { getSchemaDefinition } from "./getSchemaDefinition";
 
 /**
- * Union of generated client's responses that return schema content.
+ * Union of generated client's responses that return schema definition.
  */
 type GeneratedSchemaResponse = SchemaGetByIdResponse;
 
 /**
  * Union of generated client's responses that return schema ID.
  */
-type GeneratedSchemaIdResponse = SchemaRegisterResponse | SchemaQueryIdByContentResponse;
-
-/**
- * Union of all generated client's responses.
- */
-type GeneratedResponse = GeneratedSchemaResponse | GeneratedSchemaIdResponse;
+type GeneratedSchemaIdResponse = SchemaRegisterResponse | SchemaQueryIdByDefinitionResponse;
 
 /**
  * Converts generated client's response to IdentifiedSchemaResponse.
  *
  * @internal
  */
-export function convertSchemaResponse(
-  response: GeneratedSchemaResponse,
-  rawResponse: FullOperationResponse
-): Schema {
-  // https://github.com/Azure/azure-sdk-for-js/issues/11649
-  // Although response.body is typed as string, it is a parsed JSON object,
-  // so we use _response.bodyAsText instead as a workaround.
-  return convertResponse(response, { content: rawResponse.bodyAsText! });
+export async function convertSchemaResponse(response: GeneratedSchemaResponse): Promise<Schema> {
+  const schemaDefinition = await getSchemaDefinition(response);
+  return {
+    definition: schemaDefinition,
+    properties: {
+      id: response.schemaId!,
+      format: mapContentTypeToFormat(response.contentType!),
+      groupName: response.schemaGroupName!,
+      name: response.schemaName!,
+    },
+  };
 }
 
 /**
@@ -45,21 +43,27 @@ export function convertSchemaResponse(
  *
  * @internal
  */
-export function convertSchemaIdResponse(response: GeneratedSchemaIdResponse): SchemaId {
-  // `!` here because server is required to return this on success, but that
-  // is not modeled by the generated client.
-  return convertResponse(response, { id: response.id! });
+export function convertSchemaIdResponse(
+  schemaFormat: string
+): (response: GeneratedSchemaIdResponse) => SchemaProperties {
+  return (response: GeneratedSchemaIdResponse): SchemaProperties => {
+    return {
+      // `!`s here because server is required to return these on success, but that
+      // is not modeled by the generated client.
+      id: response.schemaId!,
+      format: schemaFormat,
+      groupName: response.schemaGroupName!,
+      name: response.schemaName!,
+    };
+  };
 }
 
-function convertResponse<T>(response: GeneratedResponse, additionalProperties: T): SchemaId & T {
-  return {
-    // `!`s here because server is required to return these on success, but that
-    // is not modeled by the generated client.
-    location: response.location!,
-    locationById: response.schemaIdLocation!,
-    id: response.schemaId!,
-    version: response.schemaVersion!,
-    serializationType: response.serializationType!,
-    ...additionalProperties
-  };
+function mapContentTypeToFormat(contentType: string): string {
+  const parts = /.*serialization=(.*)$/.exec(contentType);
+  const schemaFormat = parts?.[1];
+  if (schemaFormat) {
+    return schemaFormat;
+  } else {
+    throw new Error(`Unrecognized response's content-type: ${contentType}`);
+  }
 }

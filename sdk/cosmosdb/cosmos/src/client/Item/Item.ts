@@ -7,11 +7,12 @@ import {
   getPathFromLink,
   isResourceValid,
   ResourceType,
-  StatusCodes
+  StatusCodes,
 } from "../../common";
 import { PartitionKey } from "../../documents";
 import { extractPartitionKey, undefinedPartitionKey } from "../../extractPartitionKey";
 import { RequestOptions, Response } from "../../request";
+import { PatchRequestBody } from "../../utils/patch";
 import { Container } from "../Container";
 import { Resource } from "../Resource";
 import { ItemDefinition } from "./ItemDefinition";
@@ -74,9 +75,8 @@ export class Item {
     options: RequestOptions = {}
   ): Promise<ItemResponse<T>> {
     if (this.partitionKey === undefined) {
-      const {
-        resource: partitionKeyDefinition
-      } = await this.container.readPartitionKeyDefinition();
+      const { resource: partitionKeyDefinition } =
+        await this.container.readPartitionKeyDefinition();
       this.partitionKey = undefinedPartitionKey(partitionKeyDefinition);
     }
     const path = getPathFromLink(this.url);
@@ -88,9 +88,9 @@ export class Item {
         resourceType: ResourceType.item,
         resourceId: id,
         options,
-        partitionKey: this.partitionKey
+        partitionKey: this.partitionKey,
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error.code !== StatusCodes.NotFound) {
         throw error;
       }
@@ -138,9 +138,8 @@ export class Item {
     options: RequestOptions = {}
   ): Promise<ItemResponse<T>> {
     if (this.partitionKey === undefined) {
-      const {
-        resource: partitionKeyDefinition
-      } = await this.container.readPartitionKeyDefinition();
+      const { resource: partitionKeyDefinition } =
+        await this.container.readPartitionKeyDefinition();
       this.partitionKey = extractPartitionKey(body, partitionKeyDefinition);
     }
 
@@ -158,7 +157,7 @@ export class Item {
       resourceType: ResourceType.item,
       resourceId: id,
       options,
-      partitionKey: this.partitionKey
+      partitionKey: this.partitionKey,
     });
     return new ItemResponse(
       response.result,
@@ -181,9 +180,8 @@ export class Item {
     options: RequestOptions = {}
   ): Promise<ItemResponse<T>> {
     if (this.partitionKey === undefined) {
-      const {
-        resource: partitionKeyDefinition
-      } = await this.container.readPartitionKeyDefinition();
+      const { resource: partitionKeyDefinition } =
+        await this.container.readPartitionKeyDefinition();
       this.partitionKey = undefinedPartitionKey(partitionKeyDefinition);
     }
 
@@ -195,7 +193,45 @@ export class Item {
       resourceType: ResourceType.item,
       resourceId: id,
       options,
-      partitionKey: this.partitionKey
+      partitionKey: this.partitionKey,
+    });
+    return new ItemResponse(
+      response.result,
+      response.headers,
+      response.code,
+      response.substatus,
+      this
+    );
+  }
+
+  /**
+   * Perform a JSONPatch on the item.
+   *
+   * Any provided type, T, is not necessarily enforced by the SDK.
+   * You may get more or less properties and it's up to your logic to enforce it.
+   *
+   * @param options - Additional options for the request
+   */
+  public async patch<T extends ItemDefinition = any>(
+    body: PatchRequestBody,
+    options: RequestOptions = {}
+  ): Promise<ItemResponse<T>> {
+    if (this.partitionKey === undefined) {
+      const { resource: partitionKeyDefinition } =
+        await this.container.readPartitionKeyDefinition();
+      this.partitionKey = extractPartitionKey(body, partitionKeyDefinition);
+    }
+
+    const path = getPathFromLink(this.url);
+    const id = getIdFromLink(this.url);
+
+    const response = await this.clientContext.patch<T>({
+      body,
+      path,
+      resourceType: ResourceType.item,
+      resourceId: id,
+      options,
+      partitionKey: this.partitionKey,
     });
     return new ItemResponse(
       response.result,

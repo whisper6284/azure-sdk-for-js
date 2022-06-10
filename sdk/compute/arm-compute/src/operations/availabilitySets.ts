@@ -6,13 +6,12 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { AvailabilitySets } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ComputeManagementClientContext } from "../computeManagementClientContext";
+import { ComputeManagementClient } from "../computeManagementClient";
 import {
   AvailabilitySet,
   AvailabilitySetsListBySubscriptionNextOptionalParams,
@@ -37,15 +36,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a AvailabilitySets. */
+/** Class containing AvailabilitySets operations. */
 export class AvailabilitySetsImpl implements AvailabilitySets {
-  private readonly client: ComputeManagementClientContext;
+  private readonly client: ComputeManagementClient;
 
   /**
    * Initialize a new instance of the class AvailabilitySets class.
    * @param client Reference to the service client
    */
-  constructor(client: ComputeManagementClientContext) {
+  constructor(client: ComputeManagementClient) {
     this.client = client;
   }
 
@@ -362,15 +361,18 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
   responses: {
     200: {
       bodyMapper: Mappers.AvailabilitySet
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
     }
   },
-  requestBody: Parameters.parameters,
+  requestBody: Parameters.parameters10,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
+    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.availabilitySetName,
-    Parameters.subscriptionId
+    Parameters.availabilitySetName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
@@ -383,15 +385,18 @@ const updateOperationSpec: coreClient.OperationSpec = {
   responses: {
     200: {
       bodyMapper: Mappers.AvailabilitySet
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
     }
   },
-  requestBody: Parameters.parameters1,
+  requestBody: Parameters.parameters11,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
+    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.availabilitySetName,
-    Parameters.subscriptionId
+    Parameters.availabilitySetName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
@@ -401,14 +406,21 @@ const deleteOperationSpec: coreClient.OperationSpec = {
   path:
     "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/availabilitySets/{availabilitySetName}",
   httpMethod: "DELETE",
-  responses: { 200: {}, 204: {} },
+  responses: {
+    200: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.CloudError
+    }
+  },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
+    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.availabilitySetName,
-    Parameters.subscriptionId
+    Parameters.availabilitySetName
   ],
+  headerParameters: [Parameters.accept],
   serializer
 };
 const getOperationSpec: coreClient.OperationSpec = {
@@ -418,14 +430,17 @@ const getOperationSpec: coreClient.OperationSpec = {
   responses: {
     200: {
       bodyMapper: Mappers.AvailabilitySet
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
     }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
+    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.availabilitySetName,
-    Parameters.subscriptionId
+    Parameters.availabilitySetName
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -437,9 +452,12 @@ const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
   responses: {
     200: {
       bodyMapper: Mappers.AvailabilitySetListResult
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion, Parameters.expand],
+  queryParameters: [Parameters.apiVersion, Parameters.expand1],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
   serializer
@@ -451,13 +469,16 @@ const listOperationSpec: coreClient.OperationSpec = {
   responses: {
     200: {
       bodyMapper: Mappers.AvailabilitySetListResult
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
     }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -469,14 +490,17 @@ const listAvailableSizesOperationSpec: coreClient.OperationSpec = {
   responses: {
     200: {
       bodyMapper: Mappers.VirtualMachineSizeListResult
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
     }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
+    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.availabilitySetName,
-    Parameters.subscriptionId
+    Parameters.availabilitySetName
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -487,9 +511,12 @@ const listBySubscriptionNextOperationSpec: coreClient.OperationSpec = {
   responses: {
     200: {
       bodyMapper: Mappers.AvailabilitySetListResult
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion, Parameters.expand],
+  queryParameters: [Parameters.apiVersion, Parameters.expand1],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -504,14 +531,17 @@ const listNextOperationSpec: coreClient.OperationSpec = {
   responses: {
     200: {
       bodyMapper: Mappers.AvailabilitySetListResult
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
     }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
+    Parameters.resourceGroupName
   ],
   headerParameters: [Parameters.accept],
   serializer

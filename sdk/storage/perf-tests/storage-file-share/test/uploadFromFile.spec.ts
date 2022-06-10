@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { v4 as generateUuid } from "uuid";
-import { PerfStressOptionDictionary } from "@azure/test-utils-perfstress";
+import { PerfOptionDictionary } from "@azure/test-utils-perf";
 import fs from "fs";
 import util from "util";
 import { ShareFileClient } from "@azure/storage-file-share";
@@ -19,18 +19,16 @@ interface StorageFileShareUploadFromFileTestOptions {
 const localDirName = "temp";
 const localFileName = `${localDirName}/upload-from-test-temp-file.txt`;
 
-export class StorageFileShareUploadFromFileTest extends StorageFileShareTest<
-  StorageFileShareUploadFromFileTestOptions
-> {
+export class StorageFileShareUploadFromFileTest extends StorageFileShareTest<StorageFileShareUploadFromFileTestOptions> {
   fileClient: ShareFileClient;
-  public options: PerfStressOptionDictionary<StorageFileShareUploadFromFileTestOptions> = {
+  public options: PerfOptionDictionary<StorageFileShareUploadFromFileTestOptions> = {
     size: {
       required: true,
       description: "Size in bytes",
       shortName: "sz",
       longName: "size",
-      defaultValue: 1024
-    }
+      defaultValue: 1024,
+    },
   };
 
   constructor() {
@@ -50,7 +48,7 @@ export class StorageFileShareUploadFromFileTest extends StorageFileShareTest<
     await super.globalCleanup();
   }
 
-  async runAsync(): Promise<void> {
+  async run(): Promise<void> {
     await this.fileClient.uploadFile(localFileName);
   }
 }

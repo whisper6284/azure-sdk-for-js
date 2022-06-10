@@ -1,30 +1,28 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as assert from "assert";
+import { assert } from "chai";
 
 import { AbortController, AbortSignal } from "@azure/abort-controller";
 import { DataLakeFileSystemClient } from "../src";
 import { getDataLakeServiceClient, recorderEnvSetup } from "./utils";
-import { record, Recorder } from "@azure/test-utils-recorder";
-import * as dotenv from "dotenv";
-dotenv.config();
+import { record, Recorder } from "@azure-tools/test-recorder";
+import { Context } from "mocha";
 
-// tslint:disable:no-empty
 describe("Aborter", () => {
   let fileSystemName: string;
   let fileSystemClient: DataLakeFileSystemClient;
 
   let recorder: Recorder;
 
-  beforeEach(async function() {
+  beforeEach(async function (this: Context) {
     recorder = record(this, recorderEnvSetup);
     const serviceClient = getDataLakeServiceClient();
     fileSystemName = recorder.getUniqueName("container");
     fileSystemClient = serviceClient.getFileSystemClient(fileSystemName);
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await recorder.stop();
   });
 
@@ -32,7 +30,7 @@ describe("Aborter", () => {
     try {
       await fileSystemClient.create({ abortSignal: AbortController.timeout(1) });
       assert.fail();
-    } catch (err) {
+    } catch (err: any) {
       assert.equal(err.name, "AbortError");
       assert.equal(err.message, "The operation was aborted.", "Unexpected error caught: " + err);
     }
@@ -49,7 +47,7 @@ describe("Aborter", () => {
     try {
       await response;
       assert.fail();
-    } catch (err) {
+    } catch (err: any) {
       assert.equal(err.name, "AbortError");
       assert.equal(err.message, "The operation was aborted.", "Unexpected error caught: " + err);
     }
@@ -69,12 +67,12 @@ describe("Aborter", () => {
         AbortController.timeout(10 * 60 * 1000)
       );
       const response = fileSystemClient.create({
-        abortSignal: childAborter.signal
+        abortSignal: childAborter.signal,
       });
       aborter.abort();
       await response;
       assert.fail();
-    } catch (err) {
+    } catch (err: any) {
       assert.equal(err.name, "AbortError");
       assert.equal(err.message, "The operation was aborted.", "Unexpected error caught: " + err);
     }

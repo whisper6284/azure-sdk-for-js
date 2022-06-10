@@ -3,35 +3,27 @@
 
 import { AppConfigurationClient } from "../../src";
 import {
-  startRecorder,
+  CredsAndEndpoint,
   getTokenAuthenticationCredential,
-  CredsAndEndpoint
+  startRecorder,
 } from "./utils/testHelpers";
-import * as assert from "assert";
-import { Recorder } from "@azure/test-utils-recorder";
+import { assert } from "chai";
+import { Recorder } from "@azure-tools/test-recorder";
 import { Context } from "mocha";
 
 describe("Authentication", () => {
   let credsAndEndpoint: CredsAndEndpoint;
   let recorder: Recorder;
 
-  beforeEach(function(this: Context) {
+  beforeEach(function (this: Context) {
     recorder = startRecorder(this);
     credsAndEndpoint = getTokenAuthenticationCredential() || this.skip();
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await recorder.stop();
   });
-
-  it("invalid connection string gives a decent error message", () => {
-    assert.throws(
-      () => new AppConfigurationClient("an invalid connection string"),
-      /Invalid connection string\. Valid connection strings should match the regex 'Endpoint=\(\.\*\);Id=\(\.\*\);Secret=\(\.\*\)'/
-    );
-  });
-
-  it("token authentication works", async function() {
+  it("token authentication works", async function () {
     const client = new AppConfigurationClient(
       credsAndEndpoint.endpoint,
       credsAndEndpoint.credential
@@ -41,7 +33,23 @@ describe("Authentication", () => {
     // able to connect and call the service
     await client.addConfigurationSetting({
       key: `token-authentication-test-${recorder.newDate("label-1").valueOf()}`,
-      value: "hello"
+      value: "hello",
     });
+  });
+});
+
+describe("AppConfigurationClient constructor error cases", () => {
+  it("invalid connection string gives a decent error message", () => {
+    assert.throws(
+      () => new AppConfigurationClient("an invalid connection string"),
+      /Invalid connection string\. Valid connection strings should match the regex 'Endpoint=\(\.\*\);Id=\(\.\*\);Secret=\(\.\*\)'/
+    );
+  });
+
+  it("undefined connection string gives a decent error message", () => {
+    assert.throws(
+      () => new AppConfigurationClient(undefined as any),
+      /Invalid connection string\. Valid connection strings should match the regex 'Endpoint=\(\.\*\);Id=\(\.\*\);Secret=\(\.\*\)'/
+    );
   });
 });

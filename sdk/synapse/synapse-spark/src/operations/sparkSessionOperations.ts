@@ -14,27 +14,27 @@ import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SparkClientContext } from "../sparkClientContext";
 import {
-  SparkSessionOperationsGetSparkSessionsOptionalParams,
-  SparkSessionOperationsGetSparkSessionsResponse,
+  SparkSessionGetSparkSessionsOptionalParams,
+  SparkSessionGetSparkSessionsResponse,
   SparkSessionOptions,
-  SparkSessionOperationsCreateSparkSessionOptionalParams,
-  SparkSessionOperationsCreateSparkSessionResponse,
-  SparkSessionOperationsGetSparkSessionOptionalParams,
-  SparkSessionOperationsGetSparkSessionResponse,
-  SparkSessionOperationsCancelSparkSessionOptionalParams,
-  SparkSessionOperationsResetSparkSessionTimeoutOptionalParams,
-  SparkSessionOperationsGetSparkStatementsOptionalParams,
-  SparkSessionOperationsGetSparkStatementsResponse,
+  SparkSessionCreateSparkSessionOptionalParams,
+  SparkSessionCreateSparkSessionResponse,
+  SparkSessionGetSparkSessionOptionalParams,
+  SparkSessionGetSparkSessionResponse,
+  SparkSessionCancelSparkSessionOptionalParams,
+  SparkSessionResetSparkSessionTimeoutOptionalParams,
+  SparkSessionGetSparkStatementsOptionalParams,
+  SparkSessionGetSparkStatementsResponse,
   SparkStatementOptions,
-  SparkSessionOperationsCreateSparkStatementOptionalParams,
-  SparkSessionOperationsCreateSparkStatementResponse,
-  SparkSessionOperationsGetSparkStatementOptionalParams,
-  SparkSessionOperationsGetSparkStatementResponse,
-  SparkSessionOperationsCancelSparkStatementOptionalParams,
-  SparkSessionOperationsCancelSparkStatementResponse
+  SparkSessionCreateSparkStatementOptionalParams,
+  SparkSessionCreateSparkStatementResponse,
+  SparkSessionGetSparkStatementOptionalParams,
+  SparkSessionGetSparkStatementResponse,
+  SparkSessionCancelSparkStatementOptionalParams,
+  SparkSessionCancelSparkStatementResponse
 } from "../models";
 
-/** Class representing a SparkSessionOperations. */
+/** Class containing SparkSessionOperations operations. */
 export class SparkSessionOperationsImpl implements SparkSessionOperations {
   private readonly client: SparkClientContext;
 
@@ -51,16 +51,16 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
    * @param options The options parameters.
    */
   async getSparkSessions(
-    options?: SparkSessionOperationsGetSparkSessionsOptionalParams
-  ): Promise<SparkSessionOperationsGetSparkSessionsResponse> {
+    options?: SparkSessionGetSparkSessionsOptionalParams
+  ): Promise<SparkSessionGetSparkSessionsResponse> {
     const { span } = createSpan("SparkClient-getSparkSessions", options || {});
     try {
       const result = await this.client.sendOperationRequest(
         { options },
         getSparkSessionsOperationSpec
       );
-      return result as SparkSessionOperationsGetSparkSessionsResponse;
-    } catch (error) {
+      return result as SparkSessionGetSparkSessionsResponse;
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -78,8 +78,8 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
    */
   async createSparkSession(
     sparkSessionOptions: SparkSessionOptions,
-    options?: SparkSessionOperationsCreateSparkSessionOptionalParams
-  ): Promise<SparkSessionOperationsCreateSparkSessionResponse> {
+    options?: SparkSessionCreateSparkSessionOptionalParams
+  ): Promise<SparkSessionCreateSparkSessionResponse> {
     const { span } = createSpan(
       "SparkClient-createSparkSession",
       options || {}
@@ -89,8 +89,8 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
         { sparkSessionOptions, options },
         createSparkSessionOperationSpec
       );
-      return result as SparkSessionOperationsCreateSparkSessionResponse;
-    } catch (error) {
+      return result as SparkSessionCreateSparkSessionResponse;
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -108,16 +108,16 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
    */
   async getSparkSession(
     sessionId: number,
-    options?: SparkSessionOperationsGetSparkSessionOptionalParams
-  ): Promise<SparkSessionOperationsGetSparkSessionResponse> {
+    options?: SparkSessionGetSparkSessionOptionalParams
+  ): Promise<SparkSessionGetSparkSessionResponse> {
     const { span } = createSpan("SparkClient-getSparkSession", options || {});
     try {
       const result = await this.client.sendOperationRequest(
         { sessionId, options },
         getSparkSessionOperationSpec
       );
-      return result as SparkSessionOperationsGetSparkSessionResponse;
-    } catch (error) {
+      return result as SparkSessionGetSparkSessionResponse;
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -135,7 +135,7 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
    */
   async cancelSparkSession(
     sessionId: number,
-    options?: SparkSessionOperationsCancelSparkSessionOptionalParams
+    options?: SparkSessionCancelSparkSessionOptionalParams
   ): Promise<void> {
     const { span } = createSpan(
       "SparkClient-cancelSparkSession",
@@ -147,7 +147,7 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
         cancelSparkSessionOperationSpec
       );
       return result as void;
-    } catch (error) {
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -165,7 +165,7 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
    */
   async resetSparkSessionTimeout(
     sessionId: number,
-    options?: SparkSessionOperationsResetSparkSessionTimeoutOptionalParams
+    options?: SparkSessionResetSparkSessionTimeoutOptionalParams
   ): Promise<void> {
     const { span } = createSpan(
       "SparkClient-resetSparkSessionTimeout",
@@ -177,7 +177,7 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
         resetSparkSessionTimeoutOperationSpec
       );
       return result as void;
-    } catch (error) {
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -195,8 +195,8 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
    */
   async getSparkStatements(
     sessionId: number,
-    options?: SparkSessionOperationsGetSparkStatementsOptionalParams
-  ): Promise<SparkSessionOperationsGetSparkStatementsResponse> {
+    options?: SparkSessionGetSparkStatementsOptionalParams
+  ): Promise<SparkSessionGetSparkStatementsResponse> {
     const { span } = createSpan(
       "SparkClient-getSparkStatements",
       options || {}
@@ -206,8 +206,8 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
         { sessionId, options },
         getSparkStatementsOperationSpec
       );
-      return result as SparkSessionOperationsGetSparkStatementsResponse;
-    } catch (error) {
+      return result as SparkSessionGetSparkStatementsResponse;
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -227,8 +227,8 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
   async createSparkStatement(
     sessionId: number,
     sparkStatementOptions: SparkStatementOptions,
-    options?: SparkSessionOperationsCreateSparkStatementOptionalParams
-  ): Promise<SparkSessionOperationsCreateSparkStatementResponse> {
+    options?: SparkSessionCreateSparkStatementOptionalParams
+  ): Promise<SparkSessionCreateSparkStatementResponse> {
     const { span } = createSpan(
       "SparkClient-createSparkStatement",
       options || {}
@@ -238,8 +238,8 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
         { sessionId, sparkStatementOptions, options },
         createSparkStatementOperationSpec
       );
-      return result as SparkSessionOperationsCreateSparkStatementResponse;
-    } catch (error) {
+      return result as SparkSessionCreateSparkStatementResponse;
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -259,16 +259,16 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
   async getSparkStatement(
     sessionId: number,
     statementId: number,
-    options?: SparkSessionOperationsGetSparkStatementOptionalParams
-  ): Promise<SparkSessionOperationsGetSparkStatementResponse> {
+    options?: SparkSessionGetSparkStatementOptionalParams
+  ): Promise<SparkSessionGetSparkStatementResponse> {
     const { span } = createSpan("SparkClient-getSparkStatement", options || {});
     try {
       const result = await this.client.sendOperationRequest(
         { sessionId, statementId, options },
         getSparkStatementOperationSpec
       );
-      return result as SparkSessionOperationsGetSparkStatementResponse;
-    } catch (error) {
+      return result as SparkSessionGetSparkStatementResponse;
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -288,8 +288,8 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
   async cancelSparkStatement(
     sessionId: number,
     statementId: number,
-    options?: SparkSessionOperationsCancelSparkStatementOptionalParams
-  ): Promise<SparkSessionOperationsCancelSparkStatementResponse> {
+    options?: SparkSessionCancelSparkStatementOptionalParams
+  ): Promise<SparkSessionCancelSparkStatementResponse> {
     const { span } = createSpan(
       "SparkClient-cancelSparkStatement",
       options || {}
@@ -299,8 +299,8 @@ export class SparkSessionOperationsImpl implements SparkSessionOperations {
         { sessionId, statementId, options },
         cancelSparkStatementOperationSpec
       );
-      return result as SparkSessionOperationsCancelSparkStatementResponse;
-    } catch (error) {
+      return result as SparkSessionCancelSparkStatementResponse;
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message

@@ -13,7 +13,7 @@ import {
   getInitialHeader,
   mergeHeaders,
   PipelinedQueryExecutionContext,
-  SqlQuerySpec
+  SqlQuerySpec,
 } from "./queryExecutionContext";
 import { Response } from "./request";
 import { ErrorResponse, PartitionedQueryExecutionInfo } from "./request/ErrorResponse";
@@ -68,8 +68,8 @@ export class QueryIterator<T> {
    *
    * @example Iterate over all databases
    * ```typescript
-   * for await(const {result: db} in client.databases.readAll().getAsyncIterator()) {
-   *   console.log(`Got ${db.id} from AsyncIterator`);
+   * for await(const { resources: db } of client.databases.readAll().getAsyncIterator()) {
+   *   console.log(`Got ${db} from AsyncIterator`);
    * }
    * ```
    */
@@ -80,12 +80,12 @@ export class QueryIterator<T> {
       let response: Response<any>;
       try {
         response = await this.queryExecutionContext.fetchMore();
-      } catch (error) {
+      } catch (error: any) {
         if (this.needsQueryPlan(error)) {
           await this.createPipelinedExecutionContext();
           try {
             response = await this.queryExecutionContext.fetchMore();
-          } catch (queryError) {
+          } catch (queryError: any) {
             this.handleSplitError(queryError);
           }
         } else {
@@ -122,7 +122,7 @@ export class QueryIterator<T> {
     let response: FeedResponse<T>;
     try {
       response = await this.toArrayImplementation();
-    } catch (error) {
+    } catch (error: any) {
       this.handleSplitError(error);
     }
     return response;
@@ -144,12 +144,12 @@ export class QueryIterator<T> {
     let response: Response<any>;
     try {
       response = await this.queryExecutionContext.fetchMore();
-    } catch (error) {
+    } catch (error: any) {
       if (this.needsQueryPlan(error)) {
         await this.createPipelinedExecutionContext();
         try {
           response = await this.queryExecutionContext.fetchMore();
-        } catch (queryError) {
+        } catch (queryError: any) {
           this.handleSplitError(queryError);
         }
       } else {
@@ -183,7 +183,7 @@ export class QueryIterator<T> {
       let response: Response<any>;
       try {
         response = await this.queryExecutionContext.nextItem();
-      } catch (error) {
+      } catch (error: any) {
         if (this.needsQueryPlan(error)) {
           await this.createPipelinedExecutionContext();
           response = await this.queryExecutionContext.nextItem();

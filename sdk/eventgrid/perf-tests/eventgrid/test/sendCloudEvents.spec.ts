@@ -1,30 +1,26 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import {
-  PerfStressTest,
-  PerfStressOptionDictionary,
-  getEnvVar
-} from "@azure/test-utils-perfstress";
+import { PerfTest, PerfOptionDictionary, getEnvVar } from "@azure/test-utils-perf";
 import {
   EventGridPublisherClient,
   AzureKeyCredential,
-  SendCloudEventInput
+  SendCloudEventInput,
 } from "@azure/eventgrid";
 
 interface SendCloudEventsPerfTestOptions {
   "event-count": number;
 }
 
-export class SendCloudEventsTest extends PerfStressTest<SendCloudEventsPerfTestOptions> {
-  options: PerfStressOptionDictionary<SendCloudEventsPerfTestOptions> = {
+export class SendCloudEventsTest extends PerfTest<SendCloudEventsPerfTestOptions> {
+  options: PerfOptionDictionary<SendCloudEventsPerfTestOptions> = {
     "event-count": {
       required: true,
       description: "Number of events to send in a single request",
       shortName: "n",
       longName: "events-count",
-      defaultValue: 10
-    }
+      defaultValue: 10,
+    },
   };
   client: EventGridPublisherClient<"CloudEvent">;
   events: SendCloudEventInput<string>[] = [];
@@ -37,7 +33,7 @@ export class SendCloudEventsTest extends PerfStressTest<SendCloudEventsPerfTestO
       this.events.push({
         source: "sdk/eventgrid/perf-tests/eventgrid",
         type: "cloud-event-test-event",
-        data: `${i}`
+        data: `${i}`,
       });
     }
 
@@ -47,7 +43,7 @@ export class SendCloudEventsTest extends PerfStressTest<SendCloudEventsPerfTestO
     this.client = new EventGridPublisherClient(endpoint, "CloudEvent", new AzureKeyCredential(key));
   }
 
-  async runAsync(): Promise<void> {
+  async run(): Promise<void> {
     await this.client.send(this.events);
   }
 }

@@ -1,8 +1,6 @@
-import { PerfStressProgram, selectPerfStressTest } from "@azure/test-utils-perfstress";
+import { createPerfProgram } from "@azure/test-utils-perf";
 import { ListSettingsTest } from "./listSettings.spec";
 
-console.log("=== Starting the perfStress test ===");
+const perfProgram = createPerfProgram(ListSettingsTest);
 
-const perfStressProgram = new PerfStressProgram(selectPerfStressTest([ListSettingsTest]));
-
-perfStressProgram.run();
+perfProgram.run();

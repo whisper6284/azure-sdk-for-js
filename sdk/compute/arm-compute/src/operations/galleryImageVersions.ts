@@ -6,13 +6,12 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { GalleryImageVersions } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ComputeManagementClientContext } from "../computeManagementClientContext";
+import { ComputeManagementClient } from "../computeManagementClient";
 import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
 import { LroImpl } from "../lroImpl";
 import {
@@ -32,15 +31,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a GalleryImageVersions. */
+/** Class containing GalleryImageVersions operations. */
 export class GalleryImageVersionsImpl implements GalleryImageVersions {
-  private readonly client: ComputeManagementClientContext;
+  private readonly client: ComputeManagementClient;
 
   /**
    * Initialize a new instance of the class GalleryImageVersions class.
    * @param client Reference to the service client
    */
-  constructor(client: ComputeManagementClientContext) {
+  constructor(client: ComputeManagementClient) {
     this.client = client;
   }
 
@@ -202,10 +201,12 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
       },
       createOrUpdateOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -316,10 +317,12 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
       },
       updateOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -445,10 +448,12 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
       },
       deleteOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -546,8 +551,8 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.galleryName,
     Parameters.galleryImageName,
     Parameters.galleryImageVersionName
@@ -581,8 +586,8 @@ const updateOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.galleryName,
     Parameters.galleryImageName,
     Parameters.galleryImageVersionName
@@ -603,11 +608,11 @@ const getOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion3, Parameters.expand7],
+  queryParameters: [Parameters.apiVersion3, Parameters.expand9],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.galleryName,
     Parameters.galleryImageName,
     Parameters.galleryImageVersionName
@@ -631,8 +636,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.galleryName,
     Parameters.galleryImageName,
     Parameters.galleryImageVersionName
@@ -655,8 +660,8 @@ const listByGalleryImageOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.galleryName,
     Parameters.galleryImageName
   ],
@@ -677,9 +682,9 @@ const listByGalleryImageNextOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.nextLink,
+    Parameters.resourceGroupName,
     Parameters.galleryName,
     Parameters.galleryImageName
   ],

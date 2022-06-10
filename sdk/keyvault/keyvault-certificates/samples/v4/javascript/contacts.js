@@ -9,8 +9,7 @@ const { CertificateClient } = require("@azure/keyvault-certificates");
 const { DefaultAzureCredential } = require("@azure/identity");
 
 // Load the .env file if it exists
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 
 async function main() {
   // If you're using MSI, DefaultAzureCredential should "just work".
@@ -29,13 +28,13 @@ async function main() {
     {
       email: "a@a.com",
       name: "a",
-      phone: "111111111111"
+      phone: "111111111111",
     },
     {
       email: "b@b.com",
       name: "b",
-      phone: "222222222222"
-    }
+      phone: "222222222222",
+    },
   ];
 
   await client.setContacts(contacts);
@@ -56,8 +55,9 @@ async function main() {
   console.log("err: ", error);
 }
 
-main().catch((err) => {
-  console.log("error code: ", err.code);
-  console.log("error message: ", err.message);
-  console.log("error stack: ", err.stack);
+main().catch((error) => {
+  console.error("An error occurred:", error);
+  process.exit(1);
 });
+
+module.exports = { main };

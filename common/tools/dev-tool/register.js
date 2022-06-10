@@ -14,16 +14,20 @@
  */
 
 const path = require("path");
-
-const ts = require("typescript");
-
 const cwd = process.cwd();
 
 // This is the calling module, which will be the node repl context.
-const main = module.parent;
+const main = require.main || module.parent;
 
 // We need to know which package name to monkey patch
 const { name: hostPackageName } = main.require("./package.json");
+
+// We need to use whatever version of TypeScript the calling package uses to inspect syntax nodes, because
+// that is what the ts-node invocation will use, and we need to agree with it on syntax brands.
+const ts =
+  hostPackageName === "@azure/dev-tool"
+    ? require(path.join(cwd, "node_modules", "typescript"))
+    : main.require("typescript");
 
 // If we're bootstrapping a dev-tool command, we need to patch the package from
 // CWD instead.  This will still end up being dev-tool if we end up in a
@@ -75,8 +79,8 @@ const makeTransformers = () => ({
           return node;
         },
         transformationContext
-      )
-  ]
+      ),
+  ],
 });
 
 require("ts-node").register({
@@ -84,13 +88,13 @@ require("ts-node").register({
   transpileOnly: true,
   compilerOptions: {
     ...require("../../../tsconfig.json").compilerOptions,
-    target: "es6",
+    target: "es2019",
     module: "commonjs",
     allowJs: true,
     esModuleInterop: true,
     paths: {
-      [packageNameToPatch]: ["./src/index"]
-    }
+      [packageNameToPatch]: ["./src/index"],
+    },
   },
-  transformers: makeTransformers()
+  transformers: makeTransformers(),
 });

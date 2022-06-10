@@ -1,10 +1,115 @@
 # Release History
 
-## 4.5.0 (Unreleased)
+## 4.10.0-beta.2 (Unreleased)
 
 ### Features Added
 
-- Added new System Event: `Microsoft.ContainerService.NewKubernetesVersionAvailable`
+### Breaking Changes
+
+### Bugs Fixed
+
+### Other Changes
+
+## 4.10.0-beta.1 (2022-04-14)
+
+### Features Added
+
+- Add support for specifiying a channel to send to in a specific Partner Topic via the `channelName` property of `SendOptions`.
+
+### Other Changes
+
+- Updated our `@azure/core-tracing` dependency to the latest version (1.0.0).
+  - Notable changes include Removal of `@opentelemetry/api` as a transitive dependency and ensuring that the active context is properly propagated.
+  - Customers who would like to continue using OpenTelemetry driven tracing should visit our [OpenTelemetry Instrumentation](https://www.npmjs.com/package/@azure/opentelemetry-instrumentation-azure-sdk) package for instructions.
+
+## 4.9.0 (2022-04-07)
+
+### Features Added
+
+- Added new System Events:
+
+  - `Microsoft.HealthcareApis.FhirResourceCreated`
+  - `Microsoft.HealthcareApis.FhirUpdatedCreated`
+  - `Microsoft.HealthcareApis.FhirDeletedCreated`
+
+## 4.8.0 (2022-03-08)
+
+### Features Added
+
+- Added new value `IdentityUnsupported` to `MediaJobErrorCode` and `Account` to `MediaJobErrorCategory` for `Microsoft.Media` events.
+
+## 4.7.0 (2022-02-08)
+
+### Key Bug Fixes
+
+- The TypeScript typings for two events have had small changes to accurately reflect the data sent by Azure.
+  - `Microsoft.EventHub.CaptureFileCreated`'s `fileurl` property is now correctly cased as `fileUrl`
+  - `Microsoft.Storage.DirectoryDeleted`'s `recursive` property has been changed from `boolean` to `string`. The service sets this property to the string `"true"` or `"false"`.
+
+## 4.6.0 (2022-01-11)
+
+### Features Added
+
+- Added a new property to `AcsRecordingChunkInfo` (for the `Microsoft.Communication.RecordingFileStatusUpdated` system event):
+
+  - `deleteLocation`
+
+- Added new properties to `ContainerRegistryArtifactEventData` and `ContainerRegistryEventData` (for the `Microsoft.ContainerRegistry.{ChartDeleted|ChartPushed|ImagePushed|ImageDeleted}` system events):
+
+  - `connectedRegistry`
+  - `location`
+
+- Added new properties to `AcsRecordingFileStatusUpdatedEventData` (for the `Microsoft.Communication.RecordingFileStatusUpdated` system event):
+
+  - `recordingChannelType`
+  - `recordingContentType`
+  - `recordingFormatType`
+
+### Key Bug Fixes
+
+- The TypeScript typings for events from Azure Resource Manager were incorrect. The following properties had their types changed:
+
+  - `authorization`
+  - `claims`
+  - `httpRequest`
+
+Previously, these properties were typed as `string` but the underlying events from the service actually contained objects. Customers using `isSystemEvent` with TypeScript will
+now see compliation issues if they try to treat these properties as strings (previously, the code would fail at runtime).
+
+## 4.5.0 (2021-10-05)
+
+### Features Added
+
+- Added new properties for the `Microsoft.Media.LiveEventIngestHeartbeat` System Event:
+
+  - `ingestDriftValue`
+  - `lastFragmentArrivalTime`
+  - `transcriptionLanguage`
+  - `transcriptionState`
+
+- Added new System Events:
+  - API Management:
+    - `Microsoft.ApiManagement.APICreated`
+    - `Microsoft.ApiManagement.APIDeleted`
+    - `Microsoft.ApiManagement.APIReleaseCreated`
+    - `Microsoft.ApiManagement.APIReleaseDeleted`
+    - `Microsoft.ApiManagement.APIReleaseUpdated`
+    - `Microsoft.ApiManagement.APIUpdated`
+    - `Microsoft.ApiManagement.ProductCreated`
+    - `Microsoft.ApiManagement.ProductDeleted`
+    - `Microsoft.ApiManagement.ProductUpdated`
+    - `Microsoft.ApiManagement.SubscriptionCreated`
+    - `Microsoft.ApiManagement.SubscriptionDeleted`
+    - `Microsoft.ApiManagement.SubscriptionUpdated`
+    - `Microsoft.ApiManagement.UserCreated`
+    - `Microsoft.ApiManagement.UserDeleted`
+    - `Microsoft.ApiManagement.UserUpdated`
+  - Container Service:
+    - `Microsoft.ContainerService.NewKubernetesVersionAvailable`
+  - Communication:
+    - `Microsoft.Communication.UserDisconnected`
+  - Media Streaming:
+    - `Microsoft.Media.LiveEventChannelArchiveHeartbeat`
 
 ## 4.4.0 (2021-07-19)
 

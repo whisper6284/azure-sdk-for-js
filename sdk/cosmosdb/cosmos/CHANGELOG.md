@@ -1,6 +1,6 @@
 # Release History
 
-## 3.13.1 (Unreleased)
+## 3.16.2 (Unreleased)
 
 ### Features Added
 
@@ -11,6 +11,61 @@
 - Fixed bugs in session token clearing logic. Session Not found (404, substatus 1002) was not being handled correctly by the session retry policy and would mistakenly retry the request with the same session token.
 
 ### Other Changes
+
+## 3.16.1 (2022-05-31)
+
+### Bugs Fixed
+- Fix [#22003](https://github.com/Azure/azure-sdk-for-js/issues/22003) missing interface error. [#22015](https://github.com/Azure/azure-sdk-for-js/pull/22015)
+
+## 3.16.0 (2022-05-23)
+
+### Features Added
+- Allow users like cosmos-explorer to specify hierarchical partition keys. https://github.com/Azure/azure-sdk-for-js/pull/21934
+- Support Dedicated Gateway RequestOptions and Max Integrated Cache Staleness. https://github.com/Azure/azure-sdk-for-js/pull/21240
+
+## 3.15.1 (2022-01-24)
+
+### Bugs Fixed
+
+- Fixed the paths mapped by the `browser` entry in `package.json` to be correct for the package's new output structure. This solves errors with bundling the package for browsers.
+
+## 3.15.0 (2021-11-22)
+
+### Features Added
+
+- _GA_ Adds `container.item(itemId).patch()`. `patch()` is an alternative to `replace()` for item updates. https://github.com/Azure/azure-sdk-for-js/pull/16264/files#diff-7caca690c469e2025576523c0377ac71815f001024fde7c48b20cd24adaa6977R561
+- _GA_ support for Bulk operation PATCH.
+- _GA_ support for Batch operation PATCH.
+- Added the `SasTokenProperties` type and a `createAuthorizationSasToken` function to enable scoped access to Cosmos resources with SAS tokens. For an example that demonstrates creating a SAS token and using it to authenticate a `CosmosClient`, see [the `SasTokenAuth` sample](https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/cosmosdb/cosmos/samples/v3/typescript/src/SasTokenAuth.ts).
+
+### Other Changes
+
+- Made several changes to the sample programs to improve code quality and compatibility with Node 12, and upgraded the sample programs' dependencies.
+
+## 3.14.1 (2021-09-02)
+
+### Bugs Fixed
+
+- Fix @azure/core-rest-pipeline version for AAD auth.
+
+## 3.14.0 (2021-09-01)
+
+### Features Added
+
+- _PREVIEW_ Adds `container.item(itemId).patch()`. `patch()` is an alternative to `replace()` for item updates. https://github.com/Azure/azure-sdk-for-js/pull/16264/files#diff-7caca690c469e2025576523c0377ac71815f001024fde7c48b20cd24adaa6977R561
+- _PREVIEW_ Adds support for Bulk operation PATCH.
+- _PREVIEW_ Adds support for Batch operation PATCH.
+
+### Bugs Fixed
+
+- Fixes bug where Batch was passing the wrong header for batch requests with partition keys
+- Fixes 401s when using AAD auth. AAD credentials should now work and no longer cause 429s from @azure/identity at high throughput.
+
+## 3.13.1 (2021-08-23)
+
+### Bugs Fixed
+
+- Fixed bugs in session token clearing logic. Session Not found (404, substatus 1002) was not being handled correctly by the session retry policy and would mistakenly retry the request with the same session token.
 
 ## 3.13.0 (2021-08-10)
 

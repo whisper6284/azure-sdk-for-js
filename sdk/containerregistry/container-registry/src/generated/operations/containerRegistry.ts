@@ -8,14 +8,14 @@
 
 import { ContainerRegistry } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
+import * as coreRestPipeline from "@azure/core-rest-pipeline";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { GeneratedClientContext } from "../generatedClientContext";
+import { GeneratedClient } from "../generatedClient";
 import {
   ContainerRegistryCheckDockerV2SupportOptionalParams,
   ContainerRegistryGetManifestOptionalParams,
   ContainerRegistryGetManifestResponse,
-  Manifest,
   ContainerRegistryCreateManifestOptionalParams,
   ContainerRegistryCreateManifestResponse,
   ContainerRegistryDeleteManifestOptionalParams,
@@ -47,15 +47,15 @@ import {
   ContainerRegistryGetManifestsNextResponse
 } from "../models";
 
-/** Class representing a ContainerRegistry. */
+/** Class containing ContainerRegistry operations. */
 export class ContainerRegistryImpl implements ContainerRegistry {
-  private readonly client: GeneratedClientContext;
+  private readonly client: GeneratedClient;
 
   /**
    * Initialize a new instance of the class ContainerRegistry class.
    * @param client Reference to the service client
    */
-  constructor(client: GeneratedClientContext) {
+  constructor(client: GeneratedClient) {
     this.client = client;
   }
 
@@ -99,7 +99,7 @@ export class ContainerRegistryImpl implements ContainerRegistry {
   createManifest(
     name: string,
     reference: string,
-    payload: Manifest,
+    payload: coreRestPipeline.RequestBodyType,
     options?: ContainerRegistryCreateManifestOptionalParams
   ): Promise<ContainerRegistryCreateManifestResponse> {
     return this.client.sendOperationRequest(
@@ -369,7 +369,11 @@ const getManifestOperationSpec: coreClient.OperationSpec = {
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.Manifest
+      bodyMapper: {
+        type: { name: "Stream" },
+        serializedName: "parsedResponse"
+      },
+      headersMapper: Mappers.ContainerRegistryGetManifestHeaders
     },
     default: {
       bodyMapper: Mappers.AcrErrors
@@ -384,7 +388,6 @@ const createManifestOperationSpec: coreClient.OperationSpec = {
   httpMethod: "PUT",
   responses: {
     201: {
-      bodyMapper: { type: { name: "any" } },
       headersMapper: Mappers.ContainerRegistryCreateManifestHeaders
     },
     default: {
@@ -393,8 +396,8 @@ const createManifestOperationSpec: coreClient.OperationSpec = {
   },
   requestBody: Parameters.payload,
   urlParameters: [Parameters.url, Parameters.name, Parameters.reference],
-  headerParameters: [Parameters.accept, Parameters.contentType],
-  mediaType: "json",
+  headerParameters: [Parameters.accept2, Parameters.contentType],
+  mediaType: "binary",
   serializer
 };
 const deleteManifestOperationSpec: coreClient.OperationSpec = {
@@ -423,7 +426,7 @@ const getRepositoriesOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.AcrErrors
     }
   },
-  queryParameters: [Parameters.last, Parameters.n],
+  queryParameters: [Parameters.last, Parameters.n, Parameters.apiVersion],
   urlParameters: [Parameters.url],
   headerParameters: [Parameters.accept],
   serializer
@@ -439,6 +442,7 @@ const getPropertiesOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.AcrErrors
     }
   },
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.url, Parameters.name],
   headerParameters: [Parameters.accept],
   serializer
@@ -453,6 +457,7 @@ const deleteRepositoryOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.AcrErrors
     }
   },
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.url, Parameters.name],
   headerParameters: [Parameters.accept],
   serializer
@@ -469,6 +474,7 @@ const updatePropertiesOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.value,
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.url, Parameters.name],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
@@ -489,6 +495,7 @@ const getTagsOperationSpec: coreClient.OperationSpec = {
   queryParameters: [
     Parameters.last,
     Parameters.n,
+    Parameters.apiVersion,
     Parameters.orderby,
     Parameters.digest
   ],
@@ -507,6 +514,7 @@ const getTagPropertiesOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.AcrErrors
     }
   },
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.url, Parameters.name, Parameters.reference],
   headerParameters: [Parameters.accept],
   serializer
@@ -523,6 +531,7 @@ const updateTagAttributesOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.value1,
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.url, Parameters.name, Parameters.reference],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
@@ -538,6 +547,7 @@ const deleteTagOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.AcrErrors
     }
   },
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.url, Parameters.name, Parameters.reference],
   headerParameters: [Parameters.accept],
   serializer
@@ -554,7 +564,12 @@ const getManifestsOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.AcrErrors
     }
   },
-  queryParameters: [Parameters.last, Parameters.n, Parameters.orderby],
+  queryParameters: [
+    Parameters.last,
+    Parameters.n,
+    Parameters.apiVersion,
+    Parameters.orderby
+  ],
   urlParameters: [Parameters.url, Parameters.name],
   headerParameters: [Parameters.accept],
   serializer
@@ -570,6 +585,7 @@ const getManifestPropertiesOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.AcrErrors
     }
   },
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.url, Parameters.name, Parameters.digest1],
   headerParameters: [Parameters.accept],
   serializer
@@ -586,6 +602,7 @@ const updateManifestPropertiesOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.value2,
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.url, Parameters.name, Parameters.digest1],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
@@ -603,7 +620,7 @@ const getRepositoriesNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.AcrErrors
     }
   },
-  queryParameters: [Parameters.last, Parameters.n],
+  queryParameters: [Parameters.last, Parameters.n, Parameters.apiVersion],
   urlParameters: [Parameters.url, Parameters.nextLink],
   headerParameters: [Parameters.accept],
   serializer
@@ -623,6 +640,7 @@ const getTagsNextOperationSpec: coreClient.OperationSpec = {
   queryParameters: [
     Parameters.last,
     Parameters.n,
+    Parameters.apiVersion,
     Parameters.orderby,
     Parameters.digest
   ],
@@ -642,7 +660,12 @@ const getManifestsNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.AcrErrors
     }
   },
-  queryParameters: [Parameters.last, Parameters.n, Parameters.orderby],
+  queryParameters: [
+    Parameters.last,
+    Parameters.n,
+    Parameters.apiVersion,
+    Parameters.orderby
+  ],
   urlParameters: [Parameters.url, Parameters.name, Parameters.nextLink],
   headerParameters: [Parameters.accept],
   serializer

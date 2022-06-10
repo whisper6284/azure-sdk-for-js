@@ -1,6 +1,6 @@
 # Release History
 
-## 7.3.1 (Unreleased)
+## 7.6.0-beta.5 (Unreleased)
 
 ### Features Added
 
@@ -9,6 +9,72 @@
 ### Bugs Fixed
 
 ### Other Changes
+
+- Stop yielding empty page when listing rules using RuleManager.
+
+## 7.6.0-beta.4 (2022-06-07)
+
+### Features Added
+
+- Add support to add, retrieve, and remove subscription-level rules via AMQP links. [PR #22018](https://github.com/Azure/azure-sdk-for-js/pull/22018)
+
+## 7.6.0-beta.3 (2022-05-19)
+
+### Features Added
+
+- Add an option `omitMessageBody` in `PeekMessagesOptions` allowing omitting message body when peeking messages using `receiver.peekMessages()`
+
+## 7.6.0-beta.2 (2022-05-10)
+
+### Features Added
+
+- Adds the `customEndpointAddress` field to `ServiceBusClientOptions`. This allows for specifying a custom endpoint to use when communicating with the Service Bus service, which is useful when your network does not allow communicating to the standard endpoint. Resolves [#21574](https://github.com/Azure/azure-sdk-for-js/issues/21574).
+
+## 7.6.0-beta.1 (2022-04-05)
+
+### Bugs Fixed
+
+- Correct typing of `propertiesToModify` options to `abandonMessages()`, `deferMessages()`, and "deadLetterMessages()" [PR #20577](https://github.com/Azure/azure-sdk-for-js/pull/20577)
+
+### Other Changes
+
+- Migrate to depend on newer version of Core libraries core-client and core-rest-pipeline which bring better maintainability and performance. [PR #19587](https://github.com/Azure/azure-sdk-for-js/pull/19587)
+
+## 7.5.1 (2022-03-08)
+
+### Bugs Fixed
+
+- Fix an issue where we don't respect user request to close the receiver if the connection is disconnected when using the `subscribe()` method. [PR #20427](https://github.com/Azure/azure-sdk-for-js/pull/20427)
+
+## 7.5.0 (2022-02-14)
+
+### Features Added
+
+- Add `state` property to `ServiceBusReceivedMessage`. Its value is one of `"active"`, `"deferred"`, or `"scheduled"`. [PR #18938](https://github.com/Azure/azure-sdk-for-js/pull/18938)
+- Add optional boolean `skipParsingBodyAsJson` property to `ServiceBusReceiverOptions` and `ServiceBusSessionReceiverOptions`. By default, the client attempts to parse message body as JSON object, and this new parameter controls whether the client should skip performing this parsing. [PR #18692](https://github.com/Azure/azure-sdk-for-js/pull/18692)
+
+### Bugs Fixed
+
+- The `processError` callback to `subscribe()` was previously called only for errors on setting up the receiver, errors on message settlement or message lock renewal and not for errors on AMQP link or session. This is now fixed. [PR #19189](https://github.com/Azure/azure-sdk-for-js/pull/19189)
+- Fix an issue where we don't respect retry options before starting the next retry cycle when using the `subscribe()` method. [PR #20316](https://github.com/Azure/azure-sdk-for-js/pull/20316)
+
+## 7.4.0 (2021-11-08)
+
+### Features Added
+
+- Allowing the service API version to be configurable when using `ServiceBusAdministrationClient` as part of the constructor client options.
+  Supported versions being "2021-05" and "2017-04".
+  [#18254](https://github.com/Azure/azure-sdk-for-js/pull/18254)
+
+### Bugs Fixed
+
+- Resolves an issue ([#17932](https://github.com/Azure/azure-sdk-for-js/issues/17932)) of receivers not being closed correctly when service bus client is closed.
+
+## 7.4.0-beta.1 (2021-10-04)
+
+### Features Added
+
+- Adds new get/set property `maxMessageSizeInKilobytes` to `QueueProperties`, `TopicProperties`, `CreateQueueOptions`, and `CreateTopicOptions`. Only applicable for premium namespaces. Use this when creating or updating queues and topics. Added in [#17953](https://github.com/Azure/azure-sdk-for-js/pull/17953)
 
 ## 7.3.0 (2021-07-07)
 
@@ -106,7 +172,7 @@
 
 ## 7.0.2 (2021-01-13)
 
-- [Bug Fix] Receiving messages from sessions in "receiveAndDelete" mode using the `subscribe()` method stops after receiving 2048 of them and leaves the receiver hanging. The bug has been fixed in [PR 13178](https://github.com/Azure/azure-sdk-for-js/pull/13178). Also fixes the same issue that is seen with the `receiveMessages` API when large number of messages are requested or if the API is called in a loop.
+- [Bug Fix] Receiving messages from sessions in "receiveAndDelete" mode using the `subscribe()` method stops after receiving 2048 of them and leaves the receiver not responding. The bug has been fixed in [PR 13178](https://github.com/Azure/azure-sdk-for-js/pull/13178). Also fixes the same issue that is seen with the `receiveMessages` API when large number of messages are requested or if the API is called in a loop.
 
 ## 7.0.1 (2021-01-11)
 

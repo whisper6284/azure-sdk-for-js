@@ -27,6 +27,7 @@ Using the cryptography client available in this library you also have access to:
 > Note: This package cannot be used in the browser due to Azure Key Vault service limitations, please refer to [this document][cors] for guidance.
 
 Key links:
+
 - [Source code][package-gh]
 - [Package (npm)][package-npm]
 - [API Reference Documentation][docs]
@@ -79,7 +80,6 @@ Use the [Azure CLI][azure-cli] snippet below to create/get client secret credent
   {
     "appId": "generated-app-ID",
     "displayName": "dummy-app-name",
-    "name": "http://dummy-app-name",
     "password": "random-password",
     "tenant": "tenant-ID"
   }
@@ -205,7 +205,7 @@ const url = `https://${vaultName}.vault.azure.net`;
 
 // Change the Azure Key Vault service API version being used via the `serviceVersion` option
 const client = new KeyClient(url, credential, {
-  serviceVersion: "7.0" // Or 7.1
+  serviceVersion: "7.0", // Or 7.1
 });
 ```
 
@@ -307,7 +307,7 @@ const keyName = "MyKeyName";
 
 async function main() {
   const result = await client.createKey(keyName, "RSA", {
-    enabled: false
+    enabled: false,
   });
   console.log("result: ", result);
 }
@@ -337,7 +337,7 @@ const keyName = "MyKeyName";
 async function main() {
   const result = await client.createKey(keyName, "RSA");
   await client.updateKeyProperties(keyName, result.properties.version, {
-    enabled: false
+    enabled: false,
   });
 }
 
@@ -480,6 +480,44 @@ async function main() {
 main();
 ```
 
+### Configuring Automatic Key Rotation
+
+Using the KeyClient, you can configure automatic key rotation for a key by specifying the rotation policy.
+In addition, KeyClient provides a method to rotate a key on-demand by creating a new version of the given key.
+
+```javascript
+const { DefaultAzureCredential } = require("@azure/identity");
+const { KeyClient } = require("@azure/keyvault-keys");
+
+const vaultUrl = `https://<YOUR KEYVAULT NAME>.vault.azure.net`;
+const client = new KeyClient(url, new DefaultAzureCredential());
+
+async function main() {
+  const keyName = "MyKeyName";
+
+  // Set the key's automated rotation policy to rotate the key 30 days before expiry.
+  const policy = await client.updateKeyRotationPolicy(key.name, {
+    lifetimeActions: [
+      {
+        action: "Rotate",
+        timeBeforeExpiry: "P30D",
+      },
+    ],
+    // You may also specify the duration after which any newly rotated key will expire.
+    // In this case, any new key versions will expire after 90 days.
+    expiresIn: "P90D",
+  });
+
+  // You can get the current key rotation policy of a given key by calling the getKeyRotationPolicy method.
+  const currentPolicy = await client.getKeyRotationPolicy(key.name);
+
+  // Finally, you can rotate a key on-demand by creating a new version of the given key.
+  const rotatedKey = await client.rotateKey(key.name);
+}
+
+main();
+```
+
 ### Iterating lists of keys
 
 Using the KeyClient, you can retrieve and iterate through all of the
@@ -613,7 +651,7 @@ async function main() {
 
   const encryptResult = await cryptographyClient.encrypt({
     algorithm: "RSA1_5",
-    plaintext: Buffer.from("My Message")
+    plaintext: Buffer.from("My Message"),
   });
   console.log("encrypt result: ", encryptResult.result);
 }
@@ -642,13 +680,13 @@ async function main() {
 
   const encryptResult = await cryptographyClient.encrypt({
     algorithm: "RSA1_5",
-    plaintext: Buffer.from("My Message")
+    plaintext: Buffer.from("My Message"),
   });
   console.log("encrypt result: ", encryptResult.result);
 
   const decryptResult = await cryptographyClient.decrypt({
     algorithm: "RSA1_5",
-    ciphertext: encryptResult.result
+    ciphertext: encryptResult.result,
   });
   console.log("decrypt result: ", decryptResult.result.toString());
 }
@@ -836,6 +874,8 @@ main();
 ```
 
 ## Troubleshooting
+
+See our [troubleshooting guide](https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/keyvault/keyvault-keys/TROUBLESHOOTING.md) for details on how to diagnose various failure scenarios.
 
 Enabling logging may help uncover useful information about failures. In order to see a log of HTTP requests and responses, set the `AZURE_LOG_LEVEL` environment variable to `info`. Alternatively, logging can be enabled at runtime by calling `setLogLevel` in the `@azure/logger`:
 

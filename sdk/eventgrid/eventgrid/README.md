@@ -20,8 +20,6 @@ Key links:
 
 ### Currently supported environments
 
-### Currently supported environments
-
 - [LTS versions of Node.js](https://nodejs.org/about/releases/)
 - Latest versions of Safari, Chrome, Edge, and Firefox.
 
@@ -302,7 +300,7 @@ receiver.subscribe({
 Enabling logging may help uncover useful information about failures. In order to see a log of HTTP requests and responses, set the `AZURE_LOG_LEVEL` environment variable to `info`. Alternatively, logging can be enabled at runtime by calling `setLogLevel` in the `@azure/logger`:
 
 ```javascript
-import { setLogLevel } from "@azure/logger";
+const { setLogLevel } = require("@azure/logger");
 
 setLogLevel("info");
 ```
@@ -330,5 +328,5 @@ If you'd like to contribute to this library, please read the [contributing guide
 [event_grid]: https://docs.microsoft.com/azure/event-grid
 [azure_portal]: https://portal.azure.com
 [azure-core-tracing-github]: https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/core/core-tracing
-[cloud-events-distributed-tracing-spec]: https://github.com/cloudevents/spec/blob/master/extensions/distributed-tracing.md
+[cloud-events-distributed-tracing-spec]: https://github.com/cloudevents/spec/blob/v1.0.1/extensions/distributed-tracing.md
 [eventgrid-on-kubernetes-using-azure-arc]: https://docs.microsoft.com/azure/event-grid/kubernetes/

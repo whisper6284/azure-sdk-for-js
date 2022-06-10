@@ -2,25 +2,25 @@
 // Licensed under the MIT license.
 
 import {
-  TableServiceClientOptions,
-  TableEntity,
   CreateTableEntityResponse,
   DeleteTableEntityOptions,
   GetTableEntityOptions,
   GetTableEntityResponse,
   ListTableEntitiesOptions,
-  UpdateMode,
-  UpdateTableEntityOptions,
+  TableEntity,
   TableEntityResult,
   TableItem,
+  TableServiceClientOptions,
+  TableTransactionResponse,
   TransactionAction,
-  TableTransactionResponse
+  UpdateMode,
+  UpdateTableEntityOptions,
 } from "../models";
+import { DeleteTableEntityResponse, UpdateEntityResponse, UpsertEntityResponse } from "..";
 import { Pipeline, PipelineRequest } from "@azure/core-rest-pipeline";
 import { NamedKeyCredential } from "@azure/core-auth";
-import { DeleteTableEntityResponse, UpdateEntityResponse, UpsertEntityResponse } from "..";
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { OperationOptions } from "@azure/core-client";
+import { PagedAsyncIterableIterator } from "@azure/core-paging";
 
 export interface ConnectionString {
   kind: "AccountConnString" | "SASConnString";
@@ -45,13 +45,9 @@ export type ListTableItemsResponse = Array<TableItem> & {
  */
 export type ListEntitiesResponse<T extends object> = Array<TableEntityResult<T>> & {
   /**
-   * Contains the continuation token value for partition key.
+   * Contains the continuation token value for the next page.
    */
-  nextPartitionKey?: string;
-  /**
-   * Contains the continuation token value for row key.
-   */
-  nextRowKey?: string;
+  continuationToken?: string;
 };
 
 export interface ClientParamsFromConnectionString {

@@ -16,10 +16,13 @@ import {
   Connection,
   ConnectionOptions,
   ReceiverEvents,
-  ReceiverOptionsWithSession
+  ReceiverOptionsWithSession,
 } from "rhea-promise";
-import delay from "delay";
 import moment from "moment";
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const _start = moment();
 
@@ -80,15 +83,15 @@ async function RunTest(
     password: password,
     port: port,
     reconnect: false,
-    rejectUnauthorized: !allowUnauthorized
+    rejectUnauthorized: !allowUnauthorized,
   } as ConnectionOptions);
   await connection.open();
 
   let receiverOptions: ReceiverOptionsWithSession = {
     name: "receiver-1",
     source: {
-      address: entityPath
-    }
+      address: entityPath,
+    },
   };
 
   const manuallyManageCredit = maxConcurrentCalls > 0;

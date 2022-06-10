@@ -6,13 +6,12 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { ResourceSkus } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ComputeManagementClientContext } from "../computeManagementClientContext";
+import { ComputeManagementClient } from "../computeManagementClient";
 import {
   ResourceSku,
   ResourceSkusListNextOptionalParams,
@@ -22,15 +21,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a ResourceSkus. */
+/** Class containing ResourceSkus operations. */
 export class ResourceSkusImpl implements ResourceSkus {
-  private readonly client: ComputeManagementClientContext;
+  private readonly client: ComputeManagementClient;
 
   /**
    * Initialize a new instance of the class ResourceSkus class.
    * @param client Reference to the service client
    */
-  constructor(client: ComputeManagementClientContext) {
+  constructor(client: ComputeManagementClient) {
     this.client = client;
   }
 
@@ -112,7 +111,11 @@ const listOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ResourceSkusResult
     }
   },
-  queryParameters: [Parameters.filter, Parameters.apiVersion1],
+  queryParameters: [
+    Parameters.filter,
+    Parameters.apiVersion2,
+    Parameters.includeExtendedLocations
+  ],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
   serializer
@@ -125,7 +128,11 @@ const listNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ResourceSkusResult
     }
   },
-  queryParameters: [Parameters.filter, Parameters.apiVersion1],
+  queryParameters: [
+    Parameters.filter,
+    Parameters.apiVersion2,
+    Parameters.includeExtendedLocations
+  ],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,

@@ -1,15 +1,15 @@
 import { SearchDocumentsBase, SearchDocumentsTestOptions } from "./core/searchDocumentsBase.spec";
-import { PerfStressOptionDictionary } from "@azure/test-utils-perfstress";
+import { PerfOptionDictionary } from "@azure/test-utils-perf";
 
 export class SearchDocumentsTest extends SearchDocumentsBase<SearchDocumentsTestOptions> {
-  public options: PerfStressOptionDictionary<SearchDocumentsTestOptions> = {
+  public options: PerfOptionDictionary<SearchDocumentsTestOptions> = {
     documentsCount: {
       required: true,
       description: "Number of Documents to be created",
       shortName: "dc",
       longName: "documentsCount",
-      defaultValue: 10
-    }
+      defaultValue: 10,
+    },
   };
 
   constructor() {
@@ -21,7 +21,7 @@ export class SearchDocumentsTest extends SearchDocumentsBase<SearchDocumentsTest
     await super.populateIndex(this.parsedOptions.documentsCount.value!);
   }
 
-  async runAsync(): Promise<void> {
+  async run(): Promise<void> {
     await this.searchClient.search("");
   }
 }

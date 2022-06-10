@@ -1,5 +1,5 @@
 # NOTE: Please refer to https://aka.ms/azsdk/engsys/ci-yaml before editing this file.
-
+                
 trigger:
   branches:
     include:
@@ -9,7 +9,9 @@ trigger:
   paths:
     include:
       - sdk/purview/
-
+    exclude:
+      - sdk/purview/ci.mgmt.yml
+      - sdk/purview/arm-purview
 pr:
   branches:
     include:
@@ -17,10 +19,14 @@ pr:
       - feature/*
       - release/*
       - hotfix/*
+    exclude:
+      - feature/v4
   paths:
     include:
       - sdk/purview/
-
+    exclude:
+      - sdk/purview/ci.mgmt.yml
+      - sdk/purview/arm-purview
 extends:
   template: ../../eng/pipelines/templates/stages/archetype-sdk-client.yml
   parameters:
@@ -30,5 +36,5 @@ extends:
         safeName: azurerestpurviewcatalog
       - name: azure-rest-purview-scanning
         safeName: azurerestpurviewscanning
-      - name: azure-rest-purview-account
-        safeName: azurerestpurviewaccount
+      - name: azure-rest-purview-administration
+        safeName: azurerestpurviewadministration

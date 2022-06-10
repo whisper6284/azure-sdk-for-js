@@ -16,14 +16,17 @@ import {
   ReceiveMode,
   OnError,
   OnMessage,
-  ServiceBusMessage
+  ServiceBusMessage,
 } from "@azure/service-bus";
-import delay from "delay";
 import moment from "moment";
 
 // Load the .env file if it exists
 import * as dotenv from "dotenv";
 dotenv.config();
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const _start = moment();
 
@@ -76,7 +79,7 @@ async function RunTest(
 
   receiver.registerMessageHandler(onMessageHandler, onErrorHandler, {
     autoComplete: false,
-    maxConcurrentCalls: maxConcurrentCalls
+    maxConcurrentCalls: maxConcurrentCalls,
   });
 }
 

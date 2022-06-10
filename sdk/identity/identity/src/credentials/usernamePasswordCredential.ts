@@ -6,7 +6,7 @@ import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth"
 import { credentialLogger } from "../util/logging";
 import { MsalUsernamePassword } from "../msal/nodeFlows/msalUsernamePassword";
 import { MsalFlow } from "../msal/flows";
-import { trace } from "../util/tracing";
+import { tracingClient } from "../util/tracing";
 import { UsernamePasswordCredentialOptions } from "./usernamePasswordCredentialOptions";
 
 const logger = credentialLogger("UsernamePasswordCredential");
@@ -17,8 +17,6 @@ const logger = credentialLogger("UsernamePasswordCredential");
  * trust so you should only use it when other, more secure credential
  * types can't be used.
  */
-// We'll be using InteractiveCredential as the base of this class, which requires us to support authenticate(),
-// to reduce the number of times we send the password over the network.
 export class UsernamePasswordCredential implements TokenCredential {
   private msalFlow: MsalFlow;
 
@@ -42,7 +40,7 @@ export class UsernamePasswordCredential implements TokenCredential {
   ) {
     if (!tenantId || !clientId || !username || !password) {
       throw new Error(
-        "UsernamePasswordCredential: tenantId, clientId, username and password are required parameters."
+        "UsernamePasswordCredential: tenantId, clientId, username and password are required parameters. To troubleshoot, visit https://aka.ms/azsdk/js/identity/usernamepasswordcredential/troubleshoot."
       );
     }
     this.msalFlow = new MsalUsernamePassword({
@@ -52,7 +50,7 @@ export class UsernamePasswordCredential implements TokenCredential {
       tenantId,
       username,
       password,
-      tokenCredentialOptions: options || {}
+      tokenCredentialOptions: options || {},
     });
   }
 
@@ -69,9 +67,13 @@ export class UsernamePasswordCredential implements TokenCredential {
    *                TokenCredential implementation might make.
    */
   async getToken(scopes: string | string[], options: GetTokenOptions = {}): Promise<AccessToken> {
-    return trace(`${this.constructor.name}.getToken`, options, async (newOptions) => {
-      const arrayScopes = Array.isArray(scopes) ? scopes : [scopes];
-      return this.msalFlow.getToken(arrayScopes, newOptions);
-    });
+    return tracingClient.withSpan(
+      `${this.constructor.name}.getToken`,
+      options,
+      async (newOptions) => {
+        const arrayScopes = Array.isArray(scopes) ? scopes : [scopes];
+        return this.msalFlow.getToken(arrayScopes, newOptions);
+      }
+    );
   }
 }

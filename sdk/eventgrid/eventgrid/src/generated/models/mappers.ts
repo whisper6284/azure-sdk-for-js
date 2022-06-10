@@ -413,7 +413,7 @@ export const StorageDirectoryDeletedEventData: coreClient.CompositeMapper = {
         serializedName: "recursive",
         required: true,
         type: {
-          name: "Boolean"
+          name: "String"
         }
       },
       sequencer: {
@@ -859,8 +859,8 @@ export const EventHubCaptureFileCreatedEventData: coreClient.CompositeMapper = {
     name: "Composite",
     className: "EventHubCaptureFileCreatedEventData",
     modelProperties: {
-      fileurl: {
-        serializedName: "fileurl",
+      fileUrl: {
+        serializedName: "fileUrl",
         required: true,
         type: {
           name: "String"
@@ -982,16 +982,17 @@ export const ResourceWriteSuccessEventData: coreClient.CompositeMapper = {
       },
       authorization: {
         serializedName: "authorization",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceAuthorization"
         }
       },
       claims: {
         serializedName: "claims",
         required: true,
         type: {
-          name: "String"
+          name: "Dictionary",
+          value: { type: { name: "String" } }
         }
       },
       correlationId: {
@@ -1003,6 +1004,74 @@ export const ResourceWriteSuccessEventData: coreClient.CompositeMapper = {
       },
       httpRequest: {
         serializedName: "httpRequest",
+        type: {
+          name: "Composite",
+          className: "ResourceHttpRequest"
+        }
+      }
+    }
+  }
+};
+
+export const ResourceAuthorization: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ResourceAuthorization",
+    modelProperties: {
+      scope: {
+        serializedName: "scope",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      action: {
+        serializedName: "action",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      evidence: {
+        serializedName: "evidence",
+        required: true,
+        type: {
+          name: "Dictionary",
+          value: { type: { name: "String" } }
+        }
+      }
+    }
+  }
+};
+
+export const ResourceHttpRequest: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ResourceHttpRequest",
+    modelProperties: {
+      clientRequestId: {
+        serializedName: "clientRequestId",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      clientIpAddress: {
+        serializedName: "clientIpAddress",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      method: {
+        serializedName: "method",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      url: {
+        serializedName: "url",
         required: true,
         type: {
           name: "String"
@@ -1068,16 +1137,17 @@ export const ResourceWriteFailureEventData: coreClient.CompositeMapper = {
       },
       authorization: {
         serializedName: "authorization",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceAuthorization"
         }
       },
       claims: {
         serializedName: "claims",
         required: true,
         type: {
-          name: "String"
+          name: "Dictionary",
+          value: { type: { name: "String" } }
         }
       },
       correlationId: {
@@ -1089,9 +1159,9 @@ export const ResourceWriteFailureEventData: coreClient.CompositeMapper = {
       },
       httpRequest: {
         serializedName: "httpRequest",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceHttpRequest"
         }
       }
     }
@@ -1154,16 +1224,17 @@ export const ResourceWriteCancelEventData: coreClient.CompositeMapper = {
       },
       authorization: {
         serializedName: "authorization",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceAuthorization"
         }
       },
       claims: {
         serializedName: "claims",
         required: true,
         type: {
-          name: "String"
+          name: "Dictionary",
+          value: { type: { name: "String" } }
         }
       },
       correlationId: {
@@ -1175,9 +1246,9 @@ export const ResourceWriteCancelEventData: coreClient.CompositeMapper = {
       },
       httpRequest: {
         serializedName: "httpRequest",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceHttpRequest"
         }
       }
     }
@@ -1240,16 +1311,17 @@ export const ResourceDeleteSuccessEventData: coreClient.CompositeMapper = {
       },
       authorization: {
         serializedName: "authorization",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceAuthorization"
         }
       },
       claims: {
         serializedName: "claims",
         required: true,
         type: {
-          name: "String"
+          name: "Dictionary",
+          value: { type: { name: "String" } }
         }
       },
       correlationId: {
@@ -1261,9 +1333,9 @@ export const ResourceDeleteSuccessEventData: coreClient.CompositeMapper = {
       },
       httpRequest: {
         serializedName: "httpRequest",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceHttpRequest"
         }
       }
     }
@@ -1326,16 +1398,17 @@ export const ResourceDeleteFailureEventData: coreClient.CompositeMapper = {
       },
       authorization: {
         serializedName: "authorization",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceAuthorization"
         }
       },
       claims: {
         serializedName: "claims",
         required: true,
         type: {
-          name: "String"
+          name: "Dictionary",
+          value: { type: { name: "String" } }
         }
       },
       correlationId: {
@@ -1347,9 +1420,9 @@ export const ResourceDeleteFailureEventData: coreClient.CompositeMapper = {
       },
       httpRequest: {
         serializedName: "httpRequest",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceHttpRequest"
         }
       }
     }
@@ -1412,16 +1485,17 @@ export const ResourceDeleteCancelEventData: coreClient.CompositeMapper = {
       },
       authorization: {
         serializedName: "authorization",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceAuthorization"
         }
       },
       claims: {
         serializedName: "claims",
         required: true,
         type: {
-          name: "String"
+          name: "Dictionary",
+          value: { type: { name: "String" } }
         }
       },
       correlationId: {
@@ -1433,9 +1507,9 @@ export const ResourceDeleteCancelEventData: coreClient.CompositeMapper = {
       },
       httpRequest: {
         serializedName: "httpRequest",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceHttpRequest"
         }
       }
     }
@@ -1498,16 +1572,17 @@ export const ResourceActionSuccessEventData: coreClient.CompositeMapper = {
       },
       authorization: {
         serializedName: "authorization",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceAuthorization"
         }
       },
       claims: {
         serializedName: "claims",
         required: true,
         type: {
-          name: "String"
+          name: "Dictionary",
+          value: { type: { name: "String" } }
         }
       },
       correlationId: {
@@ -1519,9 +1594,9 @@ export const ResourceActionSuccessEventData: coreClient.CompositeMapper = {
       },
       httpRequest: {
         serializedName: "httpRequest",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceHttpRequest"
         }
       }
     }
@@ -1584,16 +1659,17 @@ export const ResourceActionFailureEventData: coreClient.CompositeMapper = {
       },
       authorization: {
         serializedName: "authorization",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceAuthorization"
         }
       },
       claims: {
         serializedName: "claims",
         required: true,
         type: {
-          name: "String"
+          name: "Dictionary",
+          value: { type: { name: "String" } }
         }
       },
       correlationId: {
@@ -1605,9 +1681,9 @@ export const ResourceActionFailureEventData: coreClient.CompositeMapper = {
       },
       httpRequest: {
         serializedName: "httpRequest",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceHttpRequest"
         }
       }
     }
@@ -1670,16 +1746,17 @@ export const ResourceActionCancelEventData: coreClient.CompositeMapper = {
       },
       authorization: {
         serializedName: "authorization",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceAuthorization"
         }
       },
       claims: {
         serializedName: "claims",
         required: true,
         type: {
-          name: "String"
+          name: "Dictionary",
+          value: { type: { name: "String" } }
         }
       },
       correlationId: {
@@ -1691,9 +1768,9 @@ export const ResourceActionCancelEventData: coreClient.CompositeMapper = {
       },
       httpRequest: {
         serializedName: "httpRequest",
-        required: true,
         type: {
-          name: "String"
+          name: "Composite",
+          className: "ResourceHttpRequest"
         }
       }
     }
@@ -2068,6 +2145,13 @@ export const ContainerRegistryEventData: coreClient.CompositeMapper = {
           name: "String"
         }
       },
+      location: {
+        serializedName: "location",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
       target: {
         serializedName: "target",
         type: {
@@ -2094,6 +2178,13 @@ export const ContainerRegistryEventData: coreClient.CompositeMapper = {
         type: {
           name: "Composite",
           className: "ContainerRegistryEventSource"
+        }
+      },
+      connectedRegistry: {
+        serializedName: "connectedRegistry",
+        type: {
+          name: "Composite",
+          className: "ContainerRegistryEventConnectedRegistry"
         }
       }
     }
@@ -2241,6 +2332,22 @@ export const ContainerRegistryEventSource: coreClient.CompositeMapper = {
   }
 };
 
+export const ContainerRegistryEventConnectedRegistry: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ContainerRegistryEventConnectedRegistry",
+    modelProperties: {
+      name: {
+        serializedName: "name",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
 export const ContainerRegistryArtifactEventData: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
@@ -2267,11 +2374,25 @@ export const ContainerRegistryArtifactEventData: coreClient.CompositeMapper = {
           name: "String"
         }
       },
+      location: {
+        serializedName: "location",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
       target: {
         serializedName: "target",
         type: {
           name: "Composite",
           className: "ContainerRegistryArtifactEventTarget"
+        }
+      },
+      connectedRegistry: {
+        serializedName: "connectedRegistry",
+        type: {
+          name: "Composite",
+          className: "ContainerRegistryEventConnectedRegistry"
         }
       }
     }
@@ -2613,7 +2734,8 @@ export const MediaJobError: coreClient.CompositeMapper = {
             "UploadTransientError",
             "ConfigurationUnsupported",
             "ContentMalformed",
-            "ContentUnsupported"
+            "ContentUnsupported",
+            "IdentityUnsupported"
           ]
         }
       },
@@ -2636,7 +2758,8 @@ export const MediaJobError: coreClient.CompositeMapper = {
             "Download",
             "Upload",
             "Configuration",
-            "Content"
+            "Content",
+            "Account"
           ]
         }
       },
@@ -3226,6 +3349,22 @@ export const MediaLiveEventIngestHeartbeatEventData: coreClient.CompositeMapper 
           name: "String"
         }
       },
+      transcriptionLanguage: {
+        serializedName: "transcriptionLanguage",
+        required: true,
+        readOnly: true,
+        type: {
+          name: "String"
+        }
+      },
+      transcriptionState: {
+        serializedName: "transcriptionState",
+        required: true,
+        readOnly: true,
+        type: {
+          name: "String"
+        }
+      },
       bitrate: {
         serializedName: "bitrate",
         required: true,
@@ -3240,6 +3379,22 @@ export const MediaLiveEventIngestHeartbeatEventData: coreClient.CompositeMapper 
         readOnly: true,
         type: {
           name: "Number"
+        }
+      },
+      ingestDriftValue: {
+        serializedName: "ingestDriftValue",
+        required: true,
+        readOnly: true,
+        type: {
+          name: "String"
+        }
+      },
+      lastFragmentArrivalTime: {
+        serializedName: "lastFragmentArrivalTime",
+        required: true,
+        readOnly: true,
+        type: {
+          name: "String"
         }
       },
       lastTimestamp: {
@@ -3365,6 +3520,31 @@ export const MediaLiveEventTrackDiscontinuityDetectedEventData: coreClient.Compo
       },
       discontinuityGap: {
         serializedName: "discontinuityGap",
+        required: true,
+        readOnly: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const MediaLiveEventChannelArchiveHeartbeatEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "MediaLiveEventChannelArchiveHeartbeatEventData",
+    modelProperties: {
+      channelLatencyMs: {
+        serializedName: "channelLatencyMs",
+        required: true,
+        readOnly: true,
+        type: {
+          name: "String"
+        }
+      },
+      latencyResultCode: {
+        serializedName: "latencyResultCode",
         required: true,
         readOnly: true,
         type: {
@@ -3640,49 +3820,49 @@ export const KeyVaultCertificateNewVersionCreatedEventData: coreClient.Composite
     className: "KeyVaultCertificateNewVersionCreatedEventData",
     modelProperties: {
       id: {
-        serializedName: "id",
+        serializedName: "Id",
         required: true,
         type: {
           name: "String"
         }
       },
       vaultName: {
-        serializedName: "vaultName",
+        serializedName: "VaultName",
         required: true,
         type: {
           name: "String"
         }
       },
       objectType: {
-        serializedName: "objectType",
+        serializedName: "ObjectType",
         required: true,
         type: {
           name: "String"
         }
       },
       objectName: {
-        serializedName: "objectName",
+        serializedName: "ObjectName",
         required: true,
         type: {
           name: "String"
         }
       },
       version: {
-        serializedName: "version",
+        serializedName: "Version",
         required: true,
         type: {
           name: "String"
         }
       },
       nbf: {
-        serializedName: "nbf",
+        serializedName: "NBF",
         required: true,
         type: {
           name: "Number"
         }
       },
       exp: {
-        serializedName: "exp",
+        serializedName: "EXP",
         required: true,
         type: {
           name: "Number"
@@ -3698,49 +3878,49 @@ export const KeyVaultCertificateNearExpiryEventData: coreClient.CompositeMapper 
     className: "KeyVaultCertificateNearExpiryEventData",
     modelProperties: {
       id: {
-        serializedName: "id",
+        serializedName: "Id",
         required: true,
         type: {
           name: "String"
         }
       },
       vaultName: {
-        serializedName: "vaultName",
+        serializedName: "VaultName",
         required: true,
         type: {
           name: "String"
         }
       },
       objectType: {
-        serializedName: "objectType",
+        serializedName: "ObjectType",
         required: true,
         type: {
           name: "String"
         }
       },
       objectName: {
-        serializedName: "objectName",
+        serializedName: "ObjectName",
         required: true,
         type: {
           name: "String"
         }
       },
       version: {
-        serializedName: "version",
+        serializedName: "Version",
         required: true,
         type: {
           name: "String"
         }
       },
       nbf: {
-        serializedName: "nbf",
+        serializedName: "NBF",
         required: true,
         type: {
           name: "Number"
         }
       },
       exp: {
-        serializedName: "exp",
+        serializedName: "EXP",
         required: true,
         type: {
           name: "Number"
@@ -3756,49 +3936,49 @@ export const KeyVaultCertificateExpiredEventData: coreClient.CompositeMapper = {
     className: "KeyVaultCertificateExpiredEventData",
     modelProperties: {
       id: {
-        serializedName: "id",
+        serializedName: "Id",
         required: true,
         type: {
           name: "String"
         }
       },
       vaultName: {
-        serializedName: "vaultName",
+        serializedName: "VaultName",
         required: true,
         type: {
           name: "String"
         }
       },
       objectType: {
-        serializedName: "objectType",
+        serializedName: "ObjectType",
         required: true,
         type: {
           name: "String"
         }
       },
       objectName: {
-        serializedName: "objectName",
+        serializedName: "ObjectName",
         required: true,
         type: {
           name: "String"
         }
       },
       version: {
-        serializedName: "version",
+        serializedName: "Version",
         required: true,
         type: {
           name: "String"
         }
       },
       nbf: {
-        serializedName: "nbf",
+        serializedName: "NBF",
         required: true,
         type: {
           name: "Number"
         }
       },
       exp: {
-        serializedName: "exp",
+        serializedName: "EXP",
         required: true,
         type: {
           name: "Number"
@@ -3814,49 +3994,49 @@ export const KeyVaultKeyNewVersionCreatedEventData: coreClient.CompositeMapper =
     className: "KeyVaultKeyNewVersionCreatedEventData",
     modelProperties: {
       id: {
-        serializedName: "id",
+        serializedName: "Id",
         required: true,
         type: {
           name: "String"
         }
       },
       vaultName: {
-        serializedName: "vaultName",
+        serializedName: "VaultName",
         required: true,
         type: {
           name: "String"
         }
       },
       objectType: {
-        serializedName: "objectType",
+        serializedName: "ObjectType",
         required: true,
         type: {
           name: "String"
         }
       },
       objectName: {
-        serializedName: "objectName",
+        serializedName: "ObjectName",
         required: true,
         type: {
           name: "String"
         }
       },
       version: {
-        serializedName: "version",
+        serializedName: "Version",
         required: true,
         type: {
           name: "String"
         }
       },
       nbf: {
-        serializedName: "nbf",
+        serializedName: "NBF",
         required: true,
         type: {
           name: "Number"
         }
       },
       exp: {
-        serializedName: "exp",
+        serializedName: "EXP",
         required: true,
         type: {
           name: "Number"
@@ -3872,49 +4052,49 @@ export const KeyVaultKeyNearExpiryEventData: coreClient.CompositeMapper = {
     className: "KeyVaultKeyNearExpiryEventData",
     modelProperties: {
       id: {
-        serializedName: "id",
+        serializedName: "Id",
         required: true,
         type: {
           name: "String"
         }
       },
       vaultName: {
-        serializedName: "vaultName",
+        serializedName: "VaultName",
         required: true,
         type: {
           name: "String"
         }
       },
       objectType: {
-        serializedName: "objectType",
+        serializedName: "ObjectType",
         required: true,
         type: {
           name: "String"
         }
       },
       objectName: {
-        serializedName: "objectName",
+        serializedName: "ObjectName",
         required: true,
         type: {
           name: "String"
         }
       },
       version: {
-        serializedName: "version",
+        serializedName: "Version",
         required: true,
         type: {
           name: "String"
         }
       },
       nbf: {
-        serializedName: "nbf",
+        serializedName: "NBF",
         required: true,
         type: {
           name: "Number"
         }
       },
       exp: {
-        serializedName: "exp",
+        serializedName: "EXP",
         required: true,
         type: {
           name: "Number"
@@ -3930,49 +4110,49 @@ export const KeyVaultKeyExpiredEventData: coreClient.CompositeMapper = {
     className: "KeyVaultKeyExpiredEventData",
     modelProperties: {
       id: {
-        serializedName: "id",
+        serializedName: "Id",
         required: true,
         type: {
           name: "String"
         }
       },
       vaultName: {
-        serializedName: "vaultName",
+        serializedName: "VaultName",
         required: true,
         type: {
           name: "String"
         }
       },
       objectType: {
-        serializedName: "objectType",
+        serializedName: "ObjectType",
         required: true,
         type: {
           name: "String"
         }
       },
       objectName: {
-        serializedName: "objectName",
+        serializedName: "ObjectName",
         required: true,
         type: {
           name: "String"
         }
       },
       version: {
-        serializedName: "version",
+        serializedName: "Version",
         required: true,
         type: {
           name: "String"
         }
       },
       nbf: {
-        serializedName: "nbf",
+        serializedName: "NBF",
         required: true,
         type: {
           name: "Number"
         }
       },
       exp: {
-        serializedName: "exp",
+        serializedName: "EXP",
         required: true,
         type: {
           name: "Number"
@@ -3988,49 +4168,49 @@ export const KeyVaultSecretNewVersionCreatedEventData: coreClient.CompositeMappe
     className: "KeyVaultSecretNewVersionCreatedEventData",
     modelProperties: {
       id: {
-        serializedName: "id",
+        serializedName: "Id",
         required: true,
         type: {
           name: "String"
         }
       },
       vaultName: {
-        serializedName: "vaultName",
+        serializedName: "VaultName",
         required: true,
         type: {
           name: "String"
         }
       },
       objectType: {
-        serializedName: "objectType",
+        serializedName: "ObjectType",
         required: true,
         type: {
           name: "String"
         }
       },
       objectName: {
-        serializedName: "objectName",
+        serializedName: "ObjectName",
         required: true,
         type: {
           name: "String"
         }
       },
       version: {
-        serializedName: "version",
+        serializedName: "Version",
         required: true,
         type: {
           name: "String"
         }
       },
       nbf: {
-        serializedName: "nbf",
+        serializedName: "NBF",
         required: true,
         type: {
           name: "Number"
         }
       },
       exp: {
-        serializedName: "exp",
+        serializedName: "EXP",
         required: true,
         type: {
           name: "Number"
@@ -4046,49 +4226,49 @@ export const KeyVaultSecretNearExpiryEventData: coreClient.CompositeMapper = {
     className: "KeyVaultSecretNearExpiryEventData",
     modelProperties: {
       id: {
-        serializedName: "id",
+        serializedName: "Id",
         required: true,
         type: {
           name: "String"
         }
       },
       vaultName: {
-        serializedName: "vaultName",
+        serializedName: "VaultName",
         required: true,
         type: {
           name: "String"
         }
       },
       objectType: {
-        serializedName: "objectType",
+        serializedName: "ObjectType",
         required: true,
         type: {
           name: "String"
         }
       },
       objectName: {
-        serializedName: "objectName",
+        serializedName: "ObjectName",
         required: true,
         type: {
           name: "String"
         }
       },
       version: {
-        serializedName: "version",
+        serializedName: "Version",
         required: true,
         type: {
           name: "String"
         }
       },
       nbf: {
-        serializedName: "nbf",
+        serializedName: "NBF",
         required: true,
         type: {
           name: "Number"
         }
       },
       exp: {
-        serializedName: "exp",
+        serializedName: "EXP",
         required: true,
         type: {
           name: "Number"
@@ -4104,49 +4284,49 @@ export const KeyVaultSecretExpiredEventData: coreClient.CompositeMapper = {
     className: "KeyVaultSecretExpiredEventData",
     modelProperties: {
       id: {
-        serializedName: "id",
+        serializedName: "Id",
         required: true,
         type: {
           name: "String"
         }
       },
       vaultName: {
-        serializedName: "vaultName",
+        serializedName: "VaultName",
         required: true,
         type: {
           name: "String"
         }
       },
       objectType: {
-        serializedName: "objectType",
+        serializedName: "ObjectType",
         required: true,
         type: {
           name: "String"
         }
       },
       objectName: {
-        serializedName: "objectName",
+        serializedName: "ObjectName",
         required: true,
         type: {
           name: "String"
         }
       },
       version: {
-        serializedName: "version",
+        serializedName: "Version",
         required: true,
         type: {
           name: "String"
         }
       },
       nbf: {
-        serializedName: "nbf",
+        serializedName: "NBF",
         required: true,
         type: {
           name: "Number"
         }
       },
       exp: {
-        serializedName: "exp",
+        serializedName: "EXP",
         required: true,
         type: {
           name: "Number"
@@ -4162,49 +4342,49 @@ export const KeyVaultAccessPolicyChangedEventData: coreClient.CompositeMapper = 
     className: "KeyVaultAccessPolicyChangedEventData",
     modelProperties: {
       id: {
-        serializedName: "id",
+        serializedName: "Id",
         required: true,
         type: {
           name: "String"
         }
       },
       vaultName: {
-        serializedName: "vaultName",
+        serializedName: "VaultName",
         required: true,
         type: {
           name: "String"
         }
       },
       objectType: {
-        serializedName: "objectType",
+        serializedName: "ObjectType",
         required: true,
         type: {
           name: "String"
         }
       },
       objectName: {
-        serializedName: "objectName",
+        serializedName: "ObjectName",
         required: true,
         type: {
           name: "String"
         }
       },
       version: {
-        serializedName: "version",
+        serializedName: "Version",
         required: true,
         type: {
           name: "String"
         }
       },
       nbf: {
-        serializedName: "nbf",
+        serializedName: "NBF",
         required: true,
         type: {
           name: "Number"
         }
       },
       exp: {
-        serializedName: "exp",
+        serializedName: "EXP",
         required: true,
         type: {
           name: "Number"
@@ -5435,6 +5615,22 @@ export const WebAppServicePlanUpdatedEventDataSku: coreClient.CompositeMapper = 
   }
 };
 
+export const AcsUserDisconnectedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "AcsUserDisconnectedEventData",
+    modelProperties: {
+      userCommunicationIdentifier: {
+        serializedName: "userCommunicationIdentifier",
+        type: {
+          name: "Composite",
+          className: "CommunicationIdentifierModel"
+        }
+      }
+    }
+  }
+};
+
 export const CommunicationIdentifierModel: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
@@ -5694,6 +5890,27 @@ export const AcsRecordingFileStatusUpdatedEventData: coreClient.CompositeMapper 
           name: "Number"
         }
       },
+      recordingContentType: {
+        serializedName: "recordingContentType",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      recordingChannelType: {
+        serializedName: "recordingChannelType",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      recordingFormatType: {
+        serializedName: "recordingFormatType",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
       sessionEndReason: {
         serializedName: "sessionEndReason",
         required: true,
@@ -5762,6 +5979,13 @@ export const AcsRecordingChunkInfo: coreClient.CompositeMapper = {
       },
       contentLocation: {
         serializedName: "contentLocation",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      deleteLocation: {
+        serializedName: "deleteLocation",
         required: true,
         type: {
           name: "String"
@@ -5976,6 +6200,357 @@ export const ContainerServiceNewKubernetesVersionAvailableEventData: coreClient.
         required: true,
         type: {
           name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementUserCreatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementUserCreatedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementUserUpdatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementUserUpdatedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementUserDeletedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementUserDeletedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementSubscriptionCreatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementSubscriptionCreatedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementSubscriptionUpdatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementSubscriptionUpdatedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementSubscriptionDeletedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementSubscriptionDeletedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementProductCreatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementProductCreatedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementProductUpdatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementProductUpdatedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementProductDeletedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementProductDeletedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementApiCreatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementApiCreatedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementApiUpdatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementApiUpdatedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementApiDeletedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementApiDeletedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementApiReleaseCreatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementApiReleaseCreatedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementApiReleaseUpdatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementApiReleaseUpdatedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const ApiManagementApiReleaseDeletedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ApiManagementApiReleaseDeletedEventData",
+    modelProperties: {
+      resourceUri: {
+        serializedName: "resourceUri",
+        required: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const HealthcareFhirResourceCreatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "HealthcareFhirResourceCreatedEventData",
+    modelProperties: {
+      resourceType: {
+        serializedName: "resourceType",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      resourceFhirAccount: {
+        serializedName: "resourceFhirAccount",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      resourceFhirId: {
+        serializedName: "resourceFhirId",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      resourceVersionId: {
+        serializedName: "resourceVersionId",
+        required: true,
+        type: {
+          name: "Number"
+        }
+      }
+    }
+  }
+};
+
+export const HealthcareFhirResourceUpdatedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "HealthcareFhirResourceUpdatedEventData",
+    modelProperties: {
+      resourceType: {
+        serializedName: "resourceType",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      resourceFhirAccount: {
+        serializedName: "resourceFhirAccount",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      resourceFhirId: {
+        serializedName: "resourceFhirId",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      resourceVersionId: {
+        serializedName: "resourceVersionId",
+        required: true,
+        type: {
+          name: "Number"
+        }
+      }
+    }
+  }
+};
+
+export const HealthcareFhirResourceDeletedEventData: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "HealthcareFhirResourceDeletedEventData",
+    modelProperties: {
+      resourceType: {
+        serializedName: "resourceType",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      resourceFhirAccount: {
+        serializedName: "resourceFhirAccount",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      resourceFhirId: {
+        serializedName: "resourceFhirId",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      resourceVersionId: {
+        serializedName: "resourceVersionId",
+        required: true,
+        type: {
+          name: "Number"
         }
       }
     }

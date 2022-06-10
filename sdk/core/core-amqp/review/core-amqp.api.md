@@ -4,9 +4,11 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import { AbortSignalLike } from '@azure/abort-controller';
 import { AccessToken } from '@azure/core-auth';
-import { AmqpError } from 'rhea-promise';
+import { AzureLogger } from '@azure/logger';
 import { Connection } from 'rhea-promise';
 import { Message } from 'rhea-promise';
 import { MessageHeader } from 'rhea-promise';
@@ -241,6 +243,7 @@ export const Constants: {
     readonly publisher: "x-opt-publisher-name";
     readonly viaPartitionKey: "x-opt-via-partition-key";
     readonly deadLetterSource: "x-opt-deadletter-source";
+    readonly messageState: "x-opt-message-state";
     readonly enqueuedTimeAnnotation: "amqp.annotation.x-opt-enqueued-time";
     readonly offsetAnnotation: "amqp.annotation.x-opt-offset";
     readonly sequenceNumberAnnotation: "amqp.annotation.x-opt-sequence-number";
@@ -427,7 +430,7 @@ export function isSasTokenProvider(thing: unknown): thing is SasTokenProvider;
 export function isSystemError(err: unknown): err is NetworkSystemError;
 
 // @public
-export const logger: import("@azure/logger").AzureLogger;
+export const logger: AzureLogger;
 
 // @public
 export class MessagingError extends Error {
@@ -593,14 +596,13 @@ export enum TokenType {
 }
 
 // @public
-export function translate(err: AmqpError | Error): MessagingError | Error;
+export function translate(err: unknown): MessagingError | Error;
 
 // @public
 export interface WebSocketOptions {
     webSocket?: WebSocketImpl;
     webSocketConstructorOptions?: any;
 }
-
 
 // (No @packageDocumentation comment for this package)
 

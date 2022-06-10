@@ -6,13 +6,12 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { CloudServices } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ComputeManagementClientContext } from "../computeManagementClientContext";
+import { ComputeManagementClient } from "../computeManagementClient";
 import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
 import { LroImpl } from "../lroImpl";
 import {
@@ -43,15 +42,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a CloudServices. */
+/** Class containing CloudServices operations. */
 export class CloudServicesImpl implements CloudServices {
-  private readonly client: ComputeManagementClientContext;
+  private readonly client: ComputeManagementClient;
 
   /**
    * Initialize a new instance of the class CloudServices class.
    * @param client Reference to the service client
    */
-  constructor(client: ComputeManagementClientContext) {
+  constructor(client: ComputeManagementClient) {
     this.client = client;
   }
 
@@ -211,10 +210,12 @@ export class CloudServicesImpl implements CloudServices {
       { resourceGroupName, cloudServiceName, options },
       createOrUpdateOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -297,10 +298,12 @@ export class CloudServicesImpl implements CloudServices {
       { resourceGroupName, cloudServiceName, options },
       updateOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -377,10 +380,12 @@ export class CloudServicesImpl implements CloudServices {
       { resourceGroupName, cloudServiceName, options },
       deleteOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -519,10 +524,12 @@ export class CloudServicesImpl implements CloudServices {
       { resourceGroupName, cloudServiceName, options },
       startOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -600,10 +607,12 @@ export class CloudServicesImpl implements CloudServices {
       { resourceGroupName, cloudServiceName, options },
       powerOffOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -681,10 +690,12 @@ export class CloudServicesImpl implements CloudServices {
       { resourceGroupName, cloudServiceName, options },
       restartOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -762,10 +773,12 @@ export class CloudServicesImpl implements CloudServices {
       { resourceGroupName, cloudServiceName, options },
       reimageOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -845,10 +858,12 @@ export class CloudServicesImpl implements CloudServices {
       { resourceGroupName, cloudServiceName, options },
       rebuildOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -927,10 +942,12 @@ export class CloudServicesImpl implements CloudServices {
       { resourceGroupName, cloudServiceName, options },
       deleteInstancesOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -1012,8 +1029,8 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.cloudServiceName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -1045,8 +1062,8 @@ const updateOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.cloudServiceName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -1069,8 +1086,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.cloudServiceName
   ],
   headerParameters: [Parameters.accept],
@@ -1091,8 +1108,8 @@ const getOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.cloudServiceName
   ],
   headerParameters: [Parameters.accept],
@@ -1113,8 +1130,8 @@ const getInstanceViewOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.cloudServiceName
   ],
   headerParameters: [Parameters.accept],
@@ -1152,8 +1169,8 @@ const listOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -1174,8 +1191,8 @@ const startOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.cloudServiceName
   ],
   headerParameters: [Parameters.accept],
@@ -1197,8 +1214,8 @@ const powerOffOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.cloudServiceName
   ],
   headerParameters: [Parameters.accept],
@@ -1221,8 +1238,8 @@ const restartOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.cloudServiceName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -1246,8 +1263,8 @@ const reimageOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.cloudServiceName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -1271,8 +1288,8 @@ const rebuildOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.cloudServiceName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -1296,8 +1313,8 @@ const deleteInstancesOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.cloudServiceName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -1338,9 +1355,9 @@ const listNextOperationSpec: coreClient.OperationSpec = {
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
+    Parameters.resourceGroupName
   ],
   headerParameters: [Parameters.accept],
   serializer

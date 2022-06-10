@@ -1,22 +1,23 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as assert from "assert";
+import { assert } from "@azure/test-utils";
 import { Context } from "mocha";
-import { env, Recorder } from "@azure/test-utils-recorder";
+import { Recorder, env } from "@azure-tools/test-recorder";
 import { createSandbox } from "sinon";
 
 import {
-  AuthenticationChallengeCache,
   AuthenticationChallenge,
+  AuthenticationChallengeCache,
+  challengeBasedAuthenticationPolicy,
   parseWWWAuthenticate,
-  challengeBasedAuthenticationPolicy
 } from "../../../keyvault-common/src";
 import { SecretClient } from "../../src";
-import { authenticate } from "../utils/testAuthentication";
-import TestClient from "../utils/testClient";
+import { authenticate } from "../public/utils/testAuthentication";
+import TestClient from "../public/utils/testClient";
 import { ClientSecretCredential } from "@azure/identity";
 import { WebResource } from "@azure/core-http";
+import { getServiceVersion } from "../public/utils/common";
 
 // Following the philosophy of not testing the insides if we can test the outsides...
 // I present you with this "Get Out of Jail Free" card (in reference to Monopoly).
@@ -30,21 +31,21 @@ describe("Challenge based authentication tests", () => {
   let testClient: TestClient;
   let recorder: Recorder;
 
-  beforeEach(async function(this: Context) {
-    const authentication = await authenticate(this);
+  beforeEach(async function (this: Context) {
+    const authentication = await authenticate(this, getServiceVersion());
     secretSuffix = authentication.secretSuffix;
     client = authentication.client;
     testClient = authentication.testClient;
     recorder = authentication.recorder;
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await recorder.stop();
   });
 
   // The tests follow
 
-  it("Authentication should work for parallel requests", async function(this: Context) {
+  it("Authentication should work for parallel requests", async function (this: Context) {
     const secretName = testClient.formatName(
       `${secretPrefix}-${this!.test!.title}-${secretSuffix}`
     );
@@ -77,7 +78,7 @@ describe("Challenge based authentication tests", () => {
     sandbox.restore();
   });
 
-  it("Once authenticated, new requests should not authenticate again", async function(this: Context) {
+  it("Once authenticated, new requests should not authenticate again", async function (this: Context) {
     // Our goal is to intercept how our pipelines are storing the challenge.
     // The first network call should indeed set the challenge in memory.
     // Subsequent network calls should not set new challenges.
@@ -104,42 +105,6 @@ describe("Challenge based authentication tests", () => {
 
     // Note: Failing to authenticate will make network requests throw.
   });
-
-  describe("parseWWWAuthenticate tests", () => {
-    it("Should work for known shapes of the WWW-Authenticate header", () => {
-      const wwwAuthenticate1 = `Bearer authorization="some_authorization", resource="https://some.url"`;
-      const parsed1 = parseWWWAuthenticate(wwwAuthenticate1);
-      assert.deepEqual(parsed1, {
-        authorization: "some_authorization",
-        resource: "https://some.url"
-      });
-
-      const wwwAuthenticate2 = `Bearer authorization="some_authorization", scope="https://some.url"`;
-      const parsed2 = parseWWWAuthenticate(wwwAuthenticate2);
-      assert.deepEqual(parsed2, {
-        authorization: "some_authorization",
-        scope: "https://some.url"
-      });
-    });
-
-    it("Should skip unexpected properties on the WWW-Authenticate header", () => {
-      const wwwAuthenticate1 = `Bearer authorization="some_authorization", a="a", b="b"`;
-      const parsed1 = parseWWWAuthenticate(wwwAuthenticate1);
-      assert.deepEqual(parsed1, {
-        authorization: "some_authorization",
-        a: "a",
-        b: "b"
-      });
-
-      const wwwAuthenticate2 = `scope="https://some.url", a="a", c="c"`;
-      const parsed2 = parseWWWAuthenticate(wwwAuthenticate2);
-      assert.deepEqual(parsed2, {
-        scope: "https://some.url",
-        a: "a",
-        c: "c"
-      });
-    });
-  });
 });
 
 describe("Local Challenge based authentication tests", () => {
@@ -155,7 +120,7 @@ describe("Local Challenge based authentication tests", () => {
       {
         sendRequest: () => {
           throw new Error("Boom");
-        }
+        },
       },
       { log: () => null, shouldLog: () => false }
     );
@@ -164,10 +129,38 @@ describe("Local Challenge based authentication tests", () => {
 
     try {
       await policy.sendRequest(request);
-    } catch (err) {
+    } catch (err: any) {
       // the next policy throws
     }
 
     assert.equal(request.body, "request body");
+  });
+
+  describe("parseWWWAuthenticate tests", () => {
+    it("Should work for known shapes of the WWW-Authenticate header", () => {
+      const wwwAuthenticate1 = `Bearer authorization="https://login.windows.net/", resource="https://some.url"`;
+      const parsed1 = parseWWWAuthenticate(wwwAuthenticate1);
+      assert.deepEqual(parsed1, {
+        authorization: "https://login.windows.net/",
+        resource: "https://some.url",
+      });
+
+      const wwwAuthenticate2 = `Bearer authorization="https://login.windows.net", scope="https://some.url"`;
+      const parsed2 = parseWWWAuthenticate(wwwAuthenticate2);
+      assert.deepEqual(parsed2, {
+        authorization: "https://login.windows.net",
+        scope: "https://some.url",
+      });
+    });
+
+    it("should include the tenantId when present", () => {
+      const wwwAuthenticate1 = `Bearer authorization="https://login.windows.net/9999", resource="https://some.url"`;
+      const parsed1 = parseWWWAuthenticate(wwwAuthenticate1);
+      assert.deepEqual(parsed1, {
+        authorization: "https://login.windows.net/9999",
+        resource: "https://some.url",
+        tenantId: "9999",
+      });
+    });
   });
 });

@@ -4,10 +4,12 @@
 
 ```ts
 
+/// <reference lib="esnext.asynciterable" />
+
+import { CommonClientOptions } from '@azure/core-client';
 import { KeyCredential } from '@azure/core-auth';
-import { OperationOptions } from '@azure/core-http';
+import { OperationOptions } from '@azure/core-client';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PipelineOptions } from '@azure/core-http';
 import { PollerLike } from '@azure/core-lro';
 import { PollOperationState } from '@azure/core-lro';
 import { TokenCredential } from '@azure/core-auth';
@@ -74,7 +76,7 @@ export class PhoneNumbersClient {
 }
 
 // @public
-export interface PhoneNumbersClientOptions extends PipelineOptions {
+export interface PhoneNumbersClientOptions extends CommonClientOptions {
 }
 
 // @public
@@ -98,6 +100,9 @@ export interface PhoneNumberSearchResult {
 }
 
 // @public
+export type PhoneNumberSource = "cloud" | "operatorConnect";
+
+// @public
 export type PhoneNumberType = "geographic" | "tollFree";
 
 // @public
@@ -107,7 +112,10 @@ export interface PurchasedPhoneNumber {
     cost: PhoneNumberCost;
     countryCode: string;
     id: string;
+    operatorId: string;
+    operatorName: string;
     phoneNumber: string;
+    phoneNumberSource: PhoneNumberSource;
     phoneNumberType: PhoneNumberType;
     purchaseDate: Date;
 }
@@ -124,7 +132,6 @@ export interface ReleasePhoneNumberResult {
 export interface SearchAvailablePhoneNumbersRequest extends PhoneNumberSearchRequest {
     countryCode: string;
 }
-
 
 // (No @packageDocumentation comment for this package)
 

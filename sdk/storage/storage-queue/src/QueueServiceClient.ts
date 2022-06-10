@@ -5,7 +5,7 @@ import {
   TokenCredential,
   isTokenCredential,
   isNode,
-  getDefaultProxySettings
+  getDefaultProxySettings,
 } from "@azure/core-http";
 import { SpanStatusCode } from "@azure/core-tracing";
 import {
@@ -16,7 +16,7 @@ import {
   ServiceGetPropertiesResponse,
   ServiceGetStatisticsResponse,
   ServiceListQueuesSegmentResponse,
-  ServiceSetPropertiesResponse
+  ServiceSetPropertiesResponse,
 } from "./generatedModels";
 import { AbortSignalLike } from "@azure/abort-controller";
 import { Service } from "./generated/src/operations";
@@ -27,7 +27,7 @@ import { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
 import {
   appendToURLPath,
   appendToURLQuery,
-  extractConnectionStringParts
+  extractConnectionStringParts,
 } from "./utils/utils.common";
 import { StorageSharedKeyCredential } from "./credentials/StorageSharedKeyCredential";
 import { AnonymousCredential } from "./credentials/AnonymousCredential";
@@ -174,6 +174,8 @@ export class QueueServiceClient extends StorageClient {
    */
   public static fromConnectionString(
     connectionString: string,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   ): QueueServiceClient {
     options = options || {};
@@ -184,7 +186,9 @@ export class QueueServiceClient extends StorageClient {
           extractedCreds.accountName!,
           extractedCreds.accountKey
         );
-        options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
+        if (!options.proxyOptions) {
+          options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
+        }
         const pipeline = newPipeline(sharedKeyCredential, options);
         return new QueueServiceClient(extractedCreds.url, pipeline);
       } else {
@@ -247,6 +251,8 @@ export class QueueServiceClient extends StorageClient {
   constructor(
     url: string,
     credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   );
   /**
@@ -266,6 +272,8 @@ export class QueueServiceClient extends StorageClient {
       | AnonymousCredential
       | TokenCredential
       | Pipeline,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   ) {
     let pipeline: Pipeline;
@@ -333,12 +341,12 @@ export class QueueServiceClient extends StorageClient {
         maxPageSize: options.maxPageSize,
         prefix: options.prefix,
         include: options.include === undefined ? undefined : [options.include],
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -480,7 +488,7 @@ export class QueueServiceClient extends StorageClient {
 
     const updatedOptions: ServiceListQueuesSegmentOptions = {
       ...options,
-      ...(options.includeMetadata ? { include: "metadata" } : {})
+      ...(options.includeMetadata ? { include: "metadata" } : {}),
     };
 
     // AsyncIterableIterator to iterate over queues
@@ -504,9 +512,9 @@ export class QueueServiceClient extends StorageClient {
       byPage: (settings: PageSettings = {}) => {
         return this.listSegments(settings.continuationToken, {
           maxPageSize: settings.maxPageSize,
-          ...updatedOptions
+          ...updatedOptions,
         });
-      }
+      },
     };
   }
 
@@ -525,12 +533,12 @@ export class QueueServiceClient extends StorageClient {
     try {
       return await this.serviceContext.getProperties({
         abortSignal: options.abortSignal,
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -555,12 +563,12 @@ export class QueueServiceClient extends StorageClient {
     try {
       return await this.serviceContext.setProperties(properties, {
         abortSignal: options.abortSignal,
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -584,12 +592,12 @@ export class QueueServiceClient extends StorageClient {
     try {
       return await this.serviceContext.getStatistics({
         abortSignal: options.abortSignal,
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -612,10 +620,10 @@ export class QueueServiceClient extends StorageClient {
     const { span, updatedOptions } = createSpan("QueueServiceClient-createQueue", options);
     try {
       return await this.getQueueClient(queueName).create(updatedOptions);
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -638,10 +646,10 @@ export class QueueServiceClient extends StorageClient {
     const { span, updatedOptions } = createSpan("QueueServiceClient-deleteQueue", options);
     try {
       return await this.getQueueClient(queueName).delete(updatedOptions);
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -686,7 +694,7 @@ export class QueueServiceClient extends StorageClient {
         expiresOn,
         resourceTypes,
         services: AccountSASServices.parse("q").toString(),
-        ...options
+        ...options,
       },
       this.credential
     ).toString();

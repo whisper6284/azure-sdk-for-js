@@ -9,10 +9,10 @@ import {
   AccountSASPermissions,
   SASProtocol,
   AccountSASResourceTypes,
-  AccountSASServices
+  AccountSASServices,
 } from "../../src";
 import { extractConnectionStringParts } from "../../src/utils/utils.common";
-import { env } from "@azure/test-utils-recorder";
+import { env } from "@azure-tools/test-recorder";
 
 // Uncomment if need to enable logger when debugging
 // import {HttpPipelineLogLevel} from "../../src"
@@ -31,11 +31,8 @@ export function getGenericQSU(
     const accountNameEnvVar = `${accountType}ACCOUNT_NAME`;
     const accountKeyEnvVar = `${accountType}ACCOUNT_KEY`;
 
-    let accountName: string | undefined;
-    let accountKey: string | undefined;
-
-    accountName = process.env[accountNameEnvVar];
-    accountKey = process.env[accountKeyEnvVar];
+    const accountName = process.env[accountNameEnvVar];
+    const accountKey = process.env[accountKeyEnvVar];
 
     if (!accountName || !accountKey || accountName === "" || accountKey === "") {
       throw new Error(
@@ -92,7 +89,7 @@ export function getSASConnectionStringFromEnvironment(): string {
       resourceTypes: AccountSASResourceTypes.parse("sco").toString(),
       services: AccountSASServices.parse("btqf").toString(),
       startsOn: now,
-      version: "2016-05-31"
+      version: "2016-05-31",
     },
     sharedKeyCredential as StorageSharedKeyCredential
   ).toString();

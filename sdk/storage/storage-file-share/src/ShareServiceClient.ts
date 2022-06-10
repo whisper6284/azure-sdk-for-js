@@ -11,7 +11,7 @@ import {
   ServiceSetPropertiesResponse,
   ServiceListSharesSegmentHeaders,
   ListSharesResponseModel,
-  SharePropertiesInternal
+  SharePropertiesInternal,
 } from "./generatedModels";
 import { Service } from "./generated/src/operations";
 import { newPipeline, StoragePipelineOptions, Pipeline } from "./Pipeline";
@@ -242,6 +242,8 @@ export class ShareServiceClient extends StorageClient {
    */
   public static fromConnectionString(
     connectionString: string,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   ): ShareServiceClient {
     const extractedCreds = extractConnectionStringParts(connectionString);
@@ -276,6 +278,8 @@ export class ShareServiceClient extends StorageClient {
    *                                  If not specified, AnonymousCredential is used.
    * @param options - Optional. Options to configure the HTTP pipeline.
    */
+  // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+  /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
   constructor(url: string, credential?: Credential, options?: StoragePipelineOptions);
   /**
    * Creates an instance of ShareServiceClient.
@@ -290,6 +294,8 @@ export class ShareServiceClient extends StorageClient {
   constructor(
     url: string,
     credentialOrPipeline?: Credential | Pipeline,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   ) {
     let pipeline: Pipeline;
@@ -341,12 +347,12 @@ export class ShareServiceClient extends StorageClient {
       const shareCreateResponse = await shareClient.create(updatedOptions);
       return {
         shareCreateResponse,
-        shareClient
+        shareClient,
       };
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -369,10 +375,10 @@ export class ShareServiceClient extends StorageClient {
     try {
       const shareClient = this.getShareClient(shareName);
       return await shareClient.delete(updatedOptions);
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -395,12 +401,12 @@ export class ShareServiceClient extends StorageClient {
     try {
       return await this.serviceContext.getProperties({
         abortSignal: options.abortSignal,
-        ...convertTracingToRequestOptionsBase(updatedOptions)
+        ...convertTracingToRequestOptionsBase(updatedOptions),
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -425,12 +431,12 @@ export class ShareServiceClient extends StorageClient {
     try {
       return await this.serviceContext.setProperties(properties, {
         abortSignal: options.abortSignal,
-        ...convertTracingToRequestOptionsBase(updatedOptions)
+        ...convertTracingToRequestOptionsBase(updatedOptions),
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -580,7 +586,7 @@ export class ShareServiceClient extends StorageClient {
 
     const updatedOptions: ServiceListSharesSegmentOptions = {
       ...options,
-      ...(include.length > 0 ? { include: include } : {})
+      ...(include.length > 0 ? { include: include } : {}),
     };
 
     // AsyncIterableIterator to iterate over queues
@@ -604,9 +610,9 @@ export class ShareServiceClient extends StorageClient {
       byPage: (settings: PageSettings = {}) => {
         return this.listSegments(settings.continuationToken, {
           maxResults: settings.maxPageSize,
-          ...updatedOptions
+          ...updatedOptions,
         });
-      }
+      },
     };
   }
 
@@ -637,7 +643,7 @@ export class ShareServiceClient extends StorageClient {
       const res = await this.serviceContext.listSharesSegment({
         marker,
         ...options,
-        ...convertTracingToRequestOptionsBase(updatedOptions)
+        ...convertTracingToRequestOptionsBase(updatedOptions),
       });
 
       // parse protocols
@@ -649,10 +655,10 @@ export class ShareServiceClient extends StorageClient {
       }
 
       return res;
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -682,13 +688,13 @@ export class ShareServiceClient extends StorageClient {
         deletedShareName: deletedShareName,
         deletedShareVersion: deletedShareVersion,
         abortSignal: options.abortSignal,
-        ...convertTracingToRequestOptionsBase(updatedOptions)
+        ...convertTracingToRequestOptionsBase(updatedOptions),
       });
       return shareClient;
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -733,7 +739,7 @@ export class ShareServiceClient extends StorageClient {
         expiresOn,
         resourceTypes,
         services: AccountSASServices.parse("f").toString(),
-        ...options
+        ...options,
       },
       this.credential
     ).toString();

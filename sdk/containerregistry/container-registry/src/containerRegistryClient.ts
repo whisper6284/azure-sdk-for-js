@@ -7,42 +7,42 @@ import { isTokenCredential, TokenCredential } from "@azure/core-auth";
 import {
   InternalPipelineOptions,
   bearerTokenAuthenticationPolicy,
-  PipelineOptions
 } from "@azure/core-rest-pipeline";
-import { OperationOptions } from "@azure/core-client";
+import { CommonClientOptions, OperationOptions } from "@azure/core-client";
 
-import { SpanStatusCode } from "@azure/core-tracing";
 import "@azure/core-paging";
 import { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
 
 import { logger } from "./logger";
 import { GeneratedClient } from "./generated";
-import { createSpan } from "./tracing";
+import { tracingClient } from "./tracing";
 import { RepositoryPageResponse } from "./models";
 import { extractNextLink } from "./utils/helpers";
 import { ChallengeHandler } from "./containerRegistryChallengeHandler";
 import {
   ContainerRepository,
   ContainerRepositoryImpl,
-  DeleteRepositoryOptions
+  DeleteRepositoryOptions,
 } from "./containerRepository";
 import { RegistryArtifact } from "./registryArtifact";
 import { ContainerRegistryRefreshTokenCredential } from "./containerRegistryTokenCredential";
 
+const LATEST_API_VERSION = "2021-07-01";
+
 /**
  * Client options used to configure Container Registry Repository API requests.
  */
-export interface ContainerRegistryClientOptions extends PipelineOptions {
+export interface ContainerRegistryClientOptions extends CommonClientOptions {
   /**
-   * Gets or sets the authentication scope to use for authentication with AAD.
-   * This defaults to the Azure Resource Manager "Azure Global" scope.  To
-   * connect to a different cloud, set this value to "&lt;resource-id&gt;/.default",
-   * where &lt;resource-id&gt; is one of the Resource IDs listed at
-   * https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/services-support-managed-identities#azure-resource-manager.
-   * For example, to connect to the Azure Germany cloud, create a client with
-   * this set to "https://management.microsoftazure.de/.default".
+   * Gets or sets the audience to use for authentication with Azure Active Directory.
+   * The authentication scope will be set from this audience.
+   * See {@link KnownContainerRegistryAudience} for known audience values.
    */
-  authenticationScope?: string;
+  audience?: string;
+  /**
+   * The version of service API to make calls against.
+   */
+  serviceVersion?: "2021-07-01";
 }
 
 /**
@@ -129,19 +129,27 @@ export class ContainerRegistryClient {
         logger: logger.info,
         // This array contains header names we want to log that are not already
         // included as safe. Unknown/unsafe headers are logged as "<REDACTED>".
-        additionalAllowedQueryParameters: ["last", "n", "orderby", "digest"]
-      }
+        additionalAllowedQueryParameters: ["last", "n", "orderby", "digest"],
+      },
     };
-    const authScope = options.authenticationScope ?? "https://management.azure.com/.default";
-    const authClient = new GeneratedClient(endpoint, internalPipelineOptions);
-    this.client = new GeneratedClient(endpoint, internalPipelineOptions);
+    // Require audience now until we have a default ACR audience from the service.
+    if (!options.audience) {
+      throw new Error(
+        "ContainerRegistryClientOptions.audience must be set to initialize ContainerRegistryClient."
+      );
+    }
+
+    const defaultScope = `${options.audience}/.default`;
+    const serviceVersion = options.serviceVersion ?? LATEST_API_VERSION;
+    const authClient = new GeneratedClient(endpoint, serviceVersion, internalPipelineOptions);
+    this.client = new GeneratedClient(endpoint, serviceVersion, internalPipelineOptions);
     this.client.pipeline.addPolicy(
       bearerTokenAuthenticationPolicy({
         credential,
-        scopes: [authScope],
+        scopes: [defaultScope],
         challengeCallbacks: new ChallengeHandler(
-          new ContainerRegistryRefreshTokenCredential(authClient, authScope, credential)
-        )
+          new ContainerRegistryRefreshTokenCredential(authClient, defaultScope, credential)
+        ),
       })
     );
   }
@@ -160,19 +168,13 @@ export class ContainerRegistryClient {
       throw new Error("invalid repositoryName");
     }
 
-    const { span, updatedOptions } = createSpan(
-      "ContainerRegistryClient-deleteRepository",
-      options
+    return tracingClient.withSpan(
+      "ContainerRegistryClient.deleteRepository",
+      options,
+      async (updatedOptions) => {
+        await this.client.containerRegistry.deleteRepository(repositoryName, updatedOptions);
+      }
     );
-
-    try {
-      await this.client.containerRegistry.deleteRepository(repositoryName, updatedOptions);
-    } catch (e) {
-      span.setStatus({ code: SpanStatusCode.ERROR, message: e.message });
-      throw e;
-    } finally {
-      span.end();
-    }
   }
 
   /**
@@ -259,7 +261,7 @@ export class ContainerRegistryClient {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: (settings: PageSettings = {}) => this.listRepositoriesPage(settings, options)
+      byPage: (settings: PageSettings = {}) => this.listRepositoriesPage(settings, options),
     };
   }
 
@@ -278,7 +280,7 @@ export class ContainerRegistryClient {
     if (!continuationState.continuationToken) {
       const optionsComplete = {
         ...options,
-        n: continuationState.maxPageSize
+        n: continuationState.maxPageSize,
       };
       const currentPage = await this.client.containerRegistry.getRepositories(optionsComplete);
       continuationState.continuationToken = extractNextLink(currentPage.link);
@@ -286,7 +288,7 @@ export class ContainerRegistryClient {
         const array = currentPage.repositories;
         yield Object.defineProperty(array, "continuationToken", {
           value: continuationState.continuationToken,
-          enumerable: true
+          enumerable: true,
         });
       }
     }
@@ -300,7 +302,7 @@ export class ContainerRegistryClient {
         const array = currentPage.repositories;
         yield Object.defineProperty(array, "continuationToken", {
           value: continuationState.continuationToken,
-          enumerable: true
+          enumerable: true,
         });
       }
     }

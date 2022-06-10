@@ -6,7 +6,7 @@ import {
   StoragePipelineOptions,
   StorageSharedKeyCredential,
   AnonymousCredential,
-  Pipeline
+  Pipeline,
 } from "@azure/storage-blob";
 import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
 import { BlobChangeFeedEvent } from "./models/BlobChangeFeedEvent";
@@ -92,6 +92,8 @@ export class BlobChangeFeedClient {
    */
   public static fromConnectionString(
     connectionString: string,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   ): BlobChangeFeedClient {
     const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString, options);
@@ -139,6 +141,8 @@ export class BlobChangeFeedClient {
   constructor(
     url: string,
     credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   );
 
@@ -159,6 +163,8 @@ export class BlobChangeFeedClient {
       | AnonymousCredential
       | TokenCredential
       | Pipeline,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   ) {
     this.changeFeedFactory = new ChangeFeedFactory();
@@ -186,7 +192,7 @@ export class BlobChangeFeedClient {
     while (changeFeed.hasNext()) {
       const event = await changeFeed.getChange({
         abortSignal: options.abortSignal,
-        tracingOptions: options.tracingOptions
+        tracingOptions: options.tracingOptions,
       });
       if (event) {
         yield event;
@@ -216,7 +222,7 @@ export class BlobChangeFeedClient {
       while (changeFeed.hasNext() && eventPage.events.length < maxPageSize) {
         const event = await changeFeed.getChange({
           abortSignal: options.abortSignal,
-          tracingOptions: options.tracingOptions
+          tracingOptions: options.tracingOptions,
         });
         if (event) {
           eventPage.events.push(event);
@@ -327,7 +333,7 @@ export class BlobChangeFeedClient {
        */
       byPage: (settings: PageSettings = {}) => {
         return this.getPage(settings.continuationToken, settings.maxPageSize, options);
-      }
+      },
     };
   }
 }

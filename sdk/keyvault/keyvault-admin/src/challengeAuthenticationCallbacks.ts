@@ -6,21 +6,11 @@ import {
   AuthorizeRequestOptions,
   ChallengeCallbacks,
   PipelineRequest,
-  RequestBodyType
+  RequestBodyType,
 } from "@azure/core-rest-pipeline";
+import { ParsedWWWAuthenticate, parseWWWAuthenticate } from "../../keyvault-common/src";
+
 import { GetTokenOptions } from "@azure/core-auth";
-
-const validParsedWWWAuthenticateProperties = ["authorization", "resource", "scope"];
-
-/**
- * @internal
- *
- * Holds the known WWWAuthenticate keys and their values as a result of
- * parsing a WWW-Authenticate header.
- */
-type ParsedWWWAuthenticate = {
-  [Key in "authorization" | "resource" | "scope"]?: string;
-};
 
 /**
  * @internal
@@ -47,29 +37,6 @@ type ChallengeState =
     };
 
 /**
- * Parses an WWW-Authenticate response.
- * This transforms a string value like:
- * `Bearer authorization="some_authorization", resource="https://some.url"`
- * into an object like:
- * `{ authorization: "some_authorization", resource: "https://some.url" }`
- * @param wwwAuthenticate - String value in the WWW-Authenticate header
- */
-export function parseWWWAuthenticate(wwwAuthenticate: string): ParsedWWWAuthenticate {
-  const pairDelimiter = /,? +/;
-  return wwwAuthenticate.split(pairDelimiter).reduce<ParsedWWWAuthenticate>((kvPairs, p) => {
-    if (p.match(/\w="/)) {
-      // 'sampleKey="sample_value"' -> [sampleKey, "sample_value"] -> { sampleKey: sample_value }
-      const [key, value] = p.split("=");
-      if (validParsedWWWAuthenticateProperties.includes(key)) {
-        // The values will be wrapped in quotes, which need to be stripped out.
-        return { ...kvPairs, [key]: value.slice(1, -1) };
-      }
-    }
-    return kvPairs;
-  }, {});
-}
-
-/**
  * @internal
  *
  * Creates challenge callback handlers to manage CAE lifecycle in Azure Key Vault.
@@ -90,9 +57,9 @@ export function createChallengeCallbacks(): ChallengeCallbacks {
     return {
       abortSignal: request.abortSignal,
       requestOptions: {
-        timeout: request.timeout
+        timeout: request.timeout,
       },
-      tracingOptions: request.tracingOptions
+      tracingOptions: request.tracingOptions,
     };
   }
 
@@ -104,7 +71,7 @@ export function createChallengeCallbacks(): ChallengeCallbacks {
       case "none":
         challengeState = {
           status: "started",
-          originalBody: request.body
+          originalBody: request.body,
         };
         request.body = null;
         break;
@@ -143,7 +110,7 @@ export function createChallengeCallbacks(): ChallengeCallbacks {
 
     const accessToken = await options.getAccessToken(
       parsedChallenge.scope ? [parsedChallenge.scope] : scopes,
-      getTokenOptions
+      { ...getTokenOptions, tenantId: parsedChallenge.tenantId }
     );
 
     if (!accessToken) {
@@ -153,7 +120,7 @@ export function createChallengeCallbacks(): ChallengeCallbacks {
     options.request.headers.set("Authorization", `Bearer ${accessToken.token}`);
 
     challengeState = {
-      status: "complete"
+      status: "complete",
     };
 
     return true;
@@ -161,6 +128,6 @@ export function createChallengeCallbacks(): ChallengeCallbacks {
 
   return {
     authorizeRequest,
-    authorizeRequestOnChallenge
+    authorizeRequestOnChallenge,
   };
 }

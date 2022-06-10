@@ -3,11 +3,11 @@
 
 import { TokenCredential, GetTokenOptions, AccessToken } from "@azure/core-auth";
 import { createHttpHeaders, createPipelineRequest } from "@azure/core-rest-pipeline";
-import { SpanStatusCode } from "@azure/core-tracing";
 import { credentialLogger, formatError, formatSuccess } from "../util/logging";
 import { getIdentityTokenEndpointSuffix } from "../util/identityTokenEndpoint";
-import { TokenCredentialOptions, IdentityClient } from "../client/identityClient";
-import { createSpan } from "../util/tracing";
+import { TokenCredentialOptions } from "../tokenCredentialOptions";
+import { IdentityClient } from "../client/identityClient";
+import { tracingClient } from "../util/tracing";
 
 const logger = credentialLogger("ClientSecretCredential");
 
@@ -63,50 +63,42 @@ export class ClientSecretCredential implements TokenCredential {
    */
   public async getToken(
     scopes: string | string[],
-    options?: GetTokenOptions
+    options: GetTokenOptions = {}
   ): Promise<AccessToken | null> {
-    const { span, updatedOptions: newOptions } = createSpan(
-      "ClientSecretCredential-getToken",
-      options
-    );
+    return tracingClient.withSpan(
+      `${this.constructor.name}.getToken`,
+      options,
+      async (newOptions) => {
+        const query = new URLSearchParams({
+          response_type: "token",
+          grant_type: "client_credentials",
+          client_id: this.clientId,
+          client_secret: this.clientSecret,
+          scope: typeof scopes === "string" ? scopes : scopes.join(" "),
+        });
 
-    const query = new URLSearchParams({
-      response_type: "token",
-      grant_type: "client_credentials",
-      client_id: this.clientId,
-      client_secret: this.clientSecret,
-      scope: typeof scopes === "string" ? scopes : scopes.join(" ")
-    });
+        try {
+          const urlSuffix = getIdentityTokenEndpointSuffix(this.tenantId);
+          const request = createPipelineRequest({
+            url: `${this.identityClient.authorityHost}/${this.tenantId}/${urlSuffix}`,
+            method: "POST",
+            body: query.toString(),
+            headers: createHttpHeaders({
+              Accept: "application/json",
+              "Content-Type": "application/x-www-form-urlencoded",
+            }),
+            abortSignal: options && options.abortSignal,
+            tracingOptions: newOptions?.tracingOptions,
+          });
 
-    try {
-      const urlSuffix = getIdentityTokenEndpointSuffix(this.tenantId);
-      const request = createPipelineRequest({
-        url: `${this.identityClient.authorityHost}/${this.tenantId}/${urlSuffix}`,
-        method: "POST",
-        body: query.toString(),
-        headers: createHttpHeaders({
-          Accept: "application/json",
-          "Content-Type": "application/x-www-form-urlencoded"
-        }),
-        abortSignal: options && options.abortSignal,
-        tracingOptions: {
-          spanOptions: newOptions.tracingOptions && newOptions.tracingOptions.spanOptions,
-          tracingContext: newOptions.tracingOptions && newOptions.tracingOptions.tracingContext
+          const tokenResponse = await this.identityClient.sendTokenRequest(request);
+          logger.getToken.info(formatSuccess(scopes));
+          return (tokenResponse && tokenResponse.accessToken) || null;
+        } catch (err: any) {
+          logger.getToken.info(formatError(scopes, err));
+          throw err;
         }
-      });
-
-      const tokenResponse = await this.identityClient.sendTokenRequest(request);
-      logger.getToken.info(formatSuccess(scopes));
-      return (tokenResponse && tokenResponse.accessToken) || null;
-    } catch (err) {
-      span.setStatus({
-        code: SpanStatusCode.ERROR,
-        message: err.message
-      });
-      logger.getToken.info(formatError(scopes, err));
-      throw err;
-    } finally {
-      span.end();
-    }
+      }
+    );
   }
 }

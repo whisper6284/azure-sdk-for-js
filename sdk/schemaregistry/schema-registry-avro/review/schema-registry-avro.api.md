@@ -7,17 +7,35 @@
 import { SchemaRegistry } from '@azure/schema-registry';
 
 // @public
-export class SchemaRegistryAvroSerializer {
-    constructor(registry: SchemaRegistry, schemaGroup: string, options?: SchemaRegistryAvroSerializerOptions);
-    deserialize<T>(buffer: Buffer): Promise<T>;
-    serialize(value: unknown, schema: string): Promise<Buffer>;
+export class AvroSerializer<MessageT = MessageContent> {
+    constructor(client: SchemaRegistry, options?: AvroSerializerOptions<MessageT>);
+    deserialize(message: MessageT, options?: DeserializeOptions): Promise<unknown>;
+    serialize(value: unknown, schema: string): Promise<MessageT>;
 }
 
 // @public
-export interface SchemaRegistryAvroSerializerOptions {
+export interface AvroSerializerOptions<MessageT> {
     autoRegisterSchemas?: boolean;
+    groupName?: string;
+    messageAdapter?: MessageAdapter<MessageT>;
 }
 
+// @public
+export interface DeserializeOptions {
+    schema?: string;
+}
+
+// @public
+export interface MessageAdapter<MessageT> {
+    consume: (message: MessageT) => MessageContent;
+    produce: (messageContent: MessageContent) => MessageT;
+}
+
+// @public
+export interface MessageContent {
+    contentType: string;
+    data: Uint8Array;
+}
 
 // (No @packageDocumentation comment for this package)
 

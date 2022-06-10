@@ -4,21 +4,23 @@
 
 ```ts
 
+/// <reference lib="esnext.asynciterable" />
+
 import { ChatMessageDeletedEvent } from '@azure/communication-signaling';
 import { ChatMessageEditedEvent } from '@azure/communication-signaling';
 import { ChatMessageReceivedEvent } from '@azure/communication-signaling';
 import { ChatThreadCreatedEvent } from '@azure/communication-signaling';
 import { ChatThreadDeletedEvent } from '@azure/communication-signaling';
 import { ChatThreadPropertiesUpdatedEvent } from '@azure/communication-signaling';
+import { CommonClientOptions } from '@azure/core-client';
 import { CommunicationIdentifier } from '@azure/communication-common';
 import { CommunicationIdentifierKind } from '@azure/communication-common';
 import { CommunicationTokenCredential } from '@azure/communication-common';
-import * as coreHttp from '@azure/core-http';
-import { OperationOptions } from '@azure/core-http';
+import * as coreClient from '@azure/core-client';
+import { OperationOptions } from '@azure/core-client';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
 import { ParticipantsAddedEvent } from '@azure/communication-signaling';
 import { ParticipantsRemovedEvent } from '@azure/communication-signaling';
-import { PipelineOptions } from '@azure/core-http';
 import { ReadReceiptReceivedEvent } from '@azure/communication-signaling';
 import { TypingIndicatorReceivedEvent } from '@azure/communication-signaling';
 
@@ -62,12 +64,14 @@ export class ChatClient {
     on(event: "chatThreadPropertiesUpdated", listener: (e: ChatThreadPropertiesUpdatedEvent) => void): void;
     on(event: "participantsAdded", listener: (e: ParticipantsAddedEvent) => void): void;
     on(event: "participantsRemoved", listener: (e: ParticipantsRemovedEvent) => void): void;
+    on(event: "realTimeNotificationConnected", listener: () => void): void;
+    on(event: "realTimeNotificationDisconnected", listener: () => void): void;
     startRealtimeNotifications(): Promise<void>;
     stopRealtimeNotifications(): Promise<void>;
-    }
+}
 
 // @public
-export interface ChatClientOptions extends PipelineOptions {
+export interface ChatClientOptions extends CommonClientOptions {
 }
 
 // @public
@@ -78,6 +82,9 @@ export interface ChatError {
     message: string;
     readonly target?: string;
 }
+
+// @public (undocumented)
+export type ChatEventId = "chatMessageReceived" | "chatMessageEdited" | "chatMessageDeleted" | "typingIndicatorReceived" | "readReceiptReceived" | "chatThreadCreated" | "chatThreadDeleted" | "chatThreadPropertiesUpdated" | "participantsAdded" | "participantsRemoved" | "realTimeNotificationConnected" | "realTimeNotificationDisconnected";
 
 // @public
 export interface ChatMessage {
@@ -102,12 +109,18 @@ export interface ChatMessageContent {
     topic?: string;
 }
 
+export { ChatMessageDeletedEvent }
+
+export { ChatMessageEditedEvent }
+
 // @public
 export interface ChatMessageReadReceipt {
     chatMessageId: string;
     readOn: Date;
     sender: CommunicationIdentifierKind;
 }
+
+export { ChatMessageReceivedEvent }
 
 // @public
 export type ChatMessageType = "text" | "html" | "topicUpdated" | "participantAdded" | "participantRemoved";
@@ -142,6 +155,10 @@ export class ChatThreadClient {
 export interface ChatThreadClientOptions extends ChatClientOptions {
 }
 
+export { ChatThreadCreatedEvent }
+
+export { ChatThreadDeletedEvent }
+
 // @public
 export interface ChatThreadItem {
     deletedOn?: Date;
@@ -158,6 +175,8 @@ export interface ChatThreadProperties {
     id: string;
     topic: string;
 }
+
+export { ChatThreadPropertiesUpdatedEvent }
 
 // @public
 export interface CreateChatThreadOptions extends OperationOptions {
@@ -205,29 +224,35 @@ export type ListParticipantsOptions = RestListParticipantsOptions;
 // @public
 export type ListReadReceiptsOptions = RestListReadReceiptsOptions;
 
+export { ParticipantsAddedEvent }
+
+export { ParticipantsRemovedEvent }
+
+export { ReadReceiptReceivedEvent }
+
 // @public
 export type RemoveParticipantOptions = OperationOptions;
 
 // @public
-export interface RestListChatThreadsOptions extends coreHttp.OperationOptions {
+export interface RestListChatThreadsOptions extends coreClient.OperationOptions {
     maxPageSize?: number;
     startTime?: Date;
 }
 
 // @public
-export interface RestListMessagesOptions extends coreHttp.OperationOptions {
+export interface RestListMessagesOptions extends coreClient.OperationOptions {
     maxPageSize?: number;
     startTime?: Date;
 }
 
 // @public
-export interface RestListParticipantsOptions extends coreHttp.OperationOptions {
+export interface RestListParticipantsOptions extends coreClient.OperationOptions {
     maxPageSize?: number;
     skip?: number;
 }
 
 // @public
-export interface RestListReadReceiptsOptions extends coreHttp.OperationOptions {
+export interface RestListReadReceiptsOptions extends coreClient.OperationOptions {
     maxPageSize?: number;
     skip?: number;
 }
@@ -262,6 +287,8 @@ export interface SendTypingNotificationOptions extends OperationOptions {
     senderDisplayName?: string;
 }
 
+export { TypingIndicatorReceivedEvent }
+
 // @public
 export interface UpdateMessageOptions extends OperationOptions {
     content?: string;
@@ -271,7 +298,6 @@ export interface UpdateMessageOptions extends OperationOptions {
 // @public
 export interface UpdateTopicOptions extends OperationOptions {
 }
-
 
 // (No @packageDocumentation comment for this package)
 

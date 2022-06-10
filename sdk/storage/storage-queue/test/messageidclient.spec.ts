@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as assert from "assert";
+import { assert } from "chai";
 import { getQSU, getSASConnectionStringFromEnvironment } from "./utils";
 import { QueueClient } from "../src/QueueClient";
-import { record, delay, Recorder } from "@azure/test-utils-recorder";
-import * as dotenv from "dotenv";
+import { record, delay, Recorder } from "@azure-tools/test-recorder";
 import { extractConnectionStringParts } from "../src/utils/utils.common";
 import { recorderEnvSetup } from "./utils/index.browser";
-dotenv.config();
+import { Context } from "mocha";
 
 describe("QueueClient messageId methods", () => {
   let queueName: string;
@@ -17,7 +16,7 @@ describe("QueueClient messageId methods", () => {
 
   let recorder: Recorder;
 
-  beforeEach(async function() {
+  beforeEach(async function (this: Context) {
     recorder = record(this, recorderEnvSetup);
     const queueServiceClient = getQSU();
     queueName = recorder.getUniqueName("queue");
@@ -25,7 +24,7 @@ describe("QueueClient messageId methods", () => {
     await queueClient.create();
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await queueClient.delete();
     await recorder.stop();
   });
@@ -180,7 +179,7 @@ describe("QueueClient messageId methods", () => {
     let error;
     try {
       await queueClient.updateMessage(eResult.messageId, eResult.popReceipt, newMessage);
-    } catch (err) {
+    } catch (err: any) {
       error = err;
     }
     assert.ok(error);
@@ -197,7 +196,7 @@ describe("QueueClient messageId methods", () => {
     let error;
     try {
       await queueClient.deleteMessage(eResult.messageId, "invalid");
-    } catch (err) {
+    } catch (err: any) {
       error = err;
     }
     assert.ok(error);

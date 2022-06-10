@@ -6,13 +6,12 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { DiskEncryptionSets } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ComputeManagementClientContext } from "../computeManagementClientContext";
+import { ComputeManagementClient } from "../computeManagementClient";
 import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
 import { LroImpl } from "../lroImpl";
 import {
@@ -40,15 +39,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a DiskEncryptionSets. */
+/** Class containing DiskEncryptionSets operations. */
 export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
-  private readonly client: ComputeManagementClientContext;
+  private readonly client: ComputeManagementClient;
 
   /**
    * Initialize a new instance of the class DiskEncryptionSets class.
    * @param client Reference to the service client
    */
-  constructor(client: ComputeManagementClientContext) {
+  constructor(client: ComputeManagementClient) {
     this.client = client;
   }
 
@@ -152,7 +151,7 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
    * @param resourceGroupName The name of the resource group.
    * @param diskEncryptionSetName The name of the disk encryption set that is being created. The name
    *                              can't be changed after the disk encryption set is created. Supported characters for the name are
-   *                              a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   *                              a-z, A-Z, 0-9, _ and -. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   public listAssociatedResources(
@@ -225,7 +224,7 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
    * @param resourceGroupName The name of the resource group.
    * @param diskEncryptionSetName The name of the disk encryption set that is being created. The name
    *                              can't be changed after the disk encryption set is created. Supported characters for the name are
-   *                              a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   *                              a-z, A-Z, 0-9, _ and -. The maximum name length is 80 characters.
    * @param diskEncryptionSet disk encryption set object supplied in the body of the Put disk encryption
    *                          set operation.
    * @param options The options parameters.
@@ -285,10 +284,12 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
       { resourceGroupName, diskEncryptionSetName, diskEncryptionSet, options },
       createOrUpdateOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -296,7 +297,7 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
    * @param resourceGroupName The name of the resource group.
    * @param diskEncryptionSetName The name of the disk encryption set that is being created. The name
    *                              can't be changed after the disk encryption set is created. Supported characters for the name are
-   *                              a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   *                              a-z, A-Z, 0-9, _ and -. The maximum name length is 80 characters.
    * @param diskEncryptionSet disk encryption set object supplied in the body of the Put disk encryption
    *                          set operation.
    * @param options The options parameters.
@@ -321,7 +322,7 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
    * @param resourceGroupName The name of the resource group.
    * @param diskEncryptionSetName The name of the disk encryption set that is being created. The name
    *                              can't be changed after the disk encryption set is created. Supported characters for the name are
-   *                              a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   *                              a-z, A-Z, 0-9, _ and -. The maximum name length is 80 characters.
    * @param diskEncryptionSet disk encryption set object supplied in the body of the Patch disk
    *                          encryption set operation.
    * @param options The options parameters.
@@ -381,10 +382,12 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
       { resourceGroupName, diskEncryptionSetName, diskEncryptionSet, options },
       updateOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -392,7 +395,7 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
    * @param resourceGroupName The name of the resource group.
    * @param diskEncryptionSetName The name of the disk encryption set that is being created. The name
    *                              can't be changed after the disk encryption set is created. Supported characters for the name are
-   *                              a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   *                              a-z, A-Z, 0-9, _ and -. The maximum name length is 80 characters.
    * @param diskEncryptionSet disk encryption set object supplied in the body of the Patch disk
    *                          encryption set operation.
    * @param options The options parameters.
@@ -417,7 +420,7 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
    * @param resourceGroupName The name of the resource group.
    * @param diskEncryptionSetName The name of the disk encryption set that is being created. The name
    *                              can't be changed after the disk encryption set is created. Supported characters for the name are
-   *                              a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   *                              a-z, A-Z, 0-9, _ and -. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   get(
@@ -436,7 +439,7 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
    * @param resourceGroupName The name of the resource group.
    * @param diskEncryptionSetName The name of the disk encryption set that is being created. The name
    *                              can't be changed after the disk encryption set is created. Supported characters for the name are
-   *                              a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   *                              a-z, A-Z, 0-9, _ and -. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   async beginDelete(
@@ -488,10 +491,12 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
       { resourceGroupName, diskEncryptionSetName, options },
       deleteOperationSpec
     );
-    return new LroEngine(lro, {
+    const poller = new LroEngine(lro, {
       resumeFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -499,7 +504,7 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
    * @param resourceGroupName The name of the resource group.
    * @param diskEncryptionSetName The name of the disk encryption set that is being created. The name
    *                              can't be changed after the disk encryption set is created. Supported characters for the name are
-   *                              a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   *                              a-z, A-Z, 0-9, _ and -. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   async beginDeleteAndWait(
@@ -545,7 +550,7 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
    * @param resourceGroupName The name of the resource group.
    * @param diskEncryptionSetName The name of the disk encryption set that is being created. The name
    *                              can't be changed after the disk encryption set is created. Supported characters for the name are
-   *                              a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   *                              a-z, A-Z, 0-9, _ and -. The maximum name length is 80 characters.
    * @param options The options parameters.
    */
   private _listAssociatedResources(
@@ -596,7 +601,7 @@ export class DiskEncryptionSetsImpl implements DiskEncryptionSets {
    * @param resourceGroupName The name of the resource group.
    * @param diskEncryptionSetName The name of the disk encryption set that is being created. The name
    *                              can't be changed after the disk encryption set is created. Supported characters for the name are
-   *                              a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+   *                              a-z, A-Z, 0-9, _ and -. The maximum name length is 80 characters.
    * @param nextLink The nextLink from the previous successful call to the ListAssociatedResources
    *                 method.
    * @param options The options parameters.
@@ -638,11 +643,11 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.diskEncryptionSet,
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskEncryptionSetName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -671,11 +676,11 @@ const updateOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.diskEncryptionSet1,
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskEncryptionSetName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -694,11 +699,11 @@ const getOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskEncryptionSetName
   ],
   headerParameters: [Parameters.accept],
@@ -717,11 +722,11 @@ const deleteOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskEncryptionSetName
   ],
   headerParameters: [Parameters.accept],
@@ -739,11 +744,11 @@ const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -760,7 +765,7 @@ const listOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
   serializer
@@ -777,11 +782,11 @@ const listAssociatedResourcesOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.diskEncryptionSetName
   ],
   headerParameters: [Parameters.accept],
@@ -798,12 +803,12 @@ const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
+    Parameters.resourceGroupName
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -819,7 +824,7 @@ const listNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -839,12 +844,12 @@ const listAssociatedResourcesNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.nextLink,
+    Parameters.resourceGroupName,
     Parameters.diskEncryptionSetName
   ],
   headerParameters: [Parameters.accept],

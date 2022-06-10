@@ -1068,6 +1068,7 @@ const copyFromURLOperationSpec: coreHttp.OperationSpec = {
     Parameters.ifTags,
     Parameters.immutabilityPolicyExpiry,
     Parameters.immutabilityPolicyMode,
+    Parameters.encryptionScope,
     Parameters.tier,
     Parameters.sourceIfModifiedSince,
     Parameters.sourceIfUnmodifiedSince,
@@ -1078,7 +1079,8 @@ const copyFromURLOperationSpec: coreHttp.OperationSpec = {
     Parameters.legalHold1,
     Parameters.xMsRequiresSync,
     Parameters.sourceContentMD5,
-    Parameters.copySourceAuthorization
+    Parameters.copySourceAuthorization,
+    Parameters.copySourceTags
   ],
   isXML: true,
   serializer: xmlSerializer

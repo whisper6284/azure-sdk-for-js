@@ -1,5 +1,67 @@
 # Release History
 
+## 12.9.1 (Unreleased)
+
+### Features Added
+
+### Breaking Changes
+
+### Bugs Fixed
+
+### Other Changes
+
+## 12.9.0 (2022-05-12)
+
+### Features Added
+
+- Includes all features released in 12.9.0-beta.1.
+
+### Bugs Fixed
+
+- Refined user-agent value to avoid failure when os information is not available on some platforms.
+
+## 12.9.0-beta.1 (2022-04-19)
+
+### Features Added
+
+- Added support for service version 2021-06-08.
+- Added support for Customer Provided Key server-side encryption of files.
+- Added ability to retrieve path createdOn and expiresOn times with DataLakeFileSystemClient.listPaths().
+
+### Bugs Fixed
+
+- Add missing browser mapping for `./dist-esm/storage-common/src/BufferScheduler.js`
+- Add `react-native` mapping to ESM entry point
+
+## 12.8.0 (2022-03-11)
+
+### Features Added
+
+- Includes all features released in 12.8.0-beta.1.
+
+### Bugs Fixed
+
+- Fixed a bug where customized `ProxyOptions` is overwrited by a default one when initializing `DataLakeServiceClient` with connection string.
+- Set correct content length in requests for uploading operations to avoid unexpected failure if customized content length is incorrect.
+
+## 12.8.0-beta.1 (2021-11-09)
+
+### Features Added
+
+- Added support for service version 2020-12-06.
+
+## 12.7.0 (2021-09-10)
+
+### Features Added
+
+- Includes all features released in 12.7.0-beta.1.
+
+## 12.6.0 (2021-08-02)
+
+- Support for Node.js 8 and IE 11 has been dropped. Please see our [support policy](https://github.com/Azure/azure-sdk-for-js/blob/main/SUPPORT.md) for more details.
+- Changed TS compilation target to ES2017 in order to produce smaller bundles and use more native platform features
+- Updated our internal core package dependencies to their latest versions in order to add support for Opentelemetry 1.0.0 which is compatible with the latest versions of our other client libraries.
+
 ## 12.7.0-beta.1 (2021-07-28)
 
 ### Features Added
@@ -7,12 +69,6 @@
 - Added support for service version 2020-10-02.
 - Added support for Parquet as an input format in `DataLakeFileClient.query()`.
 - With the dropping of support for Node.js versions that are no longer in LTS, the dependency on `@types/node` has been updated to version 12. Read our [support policy](https://github.com/Azure/azure-sdk-for-js/blob/main/SUPPORT.md) for more details.
-
-## 12.6.0 (2021-08-02)
-
-- Support for Node.js 8 and IE 11 has been dropped. Please see our [support policy](https://github.com/Azure/azure-sdk-for-js/blob/main/SUPPORT.md) for more details.
-- Changed TS compilation target to ES2017 in order to produce smaller bundles and use more native platform features
-- Updated our internal core package dependencies to their latest versions in order to add support for Opentelemetry 1.0.0 which is compatible with the latest versions of our other client libraries.
 
 ## 12.5.0 (2021-06-09)
 

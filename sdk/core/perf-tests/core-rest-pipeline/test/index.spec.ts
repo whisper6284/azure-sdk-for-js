@@ -1,10 +1,6 @@
-import { PerfStressProgram, selectPerfStressTest } from "@azure/test-utils-perfstress";
+import { createPerfProgram } from "@azure/test-utils-perf";
 import { BearerTokenAuthenticationPolicyChallengeTest } from "./bearerTokenChallengeAuthenticationPolicy/wwwChallenge.spec";
 
-console.log("=== Starting the perfStress test ===");
+const perfProgram = createPerfProgram(BearerTokenAuthenticationPolicyChallengeTest);
 
-const perfStressProgram = new PerfStressProgram(
-  selectPerfStressTest([BearerTokenAuthenticationPolicyChallengeTest])
-);
-
-perfStressProgram.run();
+perfProgram.run();

@@ -1,10 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as assert from "assert";
-import { newPipeline, ShareClient, StorageSharedKeyCredential, SignedIdentifier } from "../../src";
-import { getBSU, getConnectionStringFromEnvironment, recorderEnvSetup } from "./../utils";
-import { record, Recorder } from "@azure/test-utils-recorder";
+import { assert } from "chai";
+import { Context } from "mocha";
+
+import { record, Recorder } from "@azure-tools/test-recorder";
+
+import { newPipeline, ShareClient, SignedIdentifier, StorageSharedKeyCredential } from "../../src";
+import { getBSU, getConnectionStringFromEnvironment, recorderEnvSetup } from "../utils";
 
 describe("ShareClient Node.js only", () => {
   let shareName: string;
@@ -12,7 +15,7 @@ describe("ShareClient Node.js only", () => {
 
   let recorder: Recorder;
 
-  beforeEach(async function() {
+  beforeEach(async function (this: Context) {
     recorder = record(this, recorderEnvSetup);
     const serviceClient = getBSU();
     shareName = recorder.getUniqueName("share");
@@ -20,7 +23,7 @@ describe("ShareClient Node.js only", () => {
     await shareClient.create();
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await shareClient.delete();
     await recorder.stop();
   });
@@ -36,10 +39,10 @@ describe("ShareClient Node.js only", () => {
         accessPolicy: {
           expiresOn: tomorrow,
           permissions: "rwd",
-          startsOn: yesterday
+          startsOn: yesterday,
         },
-        id: "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="
-      }
+        id: "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
+      },
     ];
 
     await shareClient.setAccessPolicy(identifiers);
@@ -68,8 +71,8 @@ describe("ShareClient Node.js only", () => {
   it("setAccessPolicy and getAccessPolicy with empty SignedIdentifier", async () => {
     const identifiers: any = [
       {
-        id: "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="
-      }
+        id: "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
+      },
     ];
 
     await shareClient.setAccessPolicy(identifiers);
@@ -98,8 +101,8 @@ describe("ShareClient Node.js only", () => {
     const credential = factories[factories.length - 1] as StorageSharedKeyCredential;
     const newClient = new ShareClient(shareClient.url, credential, {
       retryOptions: {
-        maxTries: 5
-      }
+        maxTries: 5,
+      },
     });
 
     const result = await newClient.getProperties();
@@ -140,8 +143,8 @@ describe("ShareClient Node.js only", () => {
   it("can be created with a connection string and a share name and an option bag", async () => {
     const newClient = new ShareClient(getConnectionStringFromEnvironment(), shareName, {
       retryOptions: {
-        maxTries: 5
-      }
+        maxTries: 5,
+      },
     });
     const result = await newClient.getProperties();
 

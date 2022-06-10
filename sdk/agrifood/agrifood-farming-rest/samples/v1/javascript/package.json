@@ -1,5 +1,5 @@
 {
-  "name": "azure-agrifood-farming-samples-js",
+  "name": "@azure-samples/agrifood-farming-js",
   "private": true,
   "version": "1.0.0",
   "description": "Azure FarmBeats rest client library samples for JavaScript",
@@ -28,6 +28,6 @@
   "dependencies": {
     "@azure-rest/agrifood-farming": "next",
     "dotenv": "latest",
-    "@azure/identity": "^1.1.0"
+    "@azure/identity": "^2.0.1"
   }
 }

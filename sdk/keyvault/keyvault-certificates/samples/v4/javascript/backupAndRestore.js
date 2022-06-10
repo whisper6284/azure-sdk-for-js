@@ -5,11 +5,12 @@
  * @summary Creates a self-signed certificate, then makes a backup from it, then deletes it and purges it, and finally restores it.
  */
 
+// Load the .env file if it exists
+const dotenv = require("dotenv");
+
 const { CertificateClient } = require("@azure/keyvault-certificates");
 const { DefaultAzureCredential } = require("@azure/identity");
 
-// Load the .env file if it exists
-const dotenv = require("dotenv");
 dotenv.config();
 
 function delay(t, value) {
@@ -28,12 +29,12 @@ async function main() {
   const client = new CertificateClient(url, credential);
 
   const uniqueString = new Date().getTime();
-  const certificateName = `cert${uniqueString}`;
+  const certificateName = `backup-restore-${uniqueString}`;
 
   // Creating a self-signed certificate
   const createPoller = await client.beginCreateCertificate(certificateName, {
     issuerName: "Self",
-    subject: "cn=MyCert"
+    subject: "cn=MyCert",
   });
 
   const pendingCertificate = createPoller.getResult();
@@ -54,8 +55,9 @@ async function main() {
   console.log("Restored certificate: ", restoredCertificate);
 }
 
-main().catch((err) => {
-  console.log("error code: ", err.code);
-  console.log("error message: ", err.message);
-  console.log("error stack: ", err.stack);
+main().catch((error) => {
+  console.error("An error occurred:", error);
+  process.exit(1);
 });
+
+module.exports = { main };

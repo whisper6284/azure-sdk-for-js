@@ -29,13 +29,13 @@ export async function main(): Promise<void> {
     {
       email: "a@a.com",
       name: "a",
-      phone: "111111111111"
+      phone: "111111111111",
     },
     {
       email: "b@b.com",
       name: "b",
-      phone: "222222222222"
-    }
+      phone: "222222222222",
+    },
   ];
 
   await client.setContacts(contacts);
@@ -49,15 +49,14 @@ export async function main(): Promise<void> {
   try {
     await client.getContacts();
     throw Error("Expecting an error but not catching one.");
-  } catch (e) {
+  } catch (e: any) {
     error = e;
   }
 
   console.log("err: ", error);
 }
 
-main().catch((err) => {
-  console.log("error code: ", err.code);
-  console.log("error message: ", err.message);
-  console.log("error stack: ", err.stack);
+main().catch((error) => {
+  console.error("An error occurred:", error);
+  process.exit(1);
 });

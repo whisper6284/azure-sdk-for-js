@@ -1,14 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { PerfStressProgram, selectPerfStressTest } from "@azure/test-utils-perfstress";
+import { createPerfProgram } from "@azure/test-utils-perf";
 import { DetectLanguageTest } from "./detectLanguage.spec";
 
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("=== Starting the perfStress test ===");
+const perfProgram = createPerfProgram(DetectLanguageTest);
 
-const perfStressProgram = new PerfStressProgram(selectPerfStressTest([DetectLanguageTest]));
-
-perfStressProgram.run();
+perfProgram.run();

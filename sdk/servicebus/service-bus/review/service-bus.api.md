@@ -4,27 +4,31 @@
 
 ```ts
 
+/// <reference types="node" />
+
+import { AbortSignalLike } from '@azure/abort-controller';
 import { AmqpAnnotatedMessage } from '@azure/core-amqp';
+import { CommonClientOptions } from '@azure/core-client';
 import { delay } from '@azure/core-amqp';
 import { Delivery } from 'rhea-promise';
-import { HttpResponse } from '@azure/core-http';
-import Long from 'long';
+import { HttpMethods } from '@azure/core-rest-pipeline';
+import { default as Long_2 } from 'long';
 import { MessagingError } from '@azure/core-amqp';
 import { NamedKeyCredential } from '@azure/core-auth';
-import { OperationOptions } from '@azure/core-http';
+import { OperationOptions } from '@azure/core-client';
 import { OperationTracingOptions } from '@azure/core-tracing';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
 import { PageSettings } from '@azure/core-paging';
-import { PipelineOptions } from '@azure/core-http';
+import { ProxySettings } from '@azure/core-rest-pipeline';
 import { RetryMode } from '@azure/core-amqp';
 import { RetryOptions } from '@azure/core-amqp';
 import { SASCredential } from '@azure/core-auth';
-import { ServiceClient } from '@azure/core-http';
+import { ServiceClient } from '@azure/core-client';
 import { Span } from '@azure/core-tracing';
 import { SpanContext } from '@azure/core-tracing';
 import { TokenCredential } from '@azure/core-auth';
 import { TokenType } from '@azure/core-amqp';
-import { UserAgentOptions } from '@azure/core-http';
+import { UserAgentPolicyOptions } from '@azure/core-rest-pipeline';
 import { WebSocketImpl } from 'rhea-promise';
 import { WebSocketOptions } from '@azure/core-amqp';
 
@@ -72,6 +76,7 @@ export interface CreateQueueOptions extends OperationOptions {
     forwardTo?: string;
     lockDuration?: string;
     maxDeliveryCount?: number;
+    maxMessageSizeInKilobytes?: number;
     maxSizeInMegabytes?: number;
     requiresDuplicateDetection?: boolean;
     requiresSession?: boolean;
@@ -111,6 +116,7 @@ export interface CreateTopicOptions extends OperationOptions {
     enableBatchedOperations?: boolean;
     enableExpress?: boolean;
     enablePartitioning?: boolean;
+    maxMessageSizeInKilobytes?: number;
     maxSizeInMegabytes?: number;
     requiresDuplicateDetection?: boolean;
     status?: EntityStatus;
@@ -139,6 +145,35 @@ export type EntityStatus = "Active" | "Creating" | "Deleting" | "ReceiveDisabled
 
 // @public
 export interface GetMessageIteratorOptions extends OperationOptionsBase {
+}
+
+// @public
+export interface HttpHeader {
+    name: string;
+    value: string;
+}
+
+// @public
+export interface HttpHeadersLike {
+    clone(): HttpHeadersLike;
+    contains(headerName: string): boolean;
+    get(headerName: string): string | undefined;
+    headerNames(): string[];
+    headersArray(): HttpHeader[];
+    headerValues(): string[];
+    rawHeaders(): RawHttpHeaders;
+    remove(headerName: string): boolean;
+    set(headerName: string, headerValue: string | number): void;
+    toJson(options?: {
+        preserveCase?: boolean;
+    }): RawHttpHeaders;
+}
+
+// @public
+export interface HttpResponse {
+    headers: HttpHeadersLike;
+    request: WebResourceLike;
+    status: number;
 }
 
 // @public
@@ -171,7 +206,9 @@ export function parseServiceBusConnectionString(connectionString: string): Servi
 
 // @public
 export interface PeekMessagesOptions extends OperationOptionsBase {
-    fromSequenceNumber?: Long;
+    fromSequenceNumber?: Long_2;
+    // @beta
+    omitMessageBody?: boolean;
 }
 
 // @public
@@ -197,6 +234,7 @@ export interface QueueProperties {
     forwardTo?: string;
     lockDuration: string;
     maxDeliveryCount: number;
+    maxMessageSizeInKilobytes?: number;
     maxSizeInMegabytes: number;
     readonly name: string;
     readonly requiresDuplicateDetection: boolean;
@@ -221,6 +259,11 @@ export interface QueueRuntimeProperties {
 }
 
 // @public
+export type RawHttpHeaders = {
+    [headerName: string]: string;
+};
+
+// @public
 export interface ReceiveMessagesOptions extends OperationOptionsBase {
     maxWaitTimeInMs?: number;
 }
@@ -238,8 +281,8 @@ export interface RuleProperties {
 
 // @public
 export class ServiceBusAdministrationClient extends ServiceClient {
-    constructor(connectionString: string, options?: PipelineOptions);
-    constructor(fullyQualifiedNamespace: string, credential: TokenCredential | NamedKeyCredential, options?: PipelineOptions);
+    constructor(connectionString: string, options?: ServiceBusAdministrationClientOptions);
+    constructor(fullyQualifiedNamespace: string, credential: TokenCredential | NamedKeyCredential, options?: ServiceBusAdministrationClientOptions);
     createQueue(queueName: string, options?: CreateQueueOptions): Promise<WithResponse<QueueProperties>>;
     createRule(topicName: string, subscriptionName: string, ruleName: string, ruleFilter: SqlRuleFilter | CorrelationRuleFilter, operationOptions?: OperationOptions): Promise<WithResponse<RuleProperties>>;
     createRule(topicName: string, subscriptionName: string, ruleName: string, ruleFilter: SqlRuleFilter | CorrelationRuleFilter, ruleAction: SqlRuleAction, operationOptions?: OperationOptions): Promise<WithResponse<RuleProperties>>;
@@ -275,6 +318,11 @@ export class ServiceBusAdministrationClient extends ServiceClient {
 }
 
 // @public
+export interface ServiceBusAdministrationClientOptions extends CommonClientOptions {
+    serviceVersion?: "2021-05" | "2017-04";
+}
+
+// @public
 export class ServiceBusClient {
     constructor(connectionString: string, options?: ServiceBusClientOptions);
     constructor(fullyQualifiedNamespace: string, credential: TokenCredential | NamedKeyCredential | SASCredential, options?: ServiceBusClientOptions);
@@ -285,14 +333,16 @@ export class ServiceBusClient {
     close(): Promise<void>;
     createReceiver(queueName: string, options?: ServiceBusReceiverOptions): ServiceBusReceiver;
     createReceiver(topicName: string, subscriptionName: string, options?: ServiceBusReceiverOptions): ServiceBusReceiver;
+    createRuleManager(topicName: string, subscriptionName: string): ServiceBusRuleManager;
     createSender(queueOrTopicName: string): ServiceBusSender;
     fullyQualifiedNamespace: string;
 }
 
 // @public
 export interface ServiceBusClientOptions {
+    customEndpointAddress?: string;
     retryOptions?: RetryOptions;
-    userAgentOptions?: UserAgentOptions;
+    userAgentOptions?: UserAgentPolicyOptions;
     webSocketOptions?: WebSocketOptions;
 }
 
@@ -311,66 +361,66 @@ export class ServiceBusError extends MessagingError {
     constructor(message: string, code: ServiceBusErrorCode);
     constructor(messagingError: MessagingError);
     code: ServiceBusErrorCode;
-    }
+}
 
 // @public
 export type ServiceBusErrorCode =
 /**
- * The exception was the result of a general error within the client library.
- */
+* The exception was the result of a general error within the client library.
+*/
 "GeneralError"
 /**
- * A Service Bus resource cannot be found by the Service Bus service.
- */
- | "MessagingEntityNotFound"
+* A Service Bus resource cannot be found by the Service Bus service.
+*/
+| "MessagingEntityNotFound"
 /**
- * The lock on the message is lost. Callers should attempt to receive and process the message again.
- */
- | "MessageLockLost"
+* The lock on the message is lost. Callers should attempt to receive and process the message again.
+*/
+| "MessageLockLost"
 /**
- * The requested message was not found.
- */
- | "MessageNotFound"
+* The requested message was not found.
+*/
+| "MessageNotFound"
 /**
- * A message is larger than the maximum size allowed for its transport.
- */
- | "MessageSizeExceeded"
+* A message is larger than the maximum size allowed for its transport.
+*/
+| "MessageSizeExceeded"
 /**
- * An entity with the same name exists under the same namespace.
- */
- | "MessagingEntityAlreadyExists"
+* An entity with the same name exists under the same namespace.
+*/
+| "MessagingEntityAlreadyExists"
 /**
- * The Messaging Entity is disabled. Enable the entity again using Portal.
- */
- | "MessagingEntityDisabled"
+* The Messaging Entity is disabled. Enable the entity again using Portal.
+*/
+| "MessagingEntityDisabled"
 /**
- * The quota applied to an Service Bus resource has been exceeded while interacting with the Azure Service Bus service.
- */
- | "QuotaExceeded"
+* The quota applied to an Service Bus resource has been exceeded while interacting with the Azure Service Bus service.
+*/
+| "QuotaExceeded"
 /**
- * The Azure Service Bus service reports that it is busy in response to a client request to perform an operation.
- */
- | "ServiceBusy"
+* The Azure Service Bus service reports that it is busy in response to a client request to perform an operation.
+*/
+| "ServiceBusy"
 /**
- * An operation or other request timed out while interacting with the Azure Service Bus service.
- */
- | "ServiceTimeout"
+* An operation or other request timed out while interacting with the Azure Service Bus service.
+*/
+| "ServiceTimeout"
 /**
- * There was a general communications error encountered when interacting with the Azure Service Bus service.
- */
- | "ServiceCommunicationProblem"
+* There was a general communications error encountered when interacting with the Azure Service Bus service.
+*/
+| "ServiceCommunicationProblem"
 /**
- * The requested session cannot be locked.
- */
- | "SessionCannotBeLocked"
+* The requested session cannot be locked.
+*/
+| "SessionCannotBeLocked"
 /**
- * The lock on the session has expired. Callers should request the session again.
- */
- | "SessionLockLost"
+* The lock on the session has expired. Callers should request the session again.
+*/
+| "SessionLockLost"
 /**
- * The user doesn't have access to the entity.
- */
- | "UnauthorizedAccess";
+* The user doesn't have access to the entity.
+*/
+| "UnauthorizedAccess";
 
 // @public
 export interface ServiceBusMessage {
@@ -415,27 +465,28 @@ export interface ServiceBusReceivedMessage extends ServiceBusMessage {
     lockedUntilUtc?: Date;
     readonly lockToken?: string;
     readonly _rawAmqpMessage: AmqpAnnotatedMessage;
-    readonly sequenceNumber?: Long;
+    readonly sequenceNumber?: Long_2;
+    readonly state: "active" | "deferred" | "scheduled";
 }
 
 // @public
 export interface ServiceBusReceiver {
     abandonMessage(message: ServiceBusReceivedMessage, propertiesToModify?: {
-        [key: string]: any;
+        [key: string]: number | boolean | string | Date | null;
     }): Promise<void>;
     close(): Promise<void>;
     completeMessage(message: ServiceBusReceivedMessage): Promise<void>;
     deadLetterMessage(message: ServiceBusReceivedMessage, options?: DeadLetterOptions & {
-        [key: string]: any;
+        [key: string]: number | boolean | string | Date | null;
     }): Promise<void>;
     deferMessage(message: ServiceBusReceivedMessage, propertiesToModify?: {
-        [key: string]: any;
+        [key: string]: number | boolean | string | Date | null;
     }): Promise<void>;
     entityPath: string;
     getMessageIterator(options?: GetMessageIteratorOptions): AsyncIterableIterator<ServiceBusReceivedMessage>;
     isClosed: boolean;
     peekMessages(maxMessageCount: number, options?: PeekMessagesOptions): Promise<ServiceBusReceivedMessage[]>;
-    receiveDeferredMessages(sequenceNumbers: Long | Long[], options?: OperationOptionsBase): Promise<ServiceBusReceivedMessage[]>;
+    receiveDeferredMessages(sequenceNumbers: Long_2 | Long_2[], options?: OperationOptionsBase): Promise<ServiceBusReceivedMessage[]>;
     receiveMessages(maxMessageCount: number, options?: ReceiveMessagesOptions): Promise<ServiceBusReceivedMessage[]>;
     receiveMode: "peekLock" | "receiveAndDelete";
     renewMessageLock(message: ServiceBusReceivedMessage): Promise<Date>;
@@ -448,17 +499,25 @@ export interface ServiceBusReceiver {
 export interface ServiceBusReceiverOptions {
     maxAutoLockRenewalDurationInMs?: number;
     receiveMode?: "peekLock" | "receiveAndDelete";
+    skipParsingBodyAsJson?: boolean;
     subQueueType?: "deadLetter" | "transferDeadLetter";
 }
 
 // @public
+export interface ServiceBusRuleManager {
+    createRule(ruleName: string, filter: SqlRuleFilter | CorrelationRuleFilter, ruleAction?: SqlRuleAction, options?: OperationOptionsBase): Promise<void>;
+    deleteRule(ruleName: string, options?: OperationOptionsBase): Promise<void>;
+    listRules(options?: OperationOptions): PagedAsyncIterableIterator<RuleProperties>;
+}
+
+// @public
 export interface ServiceBusSender {
-    cancelScheduledMessages(sequenceNumbers: Long | Long[], options?: OperationOptionsBase): Promise<void>;
+    cancelScheduledMessages(sequenceNumbers: Long_2 | Long_2[], options?: OperationOptionsBase): Promise<void>;
     close(): Promise<void>;
     createMessageBatch(options?: CreateMessageBatchOptions): Promise<ServiceBusMessageBatch>;
     entityPath: string;
     isClosed: boolean;
-    scheduleMessages(messages: ServiceBusMessage | ServiceBusMessage[] | AmqpAnnotatedMessage | AmqpAnnotatedMessage[], scheduledEnqueueTimeUtc: Date, options?: OperationOptionsBase): Promise<Long[]>;
+    scheduleMessages(messages: ServiceBusMessage | ServiceBusMessage[] | AmqpAnnotatedMessage | AmqpAnnotatedMessage[], scheduledEnqueueTimeUtc: Date, options?: OperationOptionsBase): Promise<Long_2[]>;
     sendMessages(messages: ServiceBusMessage | ServiceBusMessage[] | ServiceBusMessageBatch | AmqpAnnotatedMessage | AmqpAnnotatedMessage[], options?: OperationOptionsBase): Promise<void>;
 }
 
@@ -478,6 +537,7 @@ export interface ServiceBusSessionReceiver extends ServiceBusReceiver {
 export interface ServiceBusSessionReceiverOptions extends OperationOptionsBase {
     maxAutoLockRenewalDurationInMs?: number;
     receiveMode?: "peekLock" | "receiveAndDelete";
+    skipParsingBodyAsJson?: boolean;
 }
 
 // @public
@@ -549,6 +609,7 @@ export interface TopicProperties {
     enableBatchedOperations: boolean;
     readonly enableExpress: boolean;
     readonly enablePartitioning: boolean;
+    maxMessageSizeInKilobytes?: number;
     maxSizeInMegabytes: number;
     readonly name: string;
     readonly requiresDuplicateDetection: boolean;
@@ -569,10 +630,39 @@ export interface TopicRuntimeProperties {
 }
 
 // @public
+export type TransferProgressEvent = {
+    loadedBytes: number;
+};
+
+// @public
 export interface TryAddOptions {
     // @deprecated (undocumented)
     parentSpan?: Span | SpanContext | null;
     tracingOptions?: OperationTracingOptions;
+}
+
+// @public
+export interface WebResourceLike {
+    abortSignal?: AbortSignalLike;
+    body?: any;
+    decompressResponse?: boolean;
+    formData?: any;
+    headers: HttpHeadersLike;
+    keepAlive?: boolean;
+    method: HttpMethods;
+    onDownloadProgress?: (progress: TransferProgressEvent) => void;
+    onUploadProgress?: (progress: TransferProgressEvent) => void;
+    proxySettings?: ProxySettings;
+    query?: {
+        [key: string]: any;
+    };
+    requestId: string;
+    // @deprecated
+    streamResponseBody?: boolean;
+    streamResponseStatusCodes?: Set<number>;
+    timeout: number;
+    url: string;
+    withCredentials: boolean;
 }
 
 export { WebSocketImpl }
@@ -583,7 +673,6 @@ export { WebSocketOptions }
 export type WithResponse<T extends object> = T & {
     _response: HttpResponse;
 };
-
 
 // (No @packageDocumentation comment for this package)
 

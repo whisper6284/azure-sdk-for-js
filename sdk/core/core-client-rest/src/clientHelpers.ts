@@ -2,14 +2,16 @@
 // Licensed under the MIT license.
 
 import {
-  createPipelineFromOptions,
-  bearerTokenAuthenticationPolicy,
-  Pipeline,
-  createDefaultHttpClient,
   HttpClient,
+  Pipeline,
+  bearerTokenAuthenticationPolicy,
+  createDefaultHttpClient,
+  createPipelineFromOptions,
 } from "@azure/core-rest-pipeline";
-import { TokenCredential, KeyCredential, isTokenCredential } from "@azure/core-auth";
+import { KeyCredential, TokenCredential, isTokenCredential } from "@azure/core-auth";
+
 import { ClientOptions } from "./common";
+import { apiVersionPolicy } from "./apiVersionPolicy";
 import { keyCredentialAuthenticationPolicy } from "./keyCredentialAuthenticationPolicy";
 
 let cachedHttpClient: HttpClient | undefined;
@@ -23,7 +25,8 @@ export function createDefaultPipeline(
   options: ClientOptions = {}
 ): Pipeline {
   const pipeline = createPipelineFromOptions(options);
-  pipeline.removePolicy({ name: "exponentialRetryPolicy" });
+
+  pipeline.addPolicy(apiVersionPolicy(options));
 
   if (credential) {
     if (isTokenCredential(credential)) {

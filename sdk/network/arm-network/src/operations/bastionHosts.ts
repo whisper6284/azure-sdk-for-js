@@ -6,16 +6,14 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { BastionHosts } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { NetworkManagementClientContext } from "../networkManagementClientContext";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
-import { LroEngine } from "../lro";
-import { CoreClientLro, shouldDeserializeLro } from "../coreClientLro";
+import { NetworkManagementClient } from "../networkManagementClient";
+import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
+import { LroImpl } from "../lroImpl";
 import {
   BastionHost,
   BastionHostsListNextOptionalParams,
@@ -27,6 +25,9 @@ import {
   BastionHostsGetResponse,
   BastionHostsCreateOrUpdateOptionalParams,
   BastionHostsCreateOrUpdateResponse,
+  TagsObject,
+  BastionHostsUpdateTagsOptionalParams,
+  BastionHostsUpdateTagsResponse,
   BastionHostsListResponse,
   BastionHostsListByResourceGroupResponse,
   BastionHostsListNextResponse,
@@ -34,15 +35,15 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a BastionHosts. */
+/** Class containing BastionHosts operations. */
 export class BastionHostsImpl implements BastionHosts {
-  private readonly client: NetworkManagementClientContext;
+  private readonly client: NetworkManagementClient;
 
   /**
    * Initialize a new instance of the class BastionHosts class.
    * @param client Reference to the service client
    */
-  constructor(client: NetworkManagementClientContext) {
+  constructor(client: NetworkManagementClient) {
     this.client = client;
   }
 
@@ -191,13 +192,18 @@ export class BastionHostsImpl implements BastionHosts {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       { resourceGroupName, bastionHostName, options },
-      deleteOperationSpec,
-      "location"
+      deleteOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "location"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -293,13 +299,18 @@ export class BastionHostsImpl implements BastionHosts {
       };
     };
 
-    const lro = new CoreClientLro(
+    const lro = new LroImpl(
       sendOperation,
       { resourceGroupName, bastionHostName, parameters, options },
-      createOrUpdateOperationSpec,
-      "azure-async-operation"
+      createOrUpdateOperationSpec
     );
-    return new LroEngine(lro, { intervalInMs: options?.updateIntervalInMs });
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "azure-async-operation"
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
@@ -316,6 +327,99 @@ export class BastionHostsImpl implements BastionHosts {
     options?: BastionHostsCreateOrUpdateOptionalParams
   ): Promise<BastionHostsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
+      resourceGroupName,
+      bastionHostName,
+      parameters,
+      options
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Updates Tags for BastionHost resource
+   * @param resourceGroupName The name of the resource group.
+   * @param bastionHostName The name of the Bastion Host.
+   * @param parameters Parameters supplied to update BastionHost tags.
+   * @param options The options parameters.
+   */
+  async beginUpdateTags(
+    resourceGroupName: string,
+    bastionHostName: string,
+    parameters: TagsObject,
+    options?: BastionHostsUpdateTagsOptionalParams
+  ): Promise<
+    PollerLike<
+      PollOperationState<BastionHostsUpdateTagsResponse>,
+      BastionHostsUpdateTagsResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec
+    ): Promise<BastionHostsUpdateTagsResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec
+    ) => {
+      let currentRawResponse:
+        | coreClient.FullOperationResponse
+        | undefined = undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback
+        }
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON()
+        }
+      };
+    };
+
+    const lro = new LroImpl(
+      sendOperation,
+      { resourceGroupName, bastionHostName, parameters, options },
+      updateTagsOperationSpec
+    );
+    const poller = new LroEngine(lro, {
+      resumeFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      lroResourceLocationConfig: "azure-async-operation"
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Updates Tags for BastionHost resource
+   * @param resourceGroupName The name of the resource group.
+   * @param bastionHostName The name of the Bastion Host.
+   * @param parameters Parameters supplied to update BastionHost tags.
+   * @param options The options parameters.
+   */
+  async beginUpdateTagsAndWait(
+    resourceGroupName: string,
+    bastionHostName: string,
+    parameters: TagsObject,
+    options?: BastionHostsUpdateTagsOptionalParams
+  ): Promise<BastionHostsUpdateTagsResponse> {
+    const poller = await this.beginUpdateTags(
       resourceGroupName,
       bastionHostName,
       parameters,
@@ -451,6 +555,39 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     }
   },
   requestBody: Parameters.parameters5,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.resourceGroupName,
+    Parameters.subscriptionId,
+    Parameters.bastionHostName
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer
+};
+const updateTagsOperationSpec: coreClient.OperationSpec = {
+  path:
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/bastionHosts/{bastionHostName}",
+  httpMethod: "PATCH",
+  responses: {
+    200: {
+      bodyMapper: Mappers.BastionHost
+    },
+    201: {
+      bodyMapper: Mappers.BastionHost
+    },
+    202: {
+      bodyMapper: Mappers.BastionHost
+    },
+    204: {
+      bodyMapper: Mappers.BastionHost
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
+    }
+  },
+  requestBody: Parameters.parameters1,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,

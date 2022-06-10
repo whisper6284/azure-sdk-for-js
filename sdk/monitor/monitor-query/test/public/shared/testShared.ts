@@ -1,106 +1,94 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-import { ClientSecretCredential } from "@azure/identity";
-import { env, record, Recorder, isPlaybackMode } from "@azure/test-utils-recorder";
+import { createTestCredential } from "@azure-tools/test-credential";
+import {
+  Recorder,
+  RecorderStartOptions,
+  assertEnvironmentVariable,
+  env,
+} from "@azure-tools/test-recorder";
 import * as assert from "assert";
-import { Context } from "mocha";
 import { createClientLogger } from "@azure/logger";
-import { LogsTable } from "../../../src";
-
+import { LogsQueryClient, LogsTable, MetricsQueryClient } from "../../../src";
+import { ExponentialRetryPolicyOptions } from "@azure/core-rest-pipeline";
 export const loggerForTest = createClientLogger("test");
 
-/**
- * Declare the client and recorder instances.  We will set them using the
- * beforeEach hook.
- */
-export function addTestRecorderHooks(): { recorder(): Recorder; isPlaybackMode(): boolean } {
-  // When the recorder observes the values of these environment variables in any
-  // recorded HTTP request or response, it will replace them with the values they
-  // are mapped to below.
-  const replaceableVariables: Record<string, string> = {
-    MONITOR_WORKSPACE_ID: "<workspace-id>",
-    METRICS_RESOURCE_ID: "<metrics-arm-resource-id>",
+const envSetupForPlayback: Record<string, string> = {
+  MONITOR_WORKSPACE_ID: "workspace-id",
+  METRICS_RESOURCE_ID: "metrics-arm-resource-id",
+  MQ_APPLICATIONINSIGHTS_CONNECTION_STRING: "mq_applicationinsights_connection",
+  AZURE_TENANT_ID: "98123456-7614-3456-5678-789980112547",
+  AZURE_CLIENT_ID: "azure_client_id",
+  AZURE_CLIENT_SECRET: "azure_client_secret",
+};
 
-    AZURE_TENANT_ID: "azure_tenant_id",
-    AZURE_CLIENT_ID: "azure_client_id",
-    AZURE_CLIENT_SECRET: "azure_client_secret"
-  };
+const recorderOptions: RecorderStartOptions = {
+  envSetupForPlayback,
+};
+export interface RecorderAndLogsClient {
+  client: LogsQueryClient;
+  recorder: Recorder;
+}
 
-  let recorder: Recorder;
+export interface RecorderAndMetricsClient {
+  client: MetricsQueryClient;
+  recorder: Recorder;
+}
 
-  // NOTE: use of "function" and not ES6 arrow-style functions with the
-  // beforeEach hook is IMPORTANT due to the use of `this` in the function
-  // body.
-  beforeEach(function(this: Context) {
-    loggerForTest.verbose(`Recorder: starting...`);
-    // The recorder has some convenience methods, and we need to store a
-    // reference to it so that we can `stop()` the recorder later in the
-    // `afterEach` hook.
-    recorder = record(this, {
-      // == Recorder Environment Setup == Add the replaceable variables from
-      // above
-      replaceableVariables,
+export const testEnv = new Proxy(envSetupForPlayback, {
+  get: (target, key: string) => {
+    return env[key] || target[key];
+  },
+});
 
-      // We don't use this in the template, but if we had any query parameters
-      // we wished to discard, we could add them here
-      queryParametersToSkip: [],
+export async function createRecorderAndMetricsClient(
+  recorder: Recorder
+): Promise<RecorderAndMetricsClient> {
+  await recorder.start(recorderOptions);
 
-      // Finally, we need to remove the AAD `access_token` from any requests.
-      // This is very important, as it cannot be removed using environment
-      // variable or query parameter replacement.  The
-      // `customizationsOnRecordings` field allows us to make arbitrary
-      // replacements within recordings.
-      customizationsOnRecordings: [
-        (recording: any): any =>
-          recording.replace(/"access_token":"[^"]*"/g, `"access_token":"access_token"`)
-      ]
-    });
-  });
-
-  // After each test, we need to stop the recording.
-  afterEach(async function() {
-    loggerForTest.verbose("Recorder: stopping");
-    await recorder.stop();
-  });
+  const client = new MetricsQueryClient(
+    createTestCredential(),
+    recorder.configureClientOptions({})
+  );
 
   return {
-    recorder: () => recorder,
-    isPlaybackMode: () => isPlaybackMode()
+    client: client,
+    recorder: recorder,
   };
 }
 
-export function createTestClientSecretCredential(): ClientSecretCredential {
-  if (!env.AZURE_TENANT_ID || !env.AZURE_CLIENT_ID || !env.AZURE_CLIENT_SECRET) {
-    throw new Error(
-      "AZURE_TENANT_ID, AZURE_CLIENT_ID and AZURE_CLIENT_SECRET must be set to run live tests"
-    );
-  }
+export async function createRecorderAndLogsClient(
+  recorder: Recorder,
+  retryOptions?: ExponentialRetryPolicyOptions
+): Promise<RecorderAndLogsClient> {
+  await recorder.start(recorderOptions);
 
-  return new ClientSecretCredential(
-    env.AZURE_TENANT_ID,
-    env.AZURE_CLIENT_ID,
-    env.AZURE_CLIENT_SECRET
+  const client = new LogsQueryClient(
+    createTestCredential(),
+    recorder.configureClientOptions({ retryOptions })
   );
+
+  return {
+    client,
+    recorder,
+  };
 }
 
-export function getMonitorWorkspaceId(mochaContext: Pick<Context, "skip">): string {
-  return getRequiredEnvVar(mochaContext, "MONITOR_WORKSPACE_ID");
+export function getMonitorWorkspaceId(): string {
+  return assertEnvironmentVariable("MONITOR_WORKSPACE_ID");
 }
 
-export function getMetricsArmResourceId(
-  mochaContext: Pick<Context, "skip">
-): {
+export function getMetricsArmResourceId(): {
   resourceId: string;
 } {
   return {
-    resourceId: getRequiredEnvVar(mochaContext, "METRICS_RESOURCE_ID")
+    resourceId: assertEnvironmentVariable("METRICS_RESOURCE_ID"),
   };
 }
 
-export function getAppInsightsConnectionString(mochaContext: Pick<Context, "skip">): string {
-  let appInsightsConnectionString = getRequiredEnvVar(
-    mochaContext,
-    "APPLICATIONINSIGHTS_CONNECTION_STRING"
+export function getAppInsightsConnectionString(): string {
+  let appInsightsConnectionString = assertEnvironmentVariable(
+    "MQ_APPLICATIONINSIGHTS_CONNECTION_STRING"
   );
 
   // TODO: this is a workaround for now - adding in an endpoint causes the Monitor endpoint to return a 308 (ie: permanent redirect)
@@ -113,20 +101,11 @@ export function getAppInsightsConnectionString(mochaContext: Pick<Context, "skip
   return appInsightsConnectionString;
 }
 
-function getRequiredEnvVar(mochaContext: Pick<Context, "skip">, variableName: string): string {
-  if (!env[variableName]) {
-    console.log(
-      `TODO: live tests skipped until test-resources + data population is set up (missing ${variableName} env var).`
-    );
-    mochaContext.skip();
-  }
-
-  return env[variableName];
-}
-
 export function printLogQueryTables(tables: LogsTable[]): void {
   for (const table of tables) {
-    const columnHeaderString = table.columns.map((c) => `${c.name}(${c.type}) `).join("| ");
+    const columnHeaderString = table.columnDescriptors
+      .map((c) => `${c.name}(${c.type}) `)
+      .join("| ");
     console.log(columnHeaderString);
 
     for (const row of table.rows) {
@@ -153,7 +132,7 @@ export function assertQueryTable(
     {
       name: table.name,
       rows: table.rows,
-      columns: table.columns.map((c) => c.name)
+      columns: table.columnDescriptors.map((c) => c.name),
     },
     expectedTable,
     `${message}: tables weren't equal`

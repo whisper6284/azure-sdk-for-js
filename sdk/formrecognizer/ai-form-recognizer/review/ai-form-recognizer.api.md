@@ -4,637 +4,900 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import { AzureKeyCredential } from '@azure/core-auth';
-import * as coreHttp from '@azure/core-http';
+import { CommonClientOptions } from '@azure/core-client';
 import { KeyCredential } from '@azure/core-auth';
-import { OperationOptions } from '@azure/core-http';
+import { OperationOptions } from '@azure/core-client';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PipelineOptions } from '@azure/core-http';
 import { PollerLike } from '@azure/core-lro';
 import { PollOperationState } from '@azure/core-lro';
-import { RestResponse } from '@azure/core-http';
 import { TokenCredential } from '@azure/core-auth';
 
 // @public
-export interface AccountProperties {
-    customModelCount: number;
-    customModelLimit: number;
+export type Acronymic = `${EnglishCapitalLetter}${EnglishCapitalLetter}${string}`;
+
+// @public
+export interface AddressValue {
+    city?: string;
+    countryRegion?: string;
+    houseNumber?: string;
+    poBox?: string;
+    postalCode?: string;
+    road?: string;
+    state?: string;
+    streetAddress?: string;
+}
+
+// @public
+export type AnalysisPoller<Result = AnalyzeResult<AnalyzedDocument>> = PollerLike<DocumentAnalysisPollOperationState<Result>, Result>;
+
+// @public
+export interface AnalyzedDocument {
+    boundingRegions?: BoundingRegion[];
+    confidence: number;
+    docType: string;
+    fields: {
+        [field: string]: DocumentField;
+    };
+    spans: DocumentSpan[];
+}
+
+// @public
+export interface AnalyzeDocumentOptions<Result = AnalyzeResult<AnalyzedDocument>> extends OperationOptions, PollerOptions<DocumentAnalysisPollOperationState<Result>> {
+    locale?: string;
+    pages?: string;
+}
+
+// @public
+export interface AnalyzeResult<Document = AnalyzedDocument> extends AnalyzeResultCommon {
+    documents: Document[];
+    keyValuePairs: DocumentKeyValuePair[];
+    languages: DocumentLanguage[];
+    pages: DocumentPage[];
+    paragraphs: DocumentParagraph[];
+    styles: DocumentStyle[];
+    tables: DocumentTable[];
+}
+
+// @public
+export interface AnalyzeResultCommon {
+    apiVersion: FormRecognizerApiVersion;
+    content: string;
+    modelId: string;
+}
+
+// @public
+export type AnalyzeResultOperationStatus = "notStarted" | "running" | "failed" | "succeeded";
+
+// @public
+export interface ArrayFieldSchema<Item extends Readonly<FieldSchema> = Readonly<FieldSchema>> {
+    readonly items: Item;
+    readonly type: "array";
 }
 
 export { AzureKeyCredential }
 
 // @public
-export type BeginCopyModelOptions = FormRecognizerOperationOptions & FormTrainingPollOperationOptions<CopyModelOperationState>;
+export interface BoundingRegion extends HasBoundingPolygon {
+    pageNumber: number;
+}
 
 // @public
-export type BeginCreateComposedModelOptions = FormRecognizerOperationOptions & FormTrainingPollOperationOptions<TrainingOperationState> & {
-    modelName?: string;
+export interface BuildModelOptions extends OperationOptions, CommonModelCreationOptions, PollerOptions<TrainingPollOperationState> {
+}
+
+// @public
+export type BusinessCard = ReifyPrebuiltSchema<typeof BusinessCardSchema>;
+
+// @public
+export const BusinessCardSchema: {
+    readonly modelId: "prebuilt-businessCard";
+    readonly description: "Prebuilt model to extract key information from English business cards, including personal contact info, company name, job title, and more.";
+    readonly createdDateTime: "2022-06-30T00:00:00.000Z";
+    readonly apiVersion: "2022-06-30-preview";
+    readonly docTypes: {
+        readonly businessCard: {
+            readonly buildMode: "template";
+            readonly fieldSchema: {
+                readonly ContactNames: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "object";
+                        readonly properties: {
+                            readonly FirstName: {
+                                readonly type: "string";
+                            };
+                            readonly LastName: {
+                                readonly type: "string";
+                            };
+                        };
+                    };
+                };
+                readonly CompanyNames: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "string";
+                    };
+                };
+                readonly JobTitles: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "string";
+                    };
+                };
+                readonly Departments: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "string";
+                    };
+                };
+                readonly Addresses: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "string";
+                    };
+                };
+                readonly WorkPhones: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "phoneNumber";
+                    };
+                };
+                readonly MobilePhones: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "phoneNumber";
+                    };
+                };
+                readonly Faxes: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "phoneNumber";
+                    };
+                };
+                readonly OtherPhones: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "phoneNumber";
+                    };
+                };
+                readonly Emails: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "string";
+                    };
+                };
+                readonly Websites: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "string";
+                    };
+                };
+            };
+        };
+    };
 };
 
 // @public
-export type BeginRecognizeBusinessCardsOptions = BeginRecognizePrebuiltOptions;
-
-// @public
-export type BeginRecognizeContentOptions = RecognizeContentOptions & {
-    updateIntervalInMs?: number;
-    onProgress?: (state: RecognizeContentOperationState) => void;
-    resumeFrom?: string;
-    contentType?: FormContentType;
-    language?: string;
-    readingOrder?: FormReadingOrder;
-    pages?: string[];
-};
-
-// @public
-export interface BeginRecognizeCustomFormsOptions extends BeginRecognizeFormsOptions {
+export interface CommonModelCreationOptions {
+    description?: string;
+    tags?: Record<string, string>;
 }
-
-// @public
-export interface BeginRecognizeFormsOptions extends RecognizeFormsOptions {
-    contentType?: FormContentType;
-    onProgress?: (state: RecognizeFormsOperationState) => void;
-    pages?: string[];
-    resumeFrom?: string;
-    updateIntervalInMs?: number;
-}
-
-// @public
-export type BeginRecognizeIdentityDocumentsOptions = BeginRecognizePrebuiltOptions;
-
-// @public
-export type BeginRecognizeInvoicesOptions = BeginRecognizePrebuiltOptions;
-
-// @public
-export interface BeginRecognizePrebuiltOptions extends BeginRecognizeFormsOptions {
-    locale?: string;
-}
-
-// @public
-export type BeginRecognizeReceiptsOptions = BeginRecognizePrebuiltOptions;
-
-// @public
-export type BeginTrainingOptions = TrainingFileFilter & FormTrainingPollOperationOptions<TrainingOperationState> & {
-    modelName?: string;
-};
-
-// @public
-export interface CommonFieldValue {
-    boundingBox?: Point2D[];
-    confidence?: number;
-    fieldElements?: FormElement[];
-    pageNumber?: number;
-    text?: string;
-}
-
-// @public
-export type ContentPollerLike = PollerLike<PollOperationState<FormPageArray>, FormPageArray>;
 
 // @public
 export interface CopyAuthorization {
     accessToken: string;
-    expiresOn: Date;
-    modelId: string;
-    resourceId: string;
-    resourceRegion: string;
+    expirationDateTime: Date;
+    targetModelId: string;
+    targetModelLocation: string;
+    targetResourceId: string;
+    targetResourceRegion: string;
 }
 
 // @public
-export type CopyModelOperationState = PollOperationState<CustomFormModel> & {
-    status: OperationStatus;
-};
-
-// @public
-export type CopyModelOptions = FormRecognizerOperationOptions;
-
-// @public
-export interface CustomFormModel extends CustomFormModelInfo {
-    errors?: FormRecognizerError[];
-    submodels?: CustomFormSubmodel[];
-    trainingDocuments?: TrainingDocumentInfo[];
+export interface CopyModelOptions extends OperationOptions, PollerOptions<TrainingPollOperationState> {
 }
 
 // @public
-export interface CustomFormModelField {
-    accuracy?: number;
-    label: string | null;
-    name: string;
+export interface CurrencyValue {
+    amount: number;
+    currencySymbol?: string;
 }
 
 // @public
-export interface CustomFormModelInfo {
-    modelId: string;
-    modelName?: string;
-    properties?: CustomFormModelProperties;
-    status: ModelStatus;
-    trainingCompletedOn: Date;
-    trainingStartedOn: Date;
-}
-
-// @public
-export interface CustomFormModelProperties {
-    isComposedModel?: boolean;
-}
-
-// @public
-export interface CustomFormSubmodel {
-    accuracy?: number;
-    fields: Record<string, CustomFormModelField>;
-    formType: string;
-    modelId?: string;
-}
-
-// @public
-export type DeleteModelOptions = FormRecognizerOperationOptions;
-
-// @public
-export interface FieldData {
-    boundingBox?: Point2D[];
-    fieldElements?: FormElement[];
-    pageNumber: number;
-    text?: string;
-}
-
-// @public
-export interface FormArrayField extends FormFieldCommon {
-    value?: FormField[];
-    valueType: "array";
-}
-
-// @public
-export type FormContentType = "application/pdf" | "image/jpeg" | "image/png" | "image/tiff" | "image/bmp";
-
-// @public
-export interface FormCountryRegionField extends FormFieldCommon {
-    value?: string;
-    valueType: "countryRegion";
-}
-
-// @public
-export interface FormDateField extends FormFieldCommon {
-    value?: Date;
-    valueType: "date";
-}
-
-// @public
-export type FormElement = FormWord | FormLine | FormSelectionMark;
-
-// @public
-export interface FormElementCommon {
-    boundingBox: Point2D[];
-    pageNumber: number;
-    text?: string;
-}
-
-// @public
-export type FormField = FormUnknownField | FormStringField | FormNumberField | FormDateField | FormTimeField | FormPhoneNumberField | FormIntegerField | FormSelectionMarkField | FormArrayField | FormObjectField | FormCountryRegionField;
-
-// @public
-export interface FormFieldCommon {
-    confidence?: number;
-    labelData?: FieldData;
-    name?: string;
-    valueData?: FieldData;
-}
-
-// @public
-export interface FormFieldsReport {
-    accuracy: number;
-    fieldName: string;
-}
-
-// @public
-export interface FormIntegerField extends FormFieldCommon {
-    value?: number;
-    valueType: "integer";
-}
-
-// @public
-export interface FormLine extends FormElementCommon {
-    appearance?: TextAppearance;
-    kind: "line";
-    text: string;
-    words: FormWord[];
-}
-
-// @public
-export type FormModelResponse = CustomFormModel & {
-    _response: coreHttp.HttpResponse & {
-        bodyAsText: string;
-        parsedBody: Model;
-    };
-};
-
-// @public
-export interface FormNumberField extends FormFieldCommon {
-    value?: number;
-    valueType: "number";
-}
-
-// @public
-export interface FormObjectField extends FormFieldCommon {
-    value?: Record<string, FormField>;
-    valueType: "object";
-}
-
-// @public
-export interface FormPage {
-    height: number;
-    lines?: FormLine[];
-    pageNumber: number;
-    selectionMarks?: FormSelectionMark[];
-    tables?: FormTable[];
-    textAngle: number;
-    unit: LengthUnit;
-    width: number;
-}
-
-// @public
-export interface FormPageArray extends Array<FormPage> {
-}
-
-// @public
-export interface FormPageRange {
-    firstPageNumber: number;
-    lastPageNumber: number;
-}
-
-// @public
-export interface FormPhoneNumberField extends FormFieldCommon {
-    value?: string;
-    valueType: "phoneNumber";
-}
-
-// @public
-export type FormPollerLike = PollerLike<RecognizeFormsOperationState, RecognizedFormArray>;
-
-// @public
-export type FormReadingOrder = "basic" | "natural";
-
-// @public
-export class FormRecognizerClient {
-    constructor(endpointUrl: string, credential: TokenCredential | KeyCredential, options?: FormRecognizerClientOptions);
-    beginRecognizeBusinessCards(businessCard: FormRecognizerRequestBody, options?: BeginRecognizeBusinessCardsOptions): Promise<FormPollerLike>;
-    beginRecognizeBusinessCardsFromUrl(businessCardUrl: string, options?: BeginRecognizeBusinessCardsOptions): Promise<FormPollerLike>;
-    beginRecognizeContent(form: FormRecognizerRequestBody, options?: BeginRecognizeContentOptions): Promise<ContentPollerLike>;
-    beginRecognizeContentFromUrl(formUrl: string, options?: BeginRecognizeContentOptions): Promise<ContentPollerLike>;
-    beginRecognizeCustomForms(modelId: string, form: FormRecognizerRequestBody, options?: BeginRecognizeCustomFormsOptions): Promise<FormPollerLike>;
-    beginRecognizeCustomFormsFromUrl(modelId: string, formUrl: string, options?: BeginRecognizeCustomFormsOptions): Promise<FormPollerLike>;
-    beginRecognizeIdentityDocuments(identityDocument: FormRecognizerRequestBody, options?: BeginRecognizeIdentityDocumentsOptions): Promise<FormPollerLike>;
-    beginRecognizeIdentityDocumentsFromUrl(identityDocumentUrl: string, options?: BeginRecognizeIdentityDocumentsOptions): Promise<FormPollerLike>;
-    beginRecognizeInvoices(invoice: FormRecognizerRequestBody, options?: BeginRecognizeInvoicesOptions): Promise<FormPollerLike>;
-    beginRecognizeInvoicesFromUrl(invoiceUrl: string, options?: BeginRecognizeInvoicesOptions): Promise<FormPollerLike>;
-    beginRecognizeReceipts(receipt: FormRecognizerRequestBody, options?: BeginRecognizeReceiptsOptions): Promise<FormPollerLike>;
-    beginRecognizeReceiptsFromUrl(receiptUrl: string, options?: BeginRecognizeReceiptsOptions): Promise<FormPollerLike>;
-    readonly endpointUrl: string;
-    }
-
-// @public
-export interface FormRecognizerClientOptions extends PipelineOptions {
-}
-
-// @public
-export interface FormRecognizerError {
-    code: string;
-    message: string;
-}
-
-// @public
-export interface FormRecognizerOperationOptions extends OperationOptions {
-}
-
-// @public
-export type FormRecognizerRequestBody = Blob | ArrayBuffer | ArrayBufferView | NodeJS.ReadableStream;
-
-// @public
-export interface FormSelectionMark extends FormElementCommon {
-    confidence?: number;
-    kind: "selectionMark";
-    state: "selected" | "unselected";
-}
-
-// @public
-export interface FormSelectionMarkField extends FormFieldCommon {
-    value?: "selected" | "unselected";
-    valueType: "selectionMark";
-}
-
-// @public
-export interface FormStringField extends FormFieldCommon {
-    value?: string;
-    valueType: "string";
-}
-
-// @public
-export interface FormTable {
-    boundingBox?: Point2D[];
-    cells: FormTableCell[];
-    columnCount: number;
-    pageNumber: number;
-    rowCount: number;
-}
-
-// @public
-export interface FormTableCell {
-    boundingBox: Point2D[];
-    columnIndex: number;
-    columnSpan: number;
-    confidence: number;
-    fieldElements?: FormElement[];
-    isFooter: boolean;
-    isHeader: boolean;
-    pageNumber: number;
-    rowIndex: number;
-    rowSpan: number;
-    text: string;
-}
-
-// @public
-export interface FormTimeField extends FormFieldCommon {
-    value?: string;
-    valueType: "time";
-}
-
-// @public
-export class FormTrainingClient {
-    constructor(endpointUrl: string, credential: TokenCredential | KeyCredential, options?: FormRecognizerClientOptions);
-    beginCopyModel(modelId: string, target: CopyAuthorization, options?: BeginCopyModelOptions): Promise<PollerLike<CopyModelOperationState, CustomFormModelInfo>>;
-    beginCreateComposedModel(modelIds: string[], options: BeginCreateComposedModelOptions): Promise<PollerLike<TrainingOperationState, CustomFormModel>>;
-    beginTraining(trainingFilesUrl: string, useTrainingLabels: boolean, options?: BeginTrainingOptions): Promise<PollerLike<TrainingOperationState, CustomFormModel>>;
-    deleteModel(modelId: string, options?: DeleteModelOptions): Promise<RestResponse>;
-    readonly endpointUrl: string;
-    getAccountProperties(options?: GetAccountPropertiesOptions): Promise<AccountProperties>;
-    getCopyAuthorization(resourceId: string, resourceRegion: string, options?: GetCopyAuthorizationOptions): Promise<CopyAuthorization>;
-    getCustomModel(modelId: string, options?: GetModelOptions): Promise<FormModelResponse>;
-    getFormRecognizerClient(): FormRecognizerClient;
-    listCustomModels(options?: ListModelsOptions): PagedAsyncIterableIterator<CustomFormModelInfo, ListCustomModelsResponse>;
-    }
-
-// @public
-export interface FormTrainingPollOperationOptions<TState extends PollOperationState<unknown>> {
-    onProgress?: (state: TState) => void;
-    resumeFrom?: string;
-    updateIntervalInMs?: number;
-}
-
-// @public
-export interface FormUnknownField extends FormFieldCommon {
-    value?: unknown;
-    valueType?: undefined;
-}
-
-// @public
-export interface FormWord extends FormElementCommon {
-    confidence?: number;
-    kind: "word";
-    text: string;
-}
-
-// @public
-export type GetAccountPropertiesOptions = FormRecognizerOperationOptions;
-
-// @public
-export type GetCopyAuthorizationOptions = FormRecognizerOperationOptions;
-
-// @public
-export type GetCopyModelResultOptions = FormRecognizerOperationOptions;
-
-// @public
-export type GetModelOptions = FormRecognizerOperationOptions;
-
-// @public
-export interface KeysResult {
-    clusters: {
-        [propertyName: string]: string[];
-    };
-}
-
-// @public
-export interface KeyValueElementModel {
-    boundingBox?: number[];
-    elements?: string[];
-    text: string;
-    type?: KeyValueType;
-}
-
-// @public
-export interface KeyValuePairModel {
-    confidence: number;
-    key: KeyValueElementModel;
-    label?: string;
-    value: KeyValueElementModel;
-}
-
-// @public
-export type KeyValueType = string;
-
-// @public
-export const enum KnownFormLanguage {
-    // (undocumented)
-    Af = "af",
-    // (undocumented)
-    Ast = "ast",
-    // (undocumented)
-    Bi = "bi",
-    // (undocumented)
-    Br = "br",
-    // (undocumented)
-    Ca = "ca",
-    // (undocumented)
-    Ceb = "ceb",
-    // (undocumented)
-    Ch = "ch",
-    // (undocumented)
-    Co = "co",
-    // (undocumented)
-    Crh = "crh",
-    // (undocumented)
-    Cs = "cs",
-    // (undocumented)
-    Csb = "csb",
-    // (undocumented)
-    Da = "da",
-    // (undocumented)
-    De = "de",
-    // (undocumented)
-    En = "en",
-    // (undocumented)
-    Es = "es",
-    // (undocumented)
-    Et = "et",
-    // (undocumented)
-    Eu = "eu",
-    // (undocumented)
-    Fi = "fi",
-    // (undocumented)
-    Fil = "fil",
-    // (undocumented)
-    Fj = "fj",
-    // (undocumented)
-    Fr = "fr",
-    // (undocumented)
-    Fur = "fur",
-    // (undocumented)
-    Fy = "fy",
-    // (undocumented)
-    Ga = "ga",
-    // (undocumented)
-    Gd = "gd",
-    // (undocumented)
-    Gil = "gil",
-    // (undocumented)
-    Gl = "gl",
-    // (undocumented)
-    Gv = "gv",
-    // (undocumented)
-    Hni = "hni",
-    // (undocumented)
-    Hsb = "hsb",
-    // (undocumented)
-    Ht = "ht",
-    // (undocumented)
-    Hu = "hu",
-    // (undocumented)
-    Ia = "ia",
-    // (undocumented)
-    Id = "id",
-    // (undocumented)
-    It = "it",
-    // (undocumented)
-    Iu = "iu",
-    // (undocumented)
-    Ja = "ja",
-    // (undocumented)
-    Jv = "jv",
-    // (undocumented)
-    Kaa = "kaa",
-    // (undocumented)
-    Kac = "kac",
-    // (undocumented)
-    Kea = "kea",
-    // (undocumented)
-    Kha = "kha",
-    // (undocumented)
-    Kl = "kl",
-    // (undocumented)
-    Ko = "ko",
-    // (undocumented)
-    Ku = "ku",
-    // (undocumented)
-    Kw = "kw",
-    // (undocumented)
-    Lb = "lb",
-    // (undocumented)
-    Ms = "ms",
-    // (undocumented)
-    Mww = "mww",
-    // (undocumented)
-    Nap = "nap",
-    // (undocumented)
-    Nl = "nl",
-    // (undocumented)
-    No = "no",
-    // (undocumented)
-    Oc = "oc",
-    // (undocumented)
-    Pl = "pl",
-    // (undocumented)
-    Pt = "pt",
-    // (undocumented)
-    Quc = "quc",
-    // (undocumented)
-    Rm = "rm",
-    // (undocumented)
-    Sco = "sco",
-    // (undocumented)
-    Sl = "sl",
-    // (undocumented)
-    Sq = "sq",
-    // (undocumented)
-    Sv = "sv",
-    // (undocumented)
-    Sw = "sw",
-    // (undocumented)
-    Tet = "tet",
-    // (undocumented)
-    Tr = "tr",
-    // (undocumented)
-    Tt = "tt",
-    // (undocumented)
-    Uz = "uz",
-    // (undocumented)
-    Vo = "vo",
-    // (undocumented)
-    Wae = "wae",
-    // (undocumented)
-    Yua = "yua",
-    // (undocumented)
-    Za = "za",
-    // (undocumented)
-    ZhHans = "zh-Hans",
-    // (undocumented)
-    ZhHant = "zh-Hant",
-    // (undocumented)
-    Zu = "zu"
-}
-
-// @public
-export const enum KnownFormLocale {
-    // (undocumented)
-    EnAU = "en-AU",
-    // (undocumented)
-    EnCA = "en-CA",
-    // (undocumented)
-    EnGB = "en-GB",
-    // (undocumented)
-    EnIN = "en-IN",
-    // (undocumented)
-    EnUS = "en-US"
-}
-
-// @public
-export type LengthUnit = "pixel" | "inch";
-
-// @public
-export type ListCustomModelsResponse = Models & {
-    _response: coreHttp.HttpResponse & {
-        bodyAsText: string;
-        parsedBody: Models;
-    };
-};
-
-// @public
-export type ListModelsOptions = FormRecognizerOperationOptions;
-
-// @public
-export interface Model {
-    keys?: KeysResult;
-    modelInfo: CustomFormModelInfo;
-    trainResult?: TrainResult;
-}
-
-// @public
-export interface Models {
-    modelList?: CustomFormModelInfo[];
-    nextLink?: string;
-    summary?: ModelsSummary;
-}
-
-// @public
-export interface ModelsSummary {
+export interface CustomDocumentModelsInfo {
     count: number;
-    lastModified: Date;
     limit: number;
 }
 
 // @public
-type ModelStatus = "creating" | "ready" | "invalid";
-
-export { ModelStatus as CustomFormModelStatus }
-
-export { ModelStatus }
+export interface DateFieldSchema {
+    readonly type: "date";
+}
 
 // @public
-export type OperationStatus = "notStarted" | "running" | "succeeded" | "failed";
+export interface DeleteModelOptions extends OperationOptions {
+}
+
+// @public
+export interface DocTypeInfo {
+    buildMode?: DocumentBuildMode;
+    description?: string;
+    fieldConfidence?: {
+        [propertyName: string]: number;
+    };
+    fieldSchema: {
+        [propertyName: string]: DocumentFieldSchema;
+    };
+}
+
+// @public
+export interface DocumentAddressField extends DocumentFieldCommon {
+    kind: "address";
+    value?: AddressValue;
+}
+
+// @public
+export class DocumentAnalysisClient {
+    constructor(endpoint: string, credential: TokenCredential, options?: DocumentAnalysisClientOptions);
+    constructor(endpoint: string, credential: KeyCredential, options?: DocumentAnalysisClientOptions);
+    constructor(endpoint: string, credential: KeyCredential | TokenCredential, options?: DocumentAnalysisClientOptions);
+    beginAnalyzeDocument(modelId: string, input: string | FormRecognizerRequestBody, options?: AnalyzeDocumentOptions): Promise<AnalysisPoller>;
+    beginAnalyzeDocument<Document>(model: DocumentModel<Document>, input: string | FormRecognizerRequestBody, options?: AnalyzeDocumentOptions<AnalyzeResult<Document>>): Promise<AnalysisPoller<AnalyzeResult<Document>>>;
+    // @deprecated
+    beginExtractGeneralDocument(input: string | FormRecognizerRequestBody, options?: AnalyzeDocumentOptions<GeneralDocumentResult>): Promise<AnalysisPoller<GeneralDocumentResult>>;
+    // @deprecated
+    beginExtractLayout(input: string | FormRecognizerRequestBody, options?: AnalyzeDocumentOptions<LayoutResult>): Promise<AnalysisPoller<LayoutResult>>;
+    // @deprecated
+    beginReadDocument(input: string | FormRecognizerRequestBody, options?: AnalyzeDocumentOptions<ReadResult>): Promise<AnalysisPoller<ReadResult>>;
+}
+
+// @public
+export interface DocumentAnalysisClientOptions extends FormRecognizerCommonClientOptions {
+    stringIndexType?: StringIndexType;
+}
+
+// @public
+export interface DocumentAnalysisPollOperationState<Result = AnalyzeResult<AnalyzedDocument>> extends PollOperationState<Result> {
+    createdOn: Date;
+    lastUpdatedOn: Date;
+    modelId: string;
+    operationLocation: string;
+    status: AnalyzeResultOperationStatus;
+}
+
+// @public
+export interface DocumentArrayField<T = DocumentField> extends DocumentFieldCommon {
+    kind: "array";
+    values: T[];
+}
+
+// @public
+export type DocumentBuildMode = string;
+
+// @public
+export interface DocumentCaption {
+    boundingRegions?: BoundingRegion[];
+    content: string;
+    spans: DocumentSpan[];
+}
+
+// @public
+export interface DocumentCountryRegionField extends DocumentFieldCommon {
+    kind: "countryRegion";
+    value?: string;
+}
+
+// @public
+export interface DocumentCurrencyField extends DocumentFieldCommon {
+    kind: "currency";
+    value?: CurrencyValue;
+}
+
+// @public
+export interface DocumentDateField extends DocumentValueField<Date> {
+    kind: "date";
+}
+
+// @public
+export type DocumentField = DocumentStringField | DocumentDateField | DocumentTimeField | DocumentPhoneNumberField | DocumentNumberField | DocumentIntegerField | DocumentSelectionMarkField | DocumentCountryRegionField | DocumentSignatureField | DocumentCurrencyField | DocumentAddressField | DocumentArrayField | DocumentObjectField;
+
+// @public
+export interface DocumentFieldCommon {
+    boundingRegions?: BoundingRegion[];
+    confidence?: number;
+    content?: string;
+    spans?: DocumentSpan[];
+}
+
+// @public
+export interface DocumentFieldSchema {
+    description?: string;
+    example?: string;
+    items?: DocumentFieldSchema;
+    properties?: {
+        [propertyName: string]: DocumentFieldSchema;
+    };
+    type: DocumentFieldType;
+}
+
+// @public
+export type DocumentFieldType = string;
+
+// @public
+export interface DocumentFootnote {
+    boundingRegions?: BoundingRegion[];
+    content: string;
+    spans: DocumentSpan[];
+}
+
+// @public
+export interface DocumentIntegerField extends DocumentValueField<number> {
+    kind: "integer";
+}
+
+// @public
+export interface DocumentKeyValueElement {
+    boundingRegions?: BoundingRegion[];
+    content: string;
+    spans: DocumentSpan[];
+}
+
+// @public
+export interface DocumentKeyValuePair {
+    confidence: number;
+    key: DocumentKeyValueElement;
+    value?: DocumentKeyValueElement;
+}
+
+// @public
+export interface DocumentLanguage {
+    confidence: number;
+    locale: string;
+    spans: DocumentSpan[];
+}
+
+// @public
+export interface DocumentLine extends HasBoundingPolygon {
+    content: string;
+    spans: DocumentSpan[];
+    words: () => IterableIterator<DocumentWord>;
+}
+
+// @public
+export interface DocumentModel<Result> {
+    [fromDocument]: (input: unknown) => Result;
+    modelId: string;
+}
+
+// @public
+export class DocumentModelAdministrationClient {
+    constructor(endpoint: string, credential: TokenCredential, options?: DocumentModelAdministrationClientOptions);
+    constructor(endpoint: string, credential: KeyCredential, options?: DocumentModelAdministrationClientOptions);
+    constructor(endpoint: string, credential: KeyCredential | TokenCredential, options?: DocumentModelAdministrationClientOptions);
+    beginBuildModel(modelId: string, containerUrl: string, buildMode: DocumentModelBuildMode, options?: BuildModelOptions): Promise<TrainingPoller>;
+    beginComposeModel(modelId: string, componentModelIds: Iterable<string>, options?: BuildModelOptions): Promise<TrainingPoller>;
+    beginCopyModelTo(sourceModelId: string, authorization: CopyAuthorization, options?: CopyModelOptions): Promise<TrainingPoller>;
+    deleteModel(modelId: string, options?: DeleteModelOptions): Promise<void>;
+    getCopyAuthorization(destinationModelId: string, options?: GetCopyAuthorizationOptions): Promise<CopyAuthorization>;
+    getInfo(options?: GetInfoOptions): Promise<GetInfoResponse>;
+    getModel(modelId: string, options?: GetModelOptions): Promise<ModelInfo>;
+    getOperation(operationId: string, options?: GetOperationOptions): Promise<OperationInfo>;
+    listModels(options?: ListModelsOptions): PagedAsyncIterableIterator<ModelSummary>;
+    listOperations(options?: ListOperationsOptions): PagedAsyncIterableIterator<OperationInfo>;
+}
+
+// @public
+export interface DocumentModelAdministrationClientOptions extends FormRecognizerCommonClientOptions {
+}
+
+// @public
+export type DocumentModelBuildMode = typeof DocumentModelBuildMode[keyof typeof DocumentModelBuildMode];
+
+// @public
+export const DocumentModelBuildMode: {
+    readonly Template: "template";
+    readonly Neural: "neural";
+};
+
+// @public
+export interface DocumentNumberField extends DocumentValueField<number> {
+    kind: "number";
+}
+
+// @public
+export interface DocumentObjectField<Properties = {
+    [k: string]: DocumentField | undefined;
+}> extends DocumentFieldCommon {
+    kind: "object";
+    properties: Properties;
+}
+
+// @public
+export interface DocumentPage {
+    angle?: number;
+    height?: number;
+    kind: DocumentPageKind;
+    lines?: DocumentLine[];
+    pageNumber: number;
+    selectionMarks?: DocumentSelectionMark[];
+    spans: DocumentSpan[];
+    unit?: LengthUnit;
+    width?: number;
+    words?: DocumentWord[];
+}
+
+// @public
+export type DocumentPageKind = string;
+
+// @public
+export interface DocumentParagraph {
+    boundingRegions?: BoundingRegion[];
+    content: string;
+    role?: ParagraphRole;
+    spans: DocumentSpan[];
+}
+
+// @public
+export interface DocumentPhoneNumberField extends DocumentFieldCommon {
+    kind: "phoneNumber";
+    value?: string;
+}
+
+// @public
+export interface DocumentSelectionMark extends HasBoundingPolygon {
+    confidence: number;
+    span: DocumentSpan;
+    state: SelectionMarkState;
+}
+
+// @public
+export interface DocumentSelectionMarkField extends DocumentFieldCommon {
+    kind: "selectionMark";
+    value?: string;
+}
+
+// @public
+export interface DocumentSignatureField extends DocumentFieldCommon {
+    kind: "signature";
+    value: "signed" | "unsigned";
+}
+
+// @public
+export type DocumentSignatureType = string;
+
+// @public
+export interface DocumentSpan {
+    length: number;
+    offset: number;
+}
+
+// @public
+export interface DocumentStringField<Value extends string = string> extends DocumentValueField<Value> {
+    kind: "string";
+}
+
+// @public
+export interface DocumentStyle {
+    confidence: number;
+    isHandwritten?: boolean;
+    spans: DocumentSpan[];
+}
+
+// @public
+export interface DocumentTable {
+    boundingRegions?: BoundingRegion[];
+    cells: DocumentTableCell[];
+    columnCount: number;
+    rowCount: number;
+    spans: DocumentSpan[];
+}
+
+// @public
+export interface DocumentTableCell {
+    boundingRegions?: BoundingRegion[];
+    columnIndex: number;
+    columnSpan?: number;
+    content: string;
+    kind?: DocumentTableCellKind;
+    rowIndex: number;
+    rowSpan?: number;
+    spans: DocumentSpan[];
+}
+
+// @public
+export type DocumentTableCellKind = string;
+
+// @public
+export interface DocumentTimeField extends DocumentFieldCommon {
+    kind: "time";
+    value?: string;
+}
+
+// @public
+export interface DocumentValueField<T> extends DocumentFieldCommon {
+    value?: T;
+}
+
+// @public
+export interface DocumentWord extends HasBoundingPolygon {
+    confidence: number;
+    content: string;
+    span: DocumentSpan;
+}
+
+// @public
+export type EnglishCapitalLetter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z";
+
+// @public
+export type FieldSchema = StringLikeFieldSchema | NumberFieldSchema | DateFieldSchema | ArrayFieldSchema | ObjectFieldSchema | StructuredStringFieldSchema | WellKnownObjectFieldSchema;
+
+// @public
+export type FormRecognizerApiVersion = typeof FormRecognizerApiVersion[keyof typeof FormRecognizerApiVersion];
+
+// @public
+export const FormRecognizerApiVersion: {
+    readonly Latest: "2022-06-30-preview";
+};
+
+// @public
+export interface FormRecognizerCommonClientOptions extends CommonClientOptions {
+    apiVersion?: FormRecognizerApiVersion;
+}
+
+// @public
+export type FormRecognizerRequestBody = NodeJS.ReadableStream | Blob | ArrayBuffer | ArrayBufferView;
+
+// @public
+export interface GeneralDocumentResult extends LayoutResult {
+    keyValuePairs: DocumentKeyValuePair[];
+}
+
+// @public
+export interface GetCopyAuthorizationOptions extends OperationOptions, CommonModelCreationOptions {
+}
+
+// @public
+export interface GetInfoOptions extends OperationOptions {
+}
+
+// @public
+export interface GetInfoResponse {
+    customDocumentModels: CustomDocumentModelsInfo;
+}
+
+// @public
+export interface GetModelOptions extends OperationOptions {
+}
+
+// @public
+export interface GetOperationOptions extends OperationOptions {
+}
+
+// @public
+export interface HasBoundingPolygon {
+    polygon?: Point2D[];
+}
+
+// @public
+export type IdentityDocument = ReifyPrebuiltSchema<typeof IdentityDocumentSchema>;
+
+// @public
+export const IdentityDocumentSchema: {
+    readonly modelId: "prebuilt-idDocument";
+    readonly description: "Prebuilt model to extract key information from US driver licenses and international passports.";
+    readonly createdDateTime: "2022-06-30T00:00:00.000Z";
+    readonly apiVersion: "2022-06-30-preview";
+    readonly docTypes: {
+        readonly "idDocument.driverLicense": {
+            readonly buildMode: "template";
+            readonly fieldSchema: {
+                readonly CountryRegion: {
+                    readonly type: "countryRegion";
+                };
+                readonly Region: {
+                    readonly type: "string";
+                };
+                readonly DocumentNumber: {
+                    readonly type: "string";
+                };
+                readonly FirstName: {
+                    readonly type: "string";
+                };
+                readonly LastName: {
+                    readonly type: "string";
+                };
+                readonly Address: {
+                    readonly type: "string";
+                };
+                readonly DateOfBirth: {
+                    readonly type: "date";
+                };
+                readonly DateOfExpiration: {
+                    readonly type: "date";
+                };
+                readonly Sex: {
+                    readonly type: "string";
+                };
+                readonly Endorsements: {
+                    readonly type: "string";
+                };
+                readonly Restrictions: {
+                    readonly type: "string";
+                };
+                readonly VehicleClassifications: {
+                    readonly type: "string";
+                };
+            };
+        };
+        readonly "idDocument.passport": {
+            readonly buildMode: "template";
+            readonly fieldSchema: {
+                readonly MachineReadableZone: {
+                    readonly type: "object";
+                    readonly properties: {
+                        readonly FirstName: {
+                            readonly type: "string";
+                        };
+                        readonly LastName: {
+                            readonly type: "string";
+                        };
+                        readonly DocumentNumber: {
+                            readonly type: "string";
+                        };
+                        readonly CountryRegion: {
+                            readonly type: "countryRegion";
+                        };
+                        readonly Nationality: {
+                            readonly type: "countryRegion";
+                        };
+                        readonly DateOfBirth: {
+                            readonly type: "date";
+                        };
+                        readonly DateOfExpiration: {
+                            readonly type: "date";
+                        };
+                        readonly Sex: {
+                            readonly type: "string";
+                        };
+                    };
+                };
+            };
+        };
+    };
+};
+
+// @public
+export type Invoice = ReifyPrebuiltSchema<typeof InvoiceSchema>;
+
+// @public
+export const InvoiceSchema: {
+    readonly modelId: "prebuilt-invoice";
+    readonly description: "Prebuilt model to extract key information from English invoices, including customer, vendor, invoice ID, due date, total, and more.";
+    readonly createdDateTime: "2022-06-30T00:00:00.000Z";
+    readonly apiVersion: "2022-06-30-preview";
+    readonly docTypes: {
+        readonly invoice: {
+            readonly buildMode: "template";
+            readonly fieldSchema: {
+                readonly CustomerName: {
+                    readonly type: "string";
+                };
+                readonly CustomerId: {
+                    readonly type: "string";
+                };
+                readonly PurchaseOrder: {
+                    readonly type: "string";
+                };
+                readonly InvoiceId: {
+                    readonly type: "string";
+                };
+                readonly InvoiceDate: {
+                    readonly type: "date";
+                };
+                readonly DueDate: {
+                    readonly type: "date";
+                };
+                readonly VendorName: {
+                    readonly type: "string";
+                };
+                readonly VendorAddress: {
+                    readonly type: "string";
+                };
+                readonly VendorAddressRecipient: {
+                    readonly type: "string";
+                };
+                readonly CustomerAddress: {
+                    readonly type: "string";
+                };
+                readonly CustomerAddressRecipient: {
+                    readonly type: "string";
+                };
+                readonly BillingAddress: {
+                    readonly type: "string";
+                };
+                readonly BillingAddressRecipient: {
+                    readonly type: "string";
+                };
+                readonly ShippingAddress: {
+                    readonly type: "string";
+                };
+                readonly ShippingAddressRecipient: {
+                    readonly type: "string";
+                };
+                readonly SubTotal: {
+                    readonly type: "currency";
+                };
+                readonly TotalTax: {
+                    readonly type: "currency";
+                };
+                readonly InvoiceTotal: {
+                    readonly type: "currency";
+                };
+                readonly AmountDue: {
+                    readonly type: "currency";
+                };
+                readonly PreviousUnpaidBalance: {
+                    readonly type: "currency";
+                };
+                readonly RemittanceAddress: {
+                    readonly type: "string";
+                };
+                readonly RemittanceAddressRecipient: {
+                    readonly type: "string";
+                };
+                readonly ServiceAddress: {
+                    readonly type: "string";
+                };
+                readonly ServiceAddressRecipient: {
+                    readonly type: "string";
+                };
+                readonly ServiceStartDate: {
+                    readonly type: "date";
+                };
+                readonly ServiceEndDate: {
+                    readonly type: "date";
+                };
+                readonly TotalVAT: {
+                    readonly type: "currency";
+                };
+                readonly VendorTaxId: {
+                    readonly type: "string";
+                };
+                readonly CustomerTaxId: {
+                    readonly type: "string";
+                };
+                readonly PaymentTerm: {
+                    readonly type: "string";
+                };
+                readonly Items: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "object";
+                        readonly properties: {
+                            readonly Amount: {
+                                readonly type: "currency";
+                            };
+                            readonly Date: {
+                                readonly type: "date";
+                            };
+                            readonly Description: {
+                                readonly type: "string";
+                            };
+                            readonly Quantity: {
+                                readonly type: "number";
+                            };
+                            readonly ProductCode: {
+                                readonly type: "string";
+                            };
+                            readonly Tax: {
+                                readonly type: "currency";
+                            };
+                            readonly Unit: {
+                                readonly type: "string";
+                            };
+                            readonly UnitPrice: {
+                                readonly type: "currency";
+                            };
+                            readonly VAT: {
+                                readonly type: "currency";
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    };
+};
+
+// @public
+export interface LayoutResult {
+    pages: DocumentPage[];
+    styles: DocumentStyle[];
+    tables: DocumentTable[];
+}
+
+// @public
+export type LengthUnit = string;
+
+// @public
+export interface ListModelsOptions extends OperationOptions {
+}
+
+// @public
+export interface ListOperationsOptions extends OperationOptions {
+}
+
+// @public
+export type ModelInfo = ModelSummary & {
+    docTypes?: {
+        [propertyName: string]: DocTypeInfo;
+    };
+};
+
+// @public
+export interface ModelSchema {
+    docTypes: {
+        [type: string]: {
+            fieldSchema: {
+                [k: string]: FieldSchema;
+            };
+        };
+    };
+    modelId: string;
+}
+
+// @public
+export interface ModelSummary {
+    apiVersion?: string;
+    createdDateTime: Date;
+    description?: string;
+    modelId: string;
+    tags?: {
+        [propertyName: string]: string;
+    };
+}
+
+// @public
+export interface NumberFieldSchema<Type extends "number" | "integer" = "number" | "integer"> {
+    readonly type: Type;
+}
+
+// @public
+export interface ObjectFieldSchema<Properties extends {
+    readonly [k: string]: FieldSchema;
+} = {
+    readonly [k: string]: FieldSchema;
+}> {
+    readonly properties: Properties;
+    readonly type: "object";
+}
+
+// @public
+export interface OperationInfo {
+    apiVersion?: string;
+    createdDateTime: Date;
+    kind: OperationKind;
+    lastUpdatedDateTime: Date;
+    operationId: string;
+    percentCompleted?: number;
+    resourceLocation: string;
+    status: OperationStatus;
+    tags?: {
+        [propertyName: string]: string;
+    };
+}
+
+// @public
+export type OperationKind = string;
+
+// @public
+export type OperationStatus = "notStarted" | "running" | "failed" | "succeeded" | "canceled";
+
+// @public
+export type ParagraphRole = string;
 
 // @public
 export interface Point2D {
@@ -643,80 +906,766 @@ export interface Point2D {
 }
 
 // @public
-export type RecognizeContentOperationState = PollOperationState<FormPageArray> & {
+export interface PollerOptions<TState extends PollOperationState<unknown>> extends OperationOptions {
+    onProgress?: (state: TState) => void;
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public @deprecated
+export const PrebuiltModels: {
+    BusinessCard: DocumentModel<{
+        docType: "businessCard";
+        fields: {
+            contactNames?: DocumentArrayField<DocumentObjectField<    {
+            firstName?: DocumentStringField<string> | undefined;
+            lastName?: DocumentStringField<string> | undefined;
+            }>> | undefined;
+            companyNames?: DocumentArrayField<DocumentStringField<string>> | undefined;
+            jobTitles?: DocumentArrayField<DocumentStringField<string>> | undefined;
+            departments?: DocumentArrayField<DocumentStringField<string>> | undefined;
+            addresses?: DocumentArrayField<DocumentStringField<string>> | undefined;
+            workPhones?: DocumentArrayField<DocumentPhoneNumberField> | undefined;
+            mobilePhones?: DocumentArrayField<DocumentPhoneNumberField> | undefined;
+            faxes?: DocumentArrayField<DocumentPhoneNumberField> | undefined;
+            otherPhones?: DocumentArrayField<DocumentPhoneNumberField> | undefined;
+            emails?: DocumentArrayField<DocumentStringField<string>> | undefined;
+            websites?: DocumentArrayField<DocumentStringField<string>> | undefined;
+        };
+    }>;
+    IdentityDocument: DocumentModel<IdentityDocument>;
+    Invoice: DocumentModel<{
+        docType: "invoice";
+        fields: {
+            customerName?: DocumentStringField<string> | undefined;
+            customerId?: DocumentStringField<string> | undefined;
+            purchaseOrder?: DocumentStringField<string> | undefined;
+            invoiceId?: DocumentStringField<string> | undefined;
+            invoiceDate?: DocumentDateField | undefined;
+            dueDate?: DocumentDateField | undefined;
+            vendorName?: DocumentStringField<string> | undefined;
+            vendorAddress?: DocumentStringField<string> | undefined;
+            vendorAddressRecipient?: DocumentStringField<string> | undefined;
+            customerAddress?: DocumentStringField<string> | undefined;
+            customerAddressRecipient?: DocumentStringField<string> | undefined;
+            billingAddress?: DocumentStringField<string> | undefined;
+            billingAddressRecipient?: DocumentStringField<string> | undefined;
+            shippingAddress?: DocumentStringField<string> | undefined;
+            shippingAddressRecipient?: DocumentStringField<string> | undefined;
+            subTotal?: DocumentCurrencyField | undefined;
+            totalTax?: DocumentCurrencyField | undefined;
+            invoiceTotal?: DocumentCurrencyField | undefined;
+            amountDue?: DocumentCurrencyField | undefined;
+            previousUnpaidBalance?: DocumentCurrencyField | undefined;
+            remittanceAddress?: DocumentStringField<string> | undefined;
+            remittanceAddressRecipient?: DocumentStringField<string> | undefined;
+            serviceAddress?: DocumentStringField<string> | undefined;
+            serviceAddressRecipient?: DocumentStringField<string> | undefined;
+            serviceStartDate?: DocumentDateField | undefined;
+            serviceEndDate?: DocumentDateField | undefined;
+            totalVAT?: DocumentCurrencyField | undefined;
+            vendorTaxId?: DocumentStringField<string> | undefined;
+            customerTaxId?: DocumentStringField<string> | undefined;
+            paymentTerm?: DocumentStringField<string> | undefined;
+            items?: DocumentArrayField<DocumentObjectField<    {
+            date?: DocumentDateField | undefined;
+            amount?: DocumentCurrencyField | undefined;
+            description?: DocumentStringField<string> | undefined;
+            quantity?: DocumentNumberField | undefined;
+            productCode?: DocumentStringField<string> | undefined;
+            tax?: DocumentCurrencyField | undefined;
+            unit?: DocumentStringField<string> | undefined;
+            unitPrice?: DocumentCurrencyField | undefined;
+            VAT?: DocumentCurrencyField | undefined;
+            }>> | undefined;
+        };
+    }>;
+    Receipt: DocumentModel<Receipt>;
+    TaxUsW2: DocumentModel<{
+        docType: "tax.us.w2";
+        fields: {
+            w2FormVariant?: DocumentStringField<string> | undefined;
+            taxYear?: DocumentStringField<string> | undefined;
+            w2Copy?: DocumentStringField<string> | undefined;
+            employee?: DocumentObjectField<    {
+            address?: DocumentAddressField | undefined;
+            socialSecurityNumber?: DocumentStringField<string> | undefined;
+            name?: DocumentStringField<string> | undefined;
+            }> | undefined;
+            controlNumber?: DocumentStringField<string> | undefined;
+            employer?: DocumentObjectField<    {
+            address?: DocumentAddressField | undefined;
+            name?: DocumentStringField<string> | undefined;
+            idNumber?: DocumentStringField<string> | undefined;
+            }> | undefined;
+            wagesTipsAndOtherCompensation?: DocumentNumberField | undefined;
+            federalIncomeTaxWithheld?: DocumentNumberField | undefined;
+            socialSecurityWages?: DocumentNumberField | undefined;
+            socialSecurityTaxWithheld?: DocumentNumberField | undefined;
+            medicareWagesAndTips?: DocumentNumberField | undefined;
+            medicareTaxWithheld?: DocumentNumberField | undefined;
+            socialSecurityTips?: DocumentNumberField | undefined;
+            allocatedTips?: DocumentNumberField | undefined;
+            verificationCode?: DocumentStringField<string> | undefined;
+            dependentCareBenefits?: DocumentNumberField | undefined;
+            nonQualifiedPlans?: DocumentNumberField | undefined;
+            additionalInfo?: DocumentArrayField<DocumentObjectField<    {
+            amount?: DocumentNumberField | undefined;
+            letterCode?: DocumentStringField<string> | undefined;
+            }>> | undefined;
+            isStatutoryEmployee?: DocumentStringField<string> | undefined;
+            isRetirementPlan?: DocumentStringField<string> | undefined;
+            isThirdPartySickPay?: DocumentStringField<string> | undefined;
+            other?: DocumentStringField<string> | undefined;
+            stateTaxInfos?: DocumentArrayField<DocumentObjectField<    {
+            state?: DocumentStringField<string> | undefined;
+            employerStateIdNumber?: DocumentStringField<string> | undefined;
+            "stateWagesTipsEtc "?: DocumentNumberField | undefined;
+            "stateIncomeTax "?: DocumentNumberField | undefined;
+            }>> | undefined;
+            localTaxInfos?: DocumentArrayField<DocumentObjectField<    {
+            localWagesTipsEtc?: DocumentNumberField | undefined;
+            localIncomeTax?: DocumentNumberField | undefined;
+            localityName?: DocumentStringField<string> | undefined;
+            }>> | undefined;
+        };
+    }>;
+    VaccinationCard: DocumentModel<{
+        docType: "vaccinationCard.covid.us";
+        fields: {
+            cardHolderInfo?: DocumentObjectField<    {
+            firstName?: DocumentStringField<string> | undefined;
+            dateOfBirth?: DocumentDateField | undefined;
+            lastNames?: DocumentStringField<string> | undefined;
+            patientNumber?: DocumentStringField<string> | undefined;
+            }> | undefined;
+            vaccines?: DocumentArrayField<DocumentObjectField<    {
+            manufacturer?: DocumentStringField<string> | undefined;
+            dateAdministered?: DocumentDateField | undefined;
+            }>> | undefined;
+        };
+    }>;
+    HealthInsuranceCardUs: DocumentModel<{
+        docType: "healthInsuranceCard.us";
+        fields: {
+            idNumber?: DocumentObjectField<    {
+            number?: DocumentStringField<string> | undefined;
+            prefix?: DocumentStringField<string> | undefined;
+            }> | undefined;
+            insurer?: DocumentStringField<string> | undefined;
+            member?: DocumentObjectField<    {
+            dateOfBirth?: DocumentStringField<string> | undefined;
+            name?: DocumentStringField<string> | undefined;
+            employer?: DocumentStringField<string> | undefined;
+            gender?: DocumentStringField<string> | undefined;
+            idNumberSuffix?: DocumentStringField<string> | undefined;
+            }> | undefined;
+            dependents?: DocumentArrayField<DocumentObjectField<    {
+            name?: DocumentStringField<string> | undefined;
+            idNumberSuffix?: DocumentStringField<string> | undefined;
+            }>> | undefined;
+            groupNumber?: DocumentStringField<string> | undefined;
+            prescriptionInfo?: DocumentObjectField<    {
+            issuerId?: DocumentStringField<string> | undefined;
+            rxBIN?: DocumentStringField<string> | undefined;
+            rxPCN?: DocumentStringField<string> | undefined;
+            rxGrp?: DocumentStringField<string> | undefined;
+            rxId?: DocumentStringField<string> | undefined;
+            rxPlan?: DocumentStringField<string> | undefined;
+            }> | undefined;
+            pbm?: DocumentStringField<string> | undefined;
+            effectiveDate?: DocumentDateField | undefined;
+            copays?: DocumentArrayField<DocumentObjectField<    {
+            amount?: DocumentStringField<string> | undefined;
+            benefit?: DocumentStringField<string> | undefined;
+            }>> | undefined;
+            payer?: DocumentObjectField<    {
+            phoneNumber?: DocumentPhoneNumberField | undefined;
+            address?: DocumentStringField<string> | undefined;
+            id?: DocumentStringField<string> | undefined;
+            }> | undefined;
+            medicareMedicaidInfo?: DocumentObjectField<    {
+            partAEffectiveDate?: DocumentStringField<string> | undefined;
+            partBEffectiveDate?: DocumentStringField<string> | undefined;
+            }> | undefined;
+            plan?: DocumentObjectField<    {
+            number?: DocumentStringField<string> | undefined;
+            name?: DocumentStringField<string> | undefined;
+            }> | undefined;
+        };
+    }>;
+};
+
+// @public
+export interface ReadResult extends AnalyzeResultCommon {
+    languages: DocumentLanguage[];
+    pages: DocumentPage[];
+    styles: DocumentStyle[];
+}
+
+// @public
+export type Receipt = ReifyPrebuiltSchema<typeof ReceiptSchema>;
+
+// @public
+export const ReceiptSchema: {
+    readonly modelId: "prebuilt-receipt";
+    readonly description: "Prebuilt model to extract key information from English receipts, including merchant name, transaction date, transaction total, and more.";
+    readonly createdDateTime: "2022-06-30T00:00:00.000Z";
+    readonly apiVersion: "2022-06-30-preview";
+    readonly docTypes: {
+        readonly receipt: {
+            readonly buildMode: "template";
+            readonly fieldSchema: {
+                readonly Locale: {
+                    readonly type: "string";
+                };
+                readonly MerchantName: {
+                    readonly type: "string";
+                };
+                readonly MerchantPhoneNumber: {
+                    readonly type: "phoneNumber";
+                };
+                readonly MerchantAddress: {
+                    readonly type: "string";
+                };
+                readonly Total: {
+                    readonly type: "number";
+                };
+                readonly TransactionDate: {
+                    readonly type: "date";
+                };
+                readonly TransactionTime: {
+                    readonly type: "time";
+                };
+                readonly Subtotal: {
+                    readonly type: "number";
+                };
+                readonly TotalTax: {
+                    readonly type: "number";
+                };
+                readonly Tip: {
+                    readonly type: "number";
+                };
+                readonly Items: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "object";
+                        readonly properties: {
+                            readonly TotalPrice: {
+                                readonly type: "number";
+                            };
+                            readonly Description: {
+                                readonly type: "string";
+                            };
+                            readonly Quantity: {
+                                readonly type: "number";
+                            };
+                            readonly Price: {
+                                readonly type: "number";
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        readonly "receipt.retailMeal": {
+            readonly buildMode: "template";
+            readonly fieldSchema: {
+                readonly Locale: {
+                    readonly type: "string";
+                };
+                readonly MerchantName: {
+                    readonly type: "string";
+                };
+                readonly MerchantPhoneNumber: {
+                    readonly type: "phoneNumber";
+                };
+                readonly MerchantAddress: {
+                    readonly type: "string";
+                };
+                readonly Total: {
+                    readonly type: "number";
+                };
+                readonly TransactionDate: {
+                    readonly type: "date";
+                };
+                readonly TransactionTime: {
+                    readonly type: "time";
+                };
+                readonly Subtotal: {
+                    readonly type: "number";
+                };
+                readonly TotalTax: {
+                    readonly type: "number";
+                };
+                readonly Tip: {
+                    readonly type: "number";
+                };
+                readonly Items: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "object";
+                        readonly properties: {
+                            readonly TotalPrice: {
+                                readonly type: "number";
+                            };
+                            readonly Description: {
+                                readonly type: "string";
+                            };
+                            readonly Quantity: {
+                                readonly type: "number";
+                            };
+                            readonly Price: {
+                                readonly type: "number";
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        readonly "receipt.creditCard": {
+            readonly buildMode: "template";
+            readonly fieldSchema: {
+                readonly Locale: {
+                    readonly type: "string";
+                };
+                readonly MerchantName: {
+                    readonly type: "string";
+                };
+                readonly MerchantPhoneNumber: {
+                    readonly type: "phoneNumber";
+                };
+                readonly MerchantAddress: {
+                    readonly type: "string";
+                };
+                readonly Total: {
+                    readonly type: "number";
+                };
+                readonly TransactionDate: {
+                    readonly type: "date";
+                };
+                readonly TransactionTime: {
+                    readonly type: "time";
+                };
+                readonly Subtotal: {
+                    readonly type: "number";
+                };
+                readonly TotalTax: {
+                    readonly type: "number";
+                };
+                readonly Tip: {
+                    readonly type: "number";
+                };
+                readonly Items: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "object";
+                        readonly properties: {
+                            readonly TotalPrice: {
+                                readonly type: "number";
+                            };
+                            readonly Description: {
+                                readonly type: "string";
+                            };
+                            readonly Quantity: {
+                                readonly type: "number";
+                            };
+                            readonly Price: {
+                                readonly type: "number";
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        readonly "receipt.gas": {
+            readonly buildMode: "template";
+            readonly fieldSchema: {
+                readonly Locale: {
+                    readonly type: "string";
+                };
+                readonly MerchantName: {
+                    readonly type: "string";
+                };
+                readonly MerchantPhoneNumber: {
+                    readonly type: "phoneNumber";
+                };
+                readonly MerchantAddress: {
+                    readonly type: "string";
+                };
+                readonly Total: {
+                    readonly type: "number";
+                };
+                readonly TransactionDate: {
+                    readonly type: "date";
+                };
+                readonly TransactionTime: {
+                    readonly type: "time";
+                };
+                readonly Subtotal: {
+                    readonly type: "number";
+                };
+                readonly TotalTax: {
+                    readonly type: "number";
+                };
+                readonly Tip: {
+                    readonly type: "number";
+                };
+                readonly Items: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "object";
+                        readonly properties: {
+                            readonly TotalPrice: {
+                                readonly type: "number";
+                            };
+                            readonly Description: {
+                                readonly type: "string";
+                            };
+                            readonly Quantity: {
+                                readonly type: "number";
+                            };
+                            readonly Price: {
+                                readonly type: "number";
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        readonly "receipt.parking": {
+            readonly buildMode: "template";
+            readonly fieldSchema: {
+                readonly Locale: {
+                    readonly type: "string";
+                };
+                readonly MerchantName: {
+                    readonly type: "string";
+                };
+                readonly MerchantPhoneNumber: {
+                    readonly type: "phoneNumber";
+                };
+                readonly MerchantAddress: {
+                    readonly type: "string";
+                };
+                readonly Total: {
+                    readonly type: "number";
+                };
+                readonly TransactionDate: {
+                    readonly type: "date";
+                };
+                readonly TransactionTime: {
+                    readonly type: "time";
+                };
+                readonly Subtotal: {
+                    readonly type: "number";
+                };
+                readonly TotalTax: {
+                    readonly type: "number";
+                };
+                readonly Tip: {
+                    readonly type: "number";
+                };
+                readonly Items: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "object";
+                        readonly properties: {
+                            readonly TotalPrice: {
+                                readonly type: "number";
+                            };
+                            readonly Description: {
+                                readonly type: "string";
+                            };
+                            readonly Quantity: {
+                                readonly type: "number";
+                            };
+                            readonly Price: {
+                                readonly type: "number";
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        readonly "receipt.hotel": {
+            readonly buildMode: "template";
+            readonly fieldSchema: {
+                readonly MerchantName: {
+                    readonly type: "string";
+                };
+                readonly MerchantPhoneNumber: {
+                    readonly type: "phoneNumber";
+                };
+                readonly MerchantAddress: {
+                    readonly type: "string";
+                };
+                readonly Total: {
+                    readonly type: "number";
+                };
+                readonly ArrivalDate: {
+                    readonly type: "date";
+                };
+                readonly DepartureDate: {
+                    readonly type: "date";
+                };
+                readonly Currency: {
+                    readonly type: "string";
+                };
+                readonly MerchantAliases: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "string";
+                    };
+                };
+                readonly Items: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "object";
+                        readonly properties: {
+                            readonly TotalPrice: {
+                                readonly type: "number";
+                            };
+                            readonly Description: {
+                                readonly type: "string";
+                            };
+                            readonly Date: {
+                                readonly type: "date";
+                            };
+                            readonly Category: {
+                                readonly type: "string";
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    };
+};
+
+// @public
+export type ReifyFieldSchema<Schema extends Readonly<FieldSchema>> = Schema extends StructuredStringFieldSchema<infer Type> ? {
+    time: DocumentTimeField;
+    phoneNumber: DocumentPhoneNumberField;
+}[Type] : Schema extends StringLikeFieldSchema<infer Type> ? {
+    string: Schema extends {
+        enum: string[];
+    } ? DocumentStringField<Schema["enum"][number]> : DocumentStringField;
+    countryRegion: DocumentCountryRegionField;
+}[Type] : Schema extends NumberFieldSchema<infer Type> ? {
+    number: DocumentNumberField;
+    integer: DocumentIntegerField;
+}[Type] : Schema extends DateFieldSchema ? DocumentDateField : Schema extends ArrayFieldSchema<infer Item> ? DocumentArrayField<ReifyFieldSchema<Item>> : Schema extends WellKnownObjectFieldSchema<infer Type> ? {
+    currency: DocumentCurrencyField;
+    address: DocumentAddressField;
+}[Type] : Schema extends ObjectFieldSchema<infer Properties> ? DocumentObjectField<{
+    [K in Extract<keyof Properties, string> as K extends Acronymic ? K : Uncapitalize<K>]?: ReifyFieldSchema<Properties[K]>;
+}> : never;
+
+// @public
+export type ReifyPrebuiltSchema<Schema extends Readonly<ModelSchema>> = {
+    [DocType in keyof Schema["docTypes"]]: {
+        docType: DocType;
+        fields: {
+            [K in Extract<keyof Schema["docTypes"][DocType]["fieldSchema"], string> as Uncapitalize<K>]?: ReifyFieldSchema<Schema["docTypes"][DocType]["fieldSchema"][K]>;
+        };
+    };
+}[keyof Schema["docTypes"]];
+
+// @public
+export type SelectionMarkState = string;
+
+// @public
+export type StringIndexType = typeof StringIndexType[keyof typeof StringIndexType];
+
+// @public
+export const StringIndexType: {
+    readonly Utf16CodeUnit: "utf16CodeUnit";
+    readonly UnicodeCodePoint: "unicodeCodePoint";
+};
+
+// @public
+export interface StringLikeFieldSchema<Type extends "string" | "countryRegion" = "string" | "countryRegion"> {
+    readonly enum?: readonly string[];
+    readonly type: Type;
+}
+
+// @public
+export interface StructuredStringFieldSchema<Type extends "time" | "phoneNumber" = "time" | "phoneNumber"> {
+    readonly type: Type;
+}
+
+// @public
+export type TaxUsW2 = ReifyPrebuiltSchema<typeof TaxUsW2Schema>;
+
+// @public
+export const TaxUsW2Schema: {
+    readonly modelId: "prebuilt-tax.us.w2";
+    readonly description: "Prebuilt model to extract key information from IRS US W2 tax forms (year 2018-2021)";
+    readonly createdDateTime: "2022-06-30T00:00:00.000Z";
+    readonly apiVersion: "2022-06-30-preview";
+    readonly docTypes: {
+        readonly "tax.us.w2": {
+            readonly buildMode: "template";
+            readonly fieldSchema: {
+                readonly W2FormVariant: {
+                    readonly type: "string";
+                };
+                readonly TaxYear: {
+                    readonly type: "string";
+                };
+                readonly W2Copy: {
+                    readonly type: "string";
+                };
+                readonly Employee: {
+                    readonly type: "object";
+                    readonly properties: {
+                        readonly SocialSecurityNumber: {
+                            readonly type: "string";
+                        };
+                        readonly Name: {
+                            readonly type: "string";
+                        };
+                        readonly Address: {
+                            readonly type: "address";
+                        };
+                    };
+                };
+                readonly ControlNumber: {
+                    readonly type: "string";
+                };
+                readonly Employer: {
+                    readonly type: "object";
+                    readonly properties: {
+                        readonly IdNumber: {
+                            readonly type: "string";
+                        };
+                        readonly Name: {
+                            readonly type: "string";
+                        };
+                        readonly Address: {
+                            readonly type: "address";
+                        };
+                    };
+                };
+                readonly WagesTipsAndOtherCompensation: {
+                    readonly type: "number";
+                };
+                readonly FederalIncomeTaxWithheld: {
+                    readonly type: "number";
+                };
+                readonly SocialSecurityWages: {
+                    readonly type: "number";
+                };
+                readonly SocialSecurityTaxWithheld: {
+                    readonly type: "number";
+                };
+                readonly MedicareWagesAndTips: {
+                    readonly type: "number";
+                };
+                readonly MedicareTaxWithheld: {
+                    readonly type: "number";
+                };
+                readonly SocialSecurityTips: {
+                    readonly type: "number";
+                };
+                readonly AllocatedTips: {
+                    readonly type: "number";
+                };
+                readonly VerificationCode: {
+                    readonly type: "string";
+                };
+                readonly DependentCareBenefits: {
+                    readonly type: "number";
+                };
+                readonly NonQualifiedPlans: {
+                    readonly type: "number";
+                };
+                readonly AdditionalInfo: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "object";
+                        readonly properties: {
+                            readonly LetterCode: {
+                                readonly type: "string";
+                            };
+                            readonly Amount: {
+                                readonly type: "number";
+                            };
+                        };
+                    };
+                };
+                readonly IsStatutoryEmployee: {
+                    readonly type: "string";
+                };
+                readonly IsRetirementPlan: {
+                    readonly type: "string";
+                };
+                readonly IsThirdPartySickPay: {
+                    readonly type: "string";
+                };
+                readonly Other: {
+                    readonly type: "string";
+                };
+                readonly StateTaxInfos: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "object";
+                        readonly properties: {
+                            readonly State: {
+                                readonly type: "string";
+                            };
+                            readonly EmployerStateIdNumber: {
+                                readonly type: "string";
+                            };
+                            readonly "StateWagesTipsEtc ": {
+                                readonly type: "number";
+                            };
+                            readonly "StateIncomeTax ": {
+                                readonly type: "number";
+                            };
+                        };
+                    };
+                };
+                readonly LocalTaxInfos: {
+                    readonly type: "array";
+                    readonly items: {
+                        readonly type: "object";
+                        readonly properties: {
+                            readonly LocalWagesTipsEtc: {
+                                readonly type: "number";
+                            };
+                            readonly LocalIncomeTax: {
+                                readonly type: "number";
+                            };
+                            readonly LocalityName: {
+                                readonly type: "string";
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    };
+};
+
+// @public
+export type TrainingPoller = PollerLike<TrainingPollOperationState, ModelInfo>;
+
+// @public
+export interface TrainingPollOperationState extends PollOperationState<ModelInfo> {
+    apiVersion?: string;
+    createdOn: Date;
+    lastUpdatedOn: Date;
+    operationId: string;
+    percentCompleted: number;
     status: OperationStatus;
-};
-
-// @public
-export type RecognizeContentOptions = FormRecognizerOperationOptions;
-
-// @public
-export interface RecognizedForm {
-    fields: Record<string, FormField>;
-    formType: string;
-    formTypeConfidence?: number;
-    modelId?: string;
-    pageRange: FormPageRange;
-    pages: FormPage[];
+    tags?: Record<string, string>;
 }
 
 // @public
-export interface RecognizedFormArray extends Array<RecognizedForm> {
+export interface WellKnownObjectFieldSchema<Type extends "currency" | "address" = "currency" | "address"> {
+    readonly type: Type;
 }
-
-// @public
-export interface RecognizeFormsOperationState extends PollOperationState<RecognizedFormArray> {
-    expectedDocType?: string;
-    modelId?: string;
-    resultId?: string;
-    status: OperationStatus;
-}
-
-// @public
-export interface RecognizeFormsOptions extends FormRecognizerOperationOptions {
-    includeFieldElements?: boolean;
-}
-
-export { RestResponse }
-
-// @public
-export interface TextAppearance {
-    styleConfidence: number;
-    styleName: "handwriting" | "other";
-}
-
-// @public
-export interface TrainingDocumentInfo {
-    errors: FormRecognizerError[];
-    modelId?: string;
-    name: string;
-    pageCount: number;
-    status: TrainingStatus;
-}
-
-// @public
-export type TrainingFileFilter = FormRecognizerOperationOptions & {
-    prefix?: string;
-    includeSubfolders?: boolean;
-};
-
-// @public
-export type TrainingOperationState = PollOperationState<CustomFormModelInfo> & {
-    status: ModelStatus;
-};
-
-// @public
-export type TrainingStatus = "succeeded" | "partiallySucceeded" | "failed";
-
-// @public
-export interface TrainResult {
-    averageModelAccuracy?: number;
-    errors?: FormRecognizerError[];
-    fields?: FormFieldsReport[];
-    trainingDocuments: TrainingDocumentInfo[];
-}
-
-
-// (No @packageDocumentation comment for this package)
 
 ```

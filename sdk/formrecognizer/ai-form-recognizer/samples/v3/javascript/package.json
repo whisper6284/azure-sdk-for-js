@@ -1,5 +1,5 @@
 {
-  "name": "azure-ai-form-recognizer-samples-js",
+  "name": "@azure-samples/ai-form-recognizer-js",
   "private": true,
   "version": "1.0.0",
   "description": "Azure Form Recognizer client library samples for JavaScript",
@@ -28,6 +28,6 @@
   "dependencies": {
     "@azure/ai-form-recognizer": "latest",
     "dotenv": "latest",
-    "@azure/identity": "2.0.0-beta.5"
+    "@azure/identity": "^2.0.1"
   }
 }

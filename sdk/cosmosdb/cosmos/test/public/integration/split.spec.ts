@@ -3,7 +3,8 @@
 import { Container } from "../../../src";
 import { bulkInsertItems, getTestContainer, removeAllDatabases } from "../common/TestHelpers";
 import { Constants, CosmosClient, PluginOn, CosmosClientOptions, PluginConfig } from "../../../src";
-import { masterKey, endpoint } from "../common/_testConfig";
+import { endpoint } from "../common/_testConfig";
+import { masterKey } from "../common/_fakeTestSecrets";
 import { SubStatusCodes } from "../../../src/common";
 import assert from "assert";
 
@@ -11,9 +12,7 @@ const splitError = new Error("Fake Partition Split") as any;
 splitError.code = 410;
 splitError.substatus = SubStatusCodes.PartitionKeyRangeGone;
 
-const generateDocuments = function(
-  docSize: number
-): {
+const generateDocuments = function (docSize: number): {
   id: string;
 }[] {
   const docs = [];
@@ -28,7 +27,7 @@ const documentDefinitions = generateDocuments(20);
 describe("Partition Splits", () => {
   let container: Container;
 
-  before(async function() {
+  before(async function () {
     await removeAllDatabases();
     container = await getTestContainer(
       "Partition Splits",
@@ -36,8 +35,8 @@ describe("Partition Splits", () => {
       {
         id: "partitionSplits",
         partitionKey: {
-          paths: ["/id"]
-        }
+          paths: ["/id"],
+        },
       },
       { offerThroughput: 25100 }
     );
@@ -53,7 +52,7 @@ describe("Partition Splits", () => {
         on: PluginOn.request,
         plugin: async (context, next) => {
           // This plugin throws a single 410 on the *second* time we see the same partition key range ID
-          const partitionKeyRangeId = context.headers[Constants.HttpHeaders.PartitionKeyRangeID];
+          const partitionKeyRangeId = context?.headers[Constants.HttpHeaders.PartitionKeyRangeID];
           if (partitionKeyRanges.has(partitionKeyRangeId) && hasSplit === false) {
             hasSplit = true;
             const error = new Error("Fake Partition Split") as any;
@@ -65,13 +64,13 @@ describe("Partition Splits", () => {
             partitionKeyRanges.add(partitionKeyRangeId);
           }
           return next(context);
-        }
-      }
+        },
+      },
     ];
     const client = new CosmosClient({
       ...options,
       plugins,
-      connectionPolicy: { enableBackgroundEndpointRefreshing: false }
+      connectionPolicy: { enableBackgroundEndpointRefreshing: false },
     } as any);
     const { resources } = await client
       .database(container.database.id)
@@ -92,7 +91,7 @@ describe("Partition Splits", () => {
         on: PluginOn.request,
         plugin: async (context, next) => {
           // This plugin throws a single 410 for partition key range ID 0 on every single request
-          const partitionKeyRangeId = context.headers[Constants.HttpHeaders.PartitionKeyRangeID];
+          const partitionKeyRangeId = context?.headers[Constants.HttpHeaders.PartitionKeyRangeID];
           if (partitionKeyRangeId === "0") {
             const error = new Error("Fake Partition Split") as any;
             error.code = 410;
@@ -100,13 +99,13 @@ describe("Partition Splits", () => {
             throw error;
           }
           return next(context);
-        }
-      }
+        },
+      },
     ];
     const client = new CosmosClient({
       ...options,
       plugins,
-      connectionPolicy: { enableBackgroundEndpointRefreshing: false }
+      connectionPolicy: { enableBackgroundEndpointRefreshing: false },
     } as any);
 
     // fetchAll()
@@ -117,7 +116,7 @@ describe("Partition Splits", () => {
         .items.query("SELECT * FROM root r", { maxItemCount: 2, maxDegreeOfParallelism: 1 })
         .fetchAll();
       assert.fail("Expected query to fail");
-    } catch (e) {
+    } catch (e: any) {
       assert.strictEqual(e.code, 503);
     }
 
@@ -129,7 +128,7 @@ describe("Partition Splits", () => {
         .items.query("SELECT * FROM root r", { maxItemCount: 2, maxDegreeOfParallelism: 1 })
         .fetchNext();
       assert.fail("Expected query to fail");
-    } catch (e) {
+    } catch (e: any) {
       assert.strictEqual(e.code, 503);
     }
 
@@ -145,7 +144,7 @@ describe("Partition Splits", () => {
         results.push(result);
       }
       assert.fail("Expected query to fail");
-    } catch (e) {
+    } catch (e: any) {
       assert.strictEqual(e.code, 503);
     }
   });

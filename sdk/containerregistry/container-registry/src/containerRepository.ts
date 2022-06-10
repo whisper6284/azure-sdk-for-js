@@ -4,17 +4,16 @@
 /// <reference lib="esnext.asynciterable" />
 
 import { OperationOptions } from "@azure/core-client";
-import { SpanStatusCode } from "@azure/core-tracing";
 import "@azure/core-paging";
 import { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
 
 import { GeneratedClient, RepositoryWriteableProperties } from "./generated";
-import { createSpan } from "./tracing";
+import { tracingClient } from "./tracing";
 import {
-  ManifestOrderBy,
+  ArtifactManifestOrder,
   ContainerRepositoryProperties,
   ArtifactManifestProperties,
-  ManifestPageResponse
+  ManifestPageResponse,
 } from "./models";
 import { RegistryArtifact, RegistryArtifactImpl } from "./registryArtifact";
 import { toArtifactManifestProperties, toServiceManifestOrderBy } from "./transformations";
@@ -28,8 +27,8 @@ export interface DeleteRepositoryOptions extends OperationOptions {}
  * Options for the `listRegistryArtifacts` method of `ContainerRepository`.
  */
 export interface ListManifestPropertiesOptions extends OperationOptions {
-  /** orderby query parameter */
-  orderBy?: ManifestOrderBy;
+  /** order in which the manifest properties are returned */
+  order?: ArtifactManifestOrder;
 }
 /**
  * Options for the `getProperties` method of `ContainerRepository`.
@@ -47,8 +46,6 @@ export interface UpdateRepositoryPropertiesOptions extends OperationOptions {
   canList?: boolean;
   /** Whether or not this repository can be read */
   canRead?: boolean;
-  /** Enables Teleport functionality on new images in the repository improving Container startup performance */
-  teleportEnabled?: boolean;
 }
 
 /**
@@ -186,16 +183,13 @@ export class ContainerRepositoryImpl {
    * @param options - optional configuration for the operation
    */
   public async delete(options: DeleteRepositoryOptions = {}): Promise<void> {
-    const { span, updatedOptions } = createSpan("ContainerRepository-delete", options);
-
-    try {
-      await this.client.containerRegistry.deleteRepository(this.name, updatedOptions);
-    } catch (e) {
-      span.setStatus({ code: SpanStatusCode.ERROR, message: e.message });
-      throw e;
-    } finally {
-      span.end();
-    }
+    return tracingClient.withSpan(
+      "ContainerRepositoryImpl.delete",
+      options,
+      async (updatedOptions) => {
+        await this.client.containerRegistry.deleteRepository(this.name, updatedOptions);
+      }
+    );
   }
 
   /**
@@ -216,16 +210,13 @@ export class ContainerRepositoryImpl {
   public async getProperties(
     options: GetRepositoryPropertiesOptions = {}
   ): Promise<ContainerRepositoryProperties> {
-    const { span, updatedOptions } = createSpan("ContainerRepository-getProperties", options);
-
-    try {
-      return await this.client.containerRegistry.getProperties(this.name, updatedOptions);
-    } catch (e) {
-      span.setStatus({ code: SpanStatusCode.ERROR, message: e.message });
-      throw e;
-    } finally {
-      span.end();
-    }
+    return tracingClient.withSpan(
+      "ContainerRepositoryImpl.getProperties",
+      options,
+      (updatedOptions) => {
+        return this.client.containerRegistry.getProperties(this.name, updatedOptions);
+      }
+    );
   }
 
   /**
@@ -253,21 +244,15 @@ export class ContainerRepositoryImpl {
       canWrite: options.canWrite,
       canList: options.canList,
       canRead: options.canRead,
-      teleportEnabled: options.teleportEnabled
     };
-    const { span, updatedOptions } = createSpan("ContainerRepository-updateProperties", {
-      ...options,
-      value
-    });
 
-    try {
-      return await this.client.containerRegistry.updateProperties(this.name, updatedOptions);
-    } catch (e) {
-      span.setStatus({ code: SpanStatusCode.ERROR, message: e.message });
-      throw e;
-    } finally {
-      span.end();
-    }
+    return tracingClient.withSpan(
+      "ContainerRepositoryImpl.updateProperties",
+      { ...options, value },
+      (updatedOptions) => {
+        return this.client.containerRegistry.updateProperties(this.name, updatedOptions);
+      }
+    );
   }
 
   /**
@@ -326,7 +311,7 @@ export class ContainerRepositoryImpl {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: (settings: PageSettings = {}) => this.listManifestsPage(settings, options)
+      byPage: (settings: PageSettings = {}) => this.listManifestsPage(settings, options),
     };
   }
 
@@ -342,12 +327,12 @@ export class ContainerRepositoryImpl {
     continuationState: PageSettings,
     options: ListManifestPropertiesOptions = {}
   ): AsyncIterableIterator<ManifestPageResponse> {
-    const orderby = toServiceManifestOrderBy(options.orderBy);
+    const orderby = toServiceManifestOrderBy(options.order);
     if (!continuationState.continuationToken) {
       const optionsComplete = {
         ...options,
         n: continuationState.maxPageSize,
-        orderby
+        orderby,
       };
       const currentPage = await this.client.containerRegistry.getManifests(
         this.name,
@@ -360,7 +345,7 @@ export class ContainerRepositoryImpl {
         );
         yield Object.defineProperty(array, "continuationToken", {
           value: continuationState.continuationToken,
-          enumerable: true
+          enumerable: true,
         });
       }
     }
@@ -377,7 +362,7 @@ export class ContainerRepositoryImpl {
         );
         yield Object.defineProperty(array, "continuationToken", {
           value: continuationState.continuationToken,
-          enumerable: true
+          enumerable: true,
         });
       }
     }

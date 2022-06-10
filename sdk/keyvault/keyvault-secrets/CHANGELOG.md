@@ -1,6 +1,6 @@
 # Release History
 
-## 4.3.1 (Unreleased)
+## 4.5.0-beta.1 (Unreleased)
 
 ### Features Added
 
@@ -9,6 +9,28 @@
 ### Bugs Fixed
 
 ### Other Changes
+
+## 4.4.0 (2022-03-24)
+
+### Other Changes
+
+- This release updates `SecretClient` to support service version 7.3 by default.
+
+## 4.4.0-beta.2 (2021-11-09)
+
+### Features Added
+
+- Support multi-tenant authentication against Key Vault and Managed HSM when using @azure/identity 2.0.0 or newer.
+
+### Other Changes
+
+- Updated SecretClient to use service version 7.3-preview by default.
+
+## 4.4.0-beta.1 (2021-09-07)
+
+### Other Changes
+
+- Updated the latest service version to 7.3.
 
 ## 4.3.0 (2021-07-29)
 

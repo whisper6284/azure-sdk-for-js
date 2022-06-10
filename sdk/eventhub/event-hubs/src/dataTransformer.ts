@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { message } from "rhea-promise";
-import isBuffer from "is-buffer";
-import { Buffer } from "buffer";
 import { logErrorStackTrace, logger } from "./log";
+import { Buffer } from "buffer";
+import isBuffer from "is-buffer";
+import { message } from "rhea-promise";
 
 /**
  * The allowed AMQP message body types.
@@ -46,7 +46,7 @@ export const defaultDataTransformer = {
       result.typecode = valueSectionTypeCode;
     } else if (bodyType === "sequence") {
       result = message.sequence_section(body);
-    } else if (isBuffer(body)) {
+    } else if (isBuffer(body) || body instanceof Uint8Array) {
       result = message.data_section(body);
     } else if (body === null && bodyType === "data") {
       result = message.data_section(null);
@@ -54,7 +54,7 @@ export const defaultDataTransformer = {
       try {
         const bodyStr = JSON.stringify(body);
         result = message.data_section(Buffer.from(bodyStr, "utf8"));
-      } catch (err) {
+      } catch (err: any) {
         const msg =
           `An error occurred while executing JSON.stringify() on the given body ` +
           body +
@@ -75,14 +75,21 @@ export const defaultDataTransformer = {
    * indicating which part of the AMQP message the body was decoded from.
    *
    * @param body - The AMQP message body as received from rhea.
+   * @param skipParsingBodyAsJson - Boolean to skip running JSON.parse() on message body when body type is `content`.
    * @returns The decoded/raw body and the body type.
    */
-  decode(body: unknown | RheaAmqpSection): { body: unknown; bodyType: BodyTypes } {
+  decode(
+    body: unknown | RheaAmqpSection,
+    skipParsingBodyAsJson: boolean
+  ): { body: unknown; bodyType: BodyTypes } {
     try {
       if (isRheaAmqpSection(body)) {
         switch (body.typecode) {
           case dataSectionTypeCode:
-            return { body: tryToJsonDecode(body.content), bodyType: "data" };
+            return {
+              body: skipParsingBodyAsJson ? body.content : tryToJsonDecode(body.content),
+              bodyType: "data",
+            };
           case sequenceSectionTypeCode:
             return { body: body.content, bodyType: "sequence" };
           case valueSectionTypeCode:
@@ -90,19 +97,19 @@ export const defaultDataTransformer = {
         }
       } else {
         if (isBuffer(body)) {
-          return { body: tryToJsonDecode(body), bodyType: "data" };
+          return { body: skipParsingBodyAsJson ? body : tryToJsonDecode(body), bodyType: "data" };
         }
 
         return { body, bodyType: "value" };
       }
-    } catch (err) {
+    } catch (err: any) {
       logger.verbose(
         "[decode] An error occurred while decoding the received message body. The error is: %O",
         err
       );
       throw err;
     }
-  }
+  },
 };
 
 /**
@@ -121,7 +128,7 @@ function tryToJsonDecode(body: unknown): unknown {
     // the original type back
     const bodyStr: string = processedBody.toString("utf8");
     processedBody = JSON.parse(bodyStr);
-  } catch (err) {
+  } catch (err: any) {
     logger.verbose(
       "[decode] An error occurred while trying JSON.parse() on the received body. The error is %O",
       err

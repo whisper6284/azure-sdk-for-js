@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as assert from "assert";
+import { assert } from "chai";
 import { getQSU, getConnectionStringFromEnvironment } from "../utils";
-import { record, Recorder } from "@azure/test-utils-recorder";
+import { record, Recorder } from "@azure-tools/test-recorder";
 import { QueueClient } from "../../src/QueueClient";
 import { StorageSharedKeyCredential } from "../../src/credentials/StorageSharedKeyCredential";
 import { TokenCredential } from "@azure/core-http";
 import { assertClientUsesTokenCredential } from "../utils/assert";
 import { newPipeline } from "../../src";
 import { recorderEnvSetup } from "../utils/index.browser";
+import { Context } from "mocha";
 
 describe("QueueClient message methods, Node.js only", () => {
   let queueName: string;
@@ -18,7 +19,7 @@ describe("QueueClient message methods, Node.js only", () => {
 
   let recorder: Recorder;
 
-  beforeEach(async function() {
+  beforeEach(async function (this: Context) {
     recorder = record(this, recorderEnvSetup);
     const queueServiceClient = getQSU();
     queueName = recorder.getUniqueName("queue");
@@ -26,7 +27,7 @@ describe("QueueClient message methods, Node.js only", () => {
     await queueClient.create();
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await queueClient.delete();
     await recorder.stop();
   });
@@ -37,11 +38,11 @@ describe("QueueClient message methods, Node.js only", () => {
     const buffer = Buffer.alloc(64 * 1024); // 64KB
     buffer.fill("a");
     buffer.write(specialChars, 0);
-    const messageContent = buffer.toString();
+    const newMessageContent = buffer.toString();
 
-    const eResult = await queueClient.sendMessage(messageContent, {
+    const eResult = await queueClient.sendMessage(newMessageContent, {
       messageTimeToLive: 40,
-      visibilityTimeout: 0
+      visibilityTimeout: 0,
     });
     assert.ok(eResult.date);
     assert.ok(eResult.expiresOn);
@@ -59,7 +60,7 @@ describe("QueueClient message methods, Node.js only", () => {
     assert.ok(eResult.clientRequestId);
     assert.ok(pResult.version);
     assert.deepStrictEqual(pResult.peekedMessageItems.length, 1);
-    assert.deepStrictEqual(pResult.peekedMessageItems[0].messageText, messageContent);
+    assert.deepStrictEqual(pResult.peekedMessageItems[0].messageText, newMessageContent);
     assert.deepStrictEqual(pResult.peekedMessageItems[0].dequeueCount, 0);
     assert.deepStrictEqual(pResult.peekedMessageItems[0].messageId, eResult.messageId);
     assert.deepStrictEqual(pResult.peekedMessageItems[0].insertedOn, eResult.insertedOn);
@@ -67,14 +68,14 @@ describe("QueueClient message methods, Node.js only", () => {
 
     const dResult = await queueClient.receiveMessages({
       visibilityTimeout: 10,
-      numberOfMessages: 2
+      numberOfMessages: 2,
     });
     assert.ok(dResult.date);
     assert.ok(dResult.requestId);
     assert.ok(eResult.clientRequestId);
     assert.ok(dResult.version);
     assert.deepStrictEqual(dResult.receivedMessageItems.length, 1);
-    assert.deepStrictEqual(dResult.receivedMessageItems[0].messageText, messageContent);
+    assert.deepStrictEqual(dResult.receivedMessageItems[0].messageText, newMessageContent);
     assert.deepStrictEqual(dResult.receivedMessageItems[0].dequeueCount, 1);
     assert.deepStrictEqual(dResult.receivedMessageItems[0].messageId, eResult.messageId);
     assert.deepStrictEqual(dResult.receivedMessageItems[0].insertedOn, eResult.insertedOn);
@@ -89,12 +90,12 @@ describe("QueueClient message methods, Node.js only", () => {
     const buffer = Buffer.alloc(64 * 1024 + 1);
     buffer.fill("a");
     buffer.write(specialChars, 0);
-    const messageContent = buffer.toString();
+    const newMessageContent = buffer.toString();
 
     let error;
     try {
-      await queueClient.sendMessage(messageContent, {});
-    } catch (err) {
+      await queueClient.sendMessage(newMessageContent, {});
+    } catch (err: any) {
       error = err;
     }
     assert.ok(error);
@@ -126,8 +127,8 @@ describe("QueueClient message methods, Node.js only", () => {
     const credential = factories[factories.length - 1] as StorageSharedKeyCredential;
     const newClient = new QueueClient(queueClient.url, credential, {
       retryOptions: {
-        maxTries: 5
-      }
+        maxTries: 5,
+      },
     });
 
     const eResult = await newClient.sendMessage(messageContent);
@@ -172,8 +173,8 @@ describe("QueueClient message methods, Node.js only", () => {
   it("can be created with a connection string and a queue name and an option bag", async () => {
     const newClient = new QueueClient(getConnectionStringFromEnvironment(), queueName, {
       retryOptions: {
-        maxTries: 5
-      }
+        maxTries: 5,
+      },
     });
 
     const eResult = await newClient.sendMessage(messageContent);
@@ -189,8 +190,8 @@ describe("QueueClient message methods, Node.js only", () => {
       getToken: () =>
         Promise.resolve({
           token: "token",
-          expiresOnTimestamp: 12345
-        })
+          expiresOnTimestamp: 12345,
+        }),
     };
     const newClient = new QueueClient(
       `https://myaccount.queue.core.windows.net/` + queueName,

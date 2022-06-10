@@ -12,21 +12,18 @@ import * as coreClient from "@azure/core-client";
 import * as coreTracing from "@azure/core-tracing";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ArtifactsClientContext } from "../artifactsClientContext";
-import {
-  WorkspaceOperationsGetOptionalParams,
-  WorkspaceOperationsGetResponse
-} from "../models";
+import { ArtifactsClient } from "../artifactsClient";
+import { WorkspaceGetOptionalParams, WorkspaceGetResponse } from "../models";
 
-/** Class representing a WorkspaceOperations. */
+/** Class containing WorkspaceOperations operations. */
 export class WorkspaceOperationsImpl implements WorkspaceOperations {
-  private readonly client: ArtifactsClientContext;
+  private readonly client: ArtifactsClient;
 
   /**
    * Initialize a new instance of the class WorkspaceOperations class.
    * @param client Reference to the service client
    */
-  constructor(client: ArtifactsClientContext) {
+  constructor(client: ArtifactsClient) {
     this.client = client;
   }
 
@@ -35,16 +32,16 @@ export class WorkspaceOperationsImpl implements WorkspaceOperations {
    * @param options The options parameters.
    */
   async get(
-    options?: WorkspaceOperationsGetOptionalParams
-  ): Promise<WorkspaceOperationsGetResponse> {
+    options?: WorkspaceGetOptionalParams
+  ): Promise<WorkspaceGetResponse> {
     const { span } = createSpan("ArtifactsClient-get", options || {});
     try {
       const result = await this.client.sendOperationRequest(
         { options },
         getOperationSpec
       );
-      return result as WorkspaceOperationsGetResponse;
-    } catch (error) {
+      return result as WorkspaceGetResponse;
+    } catch (error: any) {
       span.setStatus({
         code: coreTracing.SpanStatusCode.UNSET,
         message: error.message
@@ -69,7 +66,7 @@ const getOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorContract
     }
   },
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept],
   serializer

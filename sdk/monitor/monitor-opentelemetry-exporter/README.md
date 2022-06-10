@@ -4,7 +4,7 @@
 
 ## Getting started
 
-This exporter package assumes your application is [already instrumented](https://github.com/open-telemetry/opentelemetry-js/blob/master/getting-started/README.md) with the OpenTelemetry SDK. Once you are ready to export OpenTelemetry data, you can add this exporter to your application.
+This exporter package assumes your application is [already instrumented](https://opentelemetry.io/docs/js/getting-started/) with the OpenTelemetry SDK. Once you are ready to export OpenTelemetry data, you can add this exporter to your application.
 
 ### Install the package
 
@@ -28,8 +28,8 @@ Add the exporter to your existing OpenTelemetry tracer provider (`NodeTracerProv
 
 ```js
 const { AzureMonitorTraceExporter } = require("@azure/monitor-opentelemetry-exporter");
-const { NodeTracerProvider } = require("@opentelemetry/node");
-const { BatchSpanProcessor } = require("@opentelemetry/tracing");
+const { NodeTracerProvider } = require("@opentelemetry/sdk-trace-node");
+const { BatchSpanProcessor } = require("@opentelemetry/sdk-trace-base");
 
 // Use your existing provider
 const provider = new NodeTracerProvider({
@@ -44,7 +44,8 @@ provider.register();
 
 // Create an exporter instance
 const exporter = new AzureMonitorTraceExporter({
-  instrumentationKey: "ikey"
+  connectionString:
+    process.env["APPLICATIONINSIGHTS_CONNECTION_STRING"] || "<your connection string>"
 });
 
 // Add the exporter to the provider
@@ -79,15 +80,12 @@ For more information on the OpenTelemetry project, please review the [**OpenTele
 You can enable debug logging by changing the logging level of your provider.
 
 ```js
-const provider = new NodeTracerProvider({
-  logLevel: LogLevel.DEBUG,
-  plugins: {
-    https: {
-      // Ignore Application Insights Ingestion Server
-      ignoreOutgoingUrls: [new RegExp(/dc.services.visualstudio.com/i)]
-    }
-  }
-});
+const { diag, DiagConsoleLogger, DiagLogLevel } = require("@opentelemetry/api");
+const { NodeTracerProvider } = require("@opentelemetry/sdk-trace-node");
+
+const provider = new NodeTracerProvider();
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
+provider.register();
 ```
 
 ## Next steps

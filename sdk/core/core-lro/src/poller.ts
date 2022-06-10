@@ -32,8 +32,8 @@ export class PollerStoppedError extends Error {
 }
 
 /**
- * When a poller is cancelled through the `cancelOperation` method,
- * the poller will be rejected with an instance of the PollerCancelledError.
+ * When the operation is cancelled, the poller will be rejected with an instance
+ * of the PollerCancelledError.
  */
 export class PollerCancelledError extends Error {
   constructor(message: string) {
@@ -163,7 +163,8 @@ export interface PollerLike<TState extends PollOperationState<TResult>, TResult>
  */
 // eslint-disable-next-line no-use-before-define
 export abstract class Poller<TState extends PollOperationState<TResult>, TResult>
-  implements PollerLike<TState, TResult> {
+  implements PollerLike<TState, TResult>
+{
   private stopped: boolean = true;
   private resolve?: (value: TResult) => void;
   private reject?: (error: PollerStoppedError | PollerCancelledError | Error) => void;
@@ -286,7 +287,6 @@ export abstract class Poller<TState extends PollOperationState<TResult>, TResult
   protected abstract delay(): Promise<void>;
 
   /**
-   * @internal
    * Starts a loop that will break only if the poller is done
    * or if the poller is stopped.
    */
@@ -301,7 +301,6 @@ export abstract class Poller<TState extends PollOperationState<TResult>, TResult
   }
 
   /**
-   * @internal
    * pollOnce does one polling, by calling to the update method of the underlying
    * poll operation to make any relevant change effective.
    *
@@ -314,9 +313,15 @@ export abstract class Poller<TState extends PollOperationState<TResult>, TResult
       if (!this.isDone()) {
         this.operation = await this.operation.update({
           abortSignal: options.abortSignal,
-          fireProgress: this.fireProgress.bind(this)
+          fireProgress: this.fireProgress.bind(this),
         });
-        if (this.isDone() && this.resolve) {
+        if (this.operation.state.isCancelled) {
+          this.stopped = true;
+          if (this.reject) {
+            this.reject(new PollerCancelledError("Poller cancelled"));
+          }
+          throw new Error(`The long-running operation has been canceled.`);
+        } else if (this.isDone() && this.resolve) {
           // If the poller has finished polling, this means we now have a result.
           // However, it can be the case that TResult is instantiated to void, so
           // we are not expecting a result anyway. To assert that we might not
@@ -325,7 +330,7 @@ export abstract class Poller<TState extends PollOperationState<TResult>, TResult
           this.resolve(this.operation.state.result as TResult);
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       this.operation.state.error = e;
       if (this.reject) {
         this.reject(e);
@@ -335,7 +340,6 @@ export abstract class Poller<TState extends PollOperationState<TResult>, TResult
   }
 
   /**
-   * @internal
    * fireProgress calls the functions passed in via onProgress the method of the poller.
    *
    * It loops over all of the callbacks received from onProgress, and executes them, sending them
@@ -350,15 +354,10 @@ export abstract class Poller<TState extends PollOperationState<TResult>, TResult
   }
 
   /**
-   * @internal
-   * Invokes the underlying operation's cancel method, and rejects the
-   * pollUntilDone promise.
+   * Invokes the underlying operation's cancel method.
    */
   private async cancelOnce(options: { abortSignal?: AbortSignalLike } = {}): Promise<void> {
     this.operation = await this.operation.cancel(options);
-    if (this.reject) {
-      this.reject(new PollerCancelledError("Poller cancelled"));
-    }
   }
 
   /**
@@ -440,9 +439,6 @@ export abstract class Poller<TState extends PollOperationState<TResult>, TResult
    * @param options - Optional properties passed to the operation's update method.
    */
   public cancelOperation(options: { abortSignal?: AbortSignalLike } = {}): Promise<void> {
-    if (!this.stopped) {
-      this.stopped = true;
-    }
     if (!this.cancelPromise) {
       this.cancelPromise = this.cancelOnce(options);
     } else if (options.abortSignal) {

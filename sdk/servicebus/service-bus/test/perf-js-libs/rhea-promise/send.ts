@@ -11,8 +11,11 @@ Measures the maximum throughput of `sender.send()` in package `rhea-promise`.
  */
 
 import { Connection, SenderEvents, ConnectionOptions } from "rhea-promise";
-import delay from "delay";
 import moment from "moment";
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const _payload = Buffer.alloc(1024);
 const _start = moment();
@@ -67,15 +70,15 @@ async function RunTest(
     password: password,
     port: port,
     reconnect: false,
-    rejectUnauthorized: !allowUnauthorized
+    rejectUnauthorized: !allowUnauthorized,
   } as ConnectionOptions);
   await connection.open();
 
   const sender = connection.createSender({
     name: "sender-1",
     target: {
-      address: entityPath
-    }
+      address: entityPath,
+    },
   });
 
   function sendMessages(): void {

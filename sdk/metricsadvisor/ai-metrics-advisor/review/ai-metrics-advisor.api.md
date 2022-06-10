@@ -4,10 +4,12 @@
 
 ```ts
 
-import { OperationOptions } from '@azure/core-http';
+/// <reference lib="esnext.asynciterable" />
+
+import { ExtendedCommonClientOptions } from '@azure/core-http-compat';
+import { FullOperationResponse } from '@azure/core-client';
+import { OperationOptions } from '@azure/core-client';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PipelineOptions } from '@azure/core-http';
-import { RestResponse } from '@azure/core-http';
 import { TokenCredential } from '@azure/core-auth';
 
 // @public
@@ -883,7 +885,7 @@ export class MetricsAdvisorAdministrationClient {
 }
 
 // @public
-export interface MetricsAdvisorAdministrationClientOptions extends PipelineOptions {
+export interface MetricsAdvisorAdministrationClientOptions extends ExtendedCommonClientOptions {
 }
 
 // @public
@@ -905,10 +907,10 @@ export class MetricsAdvisorClient {
     listMetricDimensionValues(metricId: string, dimensionName: string, options?: ListMetricDimensionValuesOptions): PagedAsyncIterableIterator<string, DimensionValuesPageResponse>;
     listMetricEnrichmentStatus(metricId: string, startTime: Date | string, endTime: Date | string, options?: ListMetricEnrichmentStatusOptions): PagedAsyncIterableIterator<EnrichmentStatus, MetricEnrichmentStatusPageResponse>;
     listMetricSeriesDefinitions(metricId: string, activeSince: Date | string, options?: ListMetricSeriesDefinitionsOptions): PagedAsyncIterableIterator<MetricSeriesDefinition, MetricSeriesPageResponse>;
-    }
+}
 
 // @public
-export interface MetricsAdvisorClientOptions extends PipelineOptions {
+export interface MetricsAdvisorClientOptions extends ExtendedCommonClientOptions {
 }
 
 // @public
@@ -1021,6 +1023,13 @@ export type PostgreSqlDataFeedSource = {
 };
 
 // @public
+export interface RestResponse {
+    // (undocumented)
+    [key: string]: any;
+    _response: FullOperationResponse;
+}
+
+// @public
 export type Severity = "Low" | "Medium" | "High";
 
 // @public
@@ -1129,7 +1138,6 @@ export type WebNotificationHookPatch = {
     hookType: "Webhook";
     hookParameter?: Partial<WebhookHookParameter>;
 } & NotificationHookPatch;
-
 
 // (No @packageDocumentation comment for this package)
 

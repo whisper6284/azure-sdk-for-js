@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as assert from "assert";
+import { assert } from "chai";
 
 import {
   AccountSASPermissions,
@@ -14,23 +14,24 @@ import {
   generateQueueSASQueryParameters,
   QueueServiceClient,
   StorageSharedKeyCredential,
-  newPipeline
+  newPipeline,
 } from "../../src";
 import { SASProtocol } from "../../src/SASQueryParameters";
 import { getQSU } from "../utils/index";
-import { record, delay, Recorder } from "@azure/test-utils-recorder";
+import { record, delay, Recorder } from "@azure-tools/test-recorder";
 import { recorderEnvSetup } from "../utils/index.browser";
+import { Context } from "mocha";
 
 describe("Shared Access Signature (SAS) generation Node.js only", () => {
   let queueServiceClient: QueueServiceClient;
   let recorder: Recorder;
 
-  beforeEach(function() {
+  beforeEach(function (this: Context) {
     recorder = record(this, recorderEnvSetup);
     queueServiceClient = getQSU();
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await recorder.stop();
   });
 
@@ -54,7 +55,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
         resourceTypes: AccountSASResourceTypes.parse("sco").toString(),
         services: AccountSASServices.parse("btqf").toString(),
         startsOn: now,
-        version: "2016-05-31"
+        version: "2016-05-31",
       },
       sharedKeyCredential as StorageSharedKeyCredential
     ).toString();
@@ -78,7 +79,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
         expiresOn: tmr,
         permissions: AccountSASPermissions.parse("wdlcup"),
         resourceTypes: AccountSASResourceTypes.parse("sco").toString(),
-        services: AccountSASServices.parse("btqf").toString()
+        services: AccountSASServices.parse("btqf").toString(),
       },
       sharedKeyCredential as StorageSharedKeyCredential
     ).toString();
@@ -92,7 +93,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
     let error;
     try {
       await queueServiceClientwithSAS.getProperties();
-    } catch (err) {
+    } catch (err: any) {
       error = err;
     }
 
@@ -112,7 +113,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
         expiresOn: tmr,
         permissions: AccountSASPermissions.parse("rwdlacup"),
         resourceTypes: AccountSASResourceTypes.parse("sco").toString(),
-        services: AccountSASServices.parse("b").toString()
+        services: AccountSASServices.parse("b").toString(),
       },
       sharedKeyCredential as StorageSharedKeyCredential
     ).toString();
@@ -126,7 +127,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
     let error;
     try {
       await queueServiceClientwithSAS.getProperties();
-    } catch (err) {
+    } catch (err: any) {
       error = err;
     }
 
@@ -149,7 +150,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
         protocol: SASProtocol.HttpsAndHttp,
         resourceTypes: AccountSASResourceTypes.parse("co").toString(),
         services: AccountSASServices.parse("btqf").toString(),
-        version: "2016-05-31"
+        version: "2016-05-31",
       },
       sharedKeyCredential as StorageSharedKeyCredential
     ).toString();
@@ -163,7 +164,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
     let error;
     try {
       await queueServiceClientwithSAS.getProperties();
-    } catch (err) {
+    } catch (err: any) {
       error = err;
     }
 
@@ -193,7 +194,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
         permissions: QueueSASPermissions.parse("raup"),
         protocol: SASProtocol.HttpsAndHttp,
         startsOn: now,
-        version: "2016-05-31"
+        version: "2016-05-31",
       },
       sharedKeyCredential as StorageSharedKeyCredential
     );
@@ -228,7 +229,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
         permissions: QueueSASPermissions.parse("raup"),
         protocol: SASProtocol.HttpsAndHttp,
         startsOn: now,
-        version: "2016-05-31"
+        version: "2016-05-31",
       },
       sharedKeyCredential as StorageSharedKeyCredential
     );
@@ -276,17 +277,17 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
       {
         accessPolicy: {
           permissions: QueueSASPermissions.parse("raup").toString(),
-          startsOn: now
+          startsOn: now,
         },
-        id
-      }
+        id,
+      },
     ]);
 
     const queueSAS = generateQueueSASQueryParameters(
       {
         expiresOn: tmr,
         queueName: queueClient.name,
-        identifier: id
+        identifier: id,
       },
       sharedKeyCredential as StorageSharedKeyCredential
     );
@@ -301,7 +302,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
     const pResult = await queuesClientwithSAS.peekMessages();
     assert.deepStrictEqual(pResult.peekedMessageItems[0].messageText, messageContent);
     const dResult = await queuesClientwithSAS.receiveMessages({
-      visibilityTimeout: 1
+      visibilityTimeout: 1,
     });
     assert.deepStrictEqual(dResult.receivedMessageItems[0].messageText, messageContent);
 
@@ -335,7 +336,6 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
         resourceTypes: AccountSASResourceTypes.parse("sco").toString(),
         services: AccountSASServices.parse("q").toString(),
         startsOn: now,
-        version: "2016-05-31"
       },
       sharedKeyCredential as StorageSharedKeyCredential
     ).toString();
@@ -349,7 +349,45 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
         ipRange: { start: "0.0.0.0", end: "255.255.255.255" },
         protocol: SASProtocol.HttpsAndHttp,
         startsOn: now,
-        version: "2016-05-31"
+      }
+    );
+    assert.deepStrictEqual(sasURL, sasURL1);
+
+    const queueServiceClientwithSAS = new QueueServiceClient(sasURL);
+    await queueServiceClientwithSAS.getProperties();
+  });
+
+  it("QueueServiceClient.generateAccountSasUrl with previous version should work", async () => {
+    const now = recorder.newDate("now");
+    now.setMinutes(now.getMinutes() - 5); // Skip clock skew with server
+    const tmr = recorder.newDate("tmr");
+    tmr.setDate(tmr.getDate() + 1);
+
+    const sharedKeyCredential = queueServiceClient["credential"];
+    const sas = generateAccountSASQueryParameters(
+      {
+        expiresOn: tmr,
+        ipRange: { start: "0.0.0.0", end: "255.255.255.255" },
+        permissions: AccountSASPermissions.parse("rwdlacup"),
+        protocol: SASProtocol.HttpsAndHttp,
+        resourceTypes: AccountSASResourceTypes.parse("sco").toString(),
+        services: AccountSASServices.parse("q").toString(),
+        startsOn: now,
+        version: "2016-05-31",
+      },
+      sharedKeyCredential as StorageSharedKeyCredential
+    ).toString();
+    const sasURL1 = `${queueServiceClient.url}?${sas}`;
+
+    const sasURL = queueServiceClient.generateAccountSasUrl(
+      tmr,
+      AccountSASPermissions.parse("rwdlacup"),
+      undefined,
+      {
+        ipRange: { start: "0.0.0.0", end: "255.255.255.255" },
+        protocol: SASProtocol.HttpsAndHttp,
+        startsOn: now,
+        version: "2016-05-31",
       }
     );
     assert.deepStrictEqual(sasURL, sasURL1);
@@ -378,7 +416,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
         permissions: QueueSASPermissions.parse("raup"),
         protocol: SASProtocol.HttpsAndHttp,
         startsOn: now,
-        version: "2016-05-31"
+        version: "2016-05-31",
       },
       sharedKeyCredential as StorageSharedKeyCredential
     );
@@ -390,7 +428,7 @@ describe("Shared Access Signature (SAS) generation Node.js only", () => {
       permissions: QueueSASPermissions.parse("raup"),
       protocol: SASProtocol.HttpsAndHttp,
       startsOn: now,
-      version: "2016-05-31"
+      version: "2016-05-31",
     });
     assert.deepStrictEqual(sasURL, sasURL1);
 

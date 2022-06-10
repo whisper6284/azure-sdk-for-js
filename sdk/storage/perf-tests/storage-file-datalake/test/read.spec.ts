@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { drainStream, PerfStressOptionDictionary } from "@azure/test-utils-perfstress";
+import { drainStream, PerfOptionDictionary } from "@azure/test-utils-perf";
 import { StorageDFSTest } from "./storageTest.spec";
 import { DataLakeFileClient } from "@azure/storage-file-datalake";
 import { v4 as generateUuid } from "uuid";
@@ -10,14 +10,14 @@ interface StorageDFSReadTestOptions {
 }
 
 export class StorageDFSReadTest extends StorageDFSTest<StorageDFSReadTestOptions> {
-  public options: PerfStressOptionDictionary<StorageDFSReadTestOptions> = {
+  public options: PerfOptionDictionary<StorageDFSReadTestOptions> = {
     size: {
       required: true,
       description: "Size in bytes",
       shortName: "sz",
       longName: "size",
-      defaultValue: 1024
-    }
+      defaultValue: 1024,
+    },
   };
   static fileName = generateUuid();
   fileClient: DataLakeFileClient;
@@ -32,7 +32,7 @@ export class StorageDFSReadTest extends StorageDFSTest<StorageDFSReadTestOptions
     await this.fileClient.upload(Buffer.alloc(this.parsedOptions.size.value!));
   }
 
-  async runAsync(): Promise<void> {
+  async run(): Promise<void> {
     const ReadResponse = await this.fileClient.read();
     await drainStream(ReadResponse.readableStreamBody!);
   }

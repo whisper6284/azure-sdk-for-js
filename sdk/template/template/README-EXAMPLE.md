@@ -18,6 +18,13 @@ Use the client library for App Configuration to:
 
 ## Getting started
 
+### Currently supported environments
+
+- [LTS versions of Node.js](https://nodejs.org/about/releases/)
+- Latest versions of Safari, Chrome, Edge, and Firefox.
+
+See our [support policy](https://github.com/Azure/azure-sdk-for-js/blob/main/SUPPORT.md) for more details.
+
 ### Install the package
 
 ```bash
@@ -26,8 +33,8 @@ npm install @azure/app-configuration
 
 ### Prerequisites
 
-- You must have an [Azure Subscription](https://azure.microsoft.com) and an [App Configuration](https://docs.microsoft.com/azure/azure-app-configuration/) resource to use this package.
-- Node.js version 8.x.x or higher
+- An [Azure Subscription](https://azure.microsoft.com)
+- An [App Configuration](https://docs.microsoft.com/azure/azure-app-configuration/) resource.
 
 ### Create an App Configuration resource
 
@@ -155,14 +162,14 @@ run().catch((err) => console.log("ERROR:", err));
 
 The following samples show you the various ways you can interact with App Configuration:
 
-- [`helloworld.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1/typescript/src/helloworld.ts) - Get, set, and delete configuration values.
-- [`helloworldWithLabels.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1/typescript/src/helloworldWithLabels.ts) - Use labels to add additional dimensions to your settings for scenarios like beta vs production.
-- [`optimisticConcurrencyViaEtag.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1/typescript/src/optimisticConcurrencyViaEtag.ts) - Set values using etags to prevent accidental overwrites.
-- [`setReadOnlySample.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1/typescript/src/setReadOnlySample.ts) - Marking settings as read-only to prevent modification.
-- [`getSettingOnlyIfChanged.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1/typescript/src/getSettingOnlyIfChanged.ts) - Get a setting only if it changed from the last time you got it.
-- [`listRevisions.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1/typescript/src/listRevisions.ts) - List the revisions of a key, allowing you to see previous values and when they were set.
+- [`helloworld.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1-beta/typescript/src/helloworld.ts) - Get, set, and delete configuration values.
+- [`helloworldWithLabels.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1-beta/typescript/src/helloworldWithLabels.ts) - Use labels to add additional dimensions to your settings for scenarios like beta vs production.
+- [`optimisticConcurrencyViaEtag.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1-beta/typescript/src/optimisticConcurrencyViaEtag.ts) - Set values using etags to prevent accidental overwrites.
+- [`setReadOnlySample.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1-beta/typescript/src/setReadOnlySample.ts) - Marking settings as read-only to prevent modification.
+- [`getSettingOnlyIfChanged.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1-beta/typescript/src/getSettingOnlyIfChanged.ts) - Get a setting only if it changed from the last time you got it.
+- [`listRevisions.ts`](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1-beta/typescript/src/listRevisions.ts) - List the revisions of a key, allowing you to see previous values and when they were set.
 
-More in-depth examples can be found in the [samples](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1/) folder on GitHub.
+More in-depth examples can be found in the [samples](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/appconfiguration/app-configuration/samples/v1-beta/) folder on GitHub.
 
 ## Contributing
 

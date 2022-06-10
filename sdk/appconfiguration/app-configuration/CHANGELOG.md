@@ -1,5 +1,47 @@
 # Release History
 
+## 1.4.0-beta.2 (Unreleased)
+
+### Features Added
+
+### Breaking Changes
+
+### Bugs Fixed
+
+### Other Changes
+
+## 1.4.0-beta.1 (2022-05-10)
+
+### Features Added
+
+- Migrated from using `@azure/core-http` to depend on newer version of Core libraries `@azure/core-client` and `@azure/core-rest-pipeline` which bring better maintainability and performance. [#20766](https://github.com/Azure/azure-sdk-for-js/pull/20766). See [Azure Core v1 vs v2](https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/core/core-rest-pipeline/documentation/core2.md) for more on the difference and benefits of the move.
+  - As part of the migration to `@azure/core-client` and `@azure/core-rest-pipeline`,
+    through the operation options, the methods such as `AppConfgurationClient#addConfigurationSetting` can take a callback (`onResponse`) to access the HTTP response. See [Change to the \_response property](https://github.com/Azure/autorest.typescript/wiki/%60core-http%60-dependency-migration-to-%60core-client%60-%60core-rest-pipeline%60#change-to-the-_response-property).
+
+### Bugs Fixed
+
+- Fix an issue where React-Native is loading the wrong file. Adding a `react-native` mapping to point to the ESM entrypoint file. [PR #21119](https://github.com/Azure/azure-sdk-for-js/pull/21119)
+
+### Other Changes
+
+- Updated our `@azure/core-tracing` dependency to the latest version (1.0.0).
+
+  - Notable changes include Removal of `@opentelemetry/api` as a transitive dependency and ensuring that the active context is properly propagated.
+  - Customers who would like to continue using OpenTelemetry driven tracing should visit our [OpenTelemetry Instrumentation](https://www.npmjs.com/package/@azure/opentelemetry-instrumentation-azure-sdk) package for instructions.
+
+- Move to depend on `@azure/core-util` for SHA256 Digest and HMAC computing.
+
+## 1.3.1 (2021-12-14)
+
+### Bugs Fixed
+
+- Using this SDK with the resources from Sovereign clouds (AzureUSGovernment/AzureChinaCloud) would have failed with an authorization error.
+  Has been fixed in [#17583](https://github.com/Azure/azure-sdk-for-js/pull/17583)
+
+### Other Changes
+
+- Throws a better error message if provided invalid connection strings such as `undefined` to the `AppConfigurationClient` constructor. [#18356](https://github.com/Azure/azure-sdk-for-js/pull/18356)
+
 ## 1.3.0 (2021-07-26)
 
 ### Features Added
@@ -28,7 +70,7 @@
 
 ### Fixed
 
-- High request rate would result in throttling. SDK would retry on the failed requests based on the service suggested time from the `retry-after-ms` header in the error response. If there are too many parallel requests, retries for all of them may also result in a high request rate entering into a state which might seem like the application is hanging forever.
+- High request rate would result in throttling. SDK would retry on the failed requests based on the service suggested time from the `retry-after-ms` header in the error response. If there are too many parallel requests, retries for all of them may also result in a high request rate entering into a state which might seem like the application is perpetually not responding.
   - [#15721](https://github.com/Azure/azure-sdk-for-js/pull/15721) allows the user-provided abortSignal to be taken into account to abort the requests sooner.
   - More resources - [App Configuration | Throttling](https://docs.microsoft.com/azure/azure-app-configuration/rest-api-throttling) and [App Configuration | Requests Quota](https://docs.microsoft.com/azure/azure-app-configuration/faq#which-app-configuration-tier-should-i-use)
 
@@ -78,8 +120,8 @@ This release marks the general availability of the `@azure/app-configuration` pa
   ```typescript
   new AppConfigurationClient(connectionString, {
     userAgentOptions: {
-      userAgentPrefix: "MyUserAgent"
-    }
+      userAgentPrefix: "MyUserAgent",
+    },
   });
   ```
 
@@ -135,11 +177,11 @@ In previous previews:
 await client.getConfigurationSetting("MyKey", { label: "MyLabel" });
 await client.addConfigurationSetting("MyKey", {
   label: "MyLabel",
-  value: "MyValue"
+  value: "MyValue",
 });
 await client.setConfigurationSetting("MyKey", {
   label: "MyLabel",
-  value: "MyValue"
+  value: "MyValue",
 });
 await client.deleteConfigurationSetting("MyKey", { label: "MyLabel" });
 ```
@@ -152,12 +194,12 @@ await client.getConfigurationSetting({ key: "MyKey", label: "MyLabel" });
 await client.addConfigurationSetting({
   key: "MyKey",
   label: "MyLabel",
-  value: "MyValue"
+  value: "MyValue",
 });
 await client.setConfigurationSetting({
   key: "MyKey",
   label: "MyLabel",
-  value: "MyValue"
+  value: "MyValue",
 });
 await client.deleteConfigurationSetting({ key: "MyKey", label: "MyLabel" });
 ```

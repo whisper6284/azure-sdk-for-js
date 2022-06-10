@@ -24,6 +24,9 @@ export async function main(): Promise<void> {
   const client = new SecretClient(url, credential);
 
   // Create a secret
+  // The secret can be a string of any kind. For example,
+  // a multiline text block such as an RSA private key with newline characters,
+  // or a stringified JSON object, like `JSON.stringify({ mySecret: 'MySecretValue'})`.
   const uniqueString = new Date().getTime();
   const secretName = `secret${uniqueString}`;
   const result = await client.setSecret(secretName, "MySecretValue");
@@ -38,7 +41,7 @@ export async function main(): Promise<void> {
     secretName,
     result.properties.version!,
     {
-      enabled: false
+      enabled: false,
     }
   );
   console.log("updated secret: ", updatedSecret);
@@ -48,8 +51,7 @@ export async function main(): Promise<void> {
   await client.beginDeleteSecret(secretName);
 }
 
-main().catch((err) => {
-  console.log("error code: ", err.code);
-  console.log("error message: ", err.message);
-  console.log("error stack: ", err.stack);
+main().catch((error) => {
+  console.error("An error occurred:", error);
+  process.exit(1);
 });

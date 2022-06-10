@@ -59,12 +59,12 @@ export async function getHeaders({
   options = {},
   partitionKeyRangeId,
   useMultipleWriteLocations,
-  partitionKey
+  partitionKey,
 }: GetHeadersOptions): Promise<CosmosHeaders> {
   const headers: CosmosHeaders = {
     [Constants.HttpHeaders.ResponseContinuationTokenLimitInKB]: 1,
     [Constants.HttpHeaders.EnableCrossPartitionQuery]: true,
-    ...defaultHeaders
+    ...defaultHeaders,
   };
 
   if (useMultipleWriteLocations) {
@@ -127,6 +127,11 @@ export async function getHeaders({
     headers[Constants.HttpHeaders.ConsistencyLevel] = options.consistencyLevel;
   }
 
+  if (options.maxIntegratedCacheStalenessInMs && resourceType === ResourceType.item) {
+    headers[Constants.HttpHeaders.DedicatedGatewayPerRequestCacheStaleness] =
+      options.maxIntegratedCacheStalenessInMs;
+  }
+
   if (options.resourceTokenExpirySeconds) {
     headers[Constants.HttpHeaders.ResourceTokenExpiry] = options.resourceTokenExpirySeconds;
   }
@@ -187,12 +192,12 @@ export async function getHeaders({
   if (options.disableRUPerMinuteUsage) {
     headers[Constants.HttpHeaders.DisableRUPerMinuteUsage] = true;
   }
+
   if (
     clientOptions.key ||
     clientOptions.resourceTokens ||
     clientOptions.tokenProvider ||
-    clientOptions.permissionFeed ||
-    clientOptions.aadCredentials
+    clientOptions.permissionFeed
   ) {
     await setAuthorizationHeader(clientOptions, verb, path, resourceId, resourceType, headers);
   }

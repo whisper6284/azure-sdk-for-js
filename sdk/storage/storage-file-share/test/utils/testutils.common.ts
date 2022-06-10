@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { padStart } from "../../src/utils/utils.common";
-import { env, RecorderEnvironmentSetup } from "@azure/test-utils-recorder";
+import { env, RecorderEnvironmentSetup } from "@azure-tools/test-recorder";
 import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-http";
 
 export function isBrowser(): boolean {
@@ -31,7 +30,7 @@ export const recorderEnvSetup: RecorderEnvironmentSetup = {
     PREMIUM_FILE_ACCOUNT_NAME: `${mockAccountName}`,
     PREMIUM_FILE_ACCOUNT_KEY: `${mockAccountKey}`,
     PREMIUM_FILE_ACCOUNT_SAS: `${mockAccountKey}`,
-    PREMIUM_FILE_STORAGE_CONNECTION_STRING: `DefaultEndpointsProtocol=https;AccountName=${mockSDAccountName};AccountKey=${mockAccountKey};EndpointSuffix=core.windows.net`
+    PREMIUM_FILE_STORAGE_CONNECTION_STRING: `DefaultEndpointsProtocol=https;AccountName=${mockSDAccountName};AccountKey=${mockAccountKey};EndpointSuffix=core.windows.net`,
   },
   customizationsOnRecordings: [
     // Used in record mode
@@ -41,7 +40,7 @@ export const recorderEnvSetup: RecorderEnvironmentSetup = {
       recording.replace(
         new RegExp(env.ACCOUNT_SAS.match("(.*)&sig=(.*)")[2], "g"),
         `${mockAccountKey}`
-      )
+      ),
   ],
   // SAS token may contain sensitive information
   queryParametersToSkip: [
@@ -53,8 +52,8 @@ export const recorderEnvSetup: RecorderEnvironmentSetup = {
     "srt",
     "ss",
     "st",
-    "sv"
-  ]
+    "sv",
+  ],
 };
 
 /**
@@ -95,17 +94,15 @@ export class SimpleTokenCredential implements TokenCredential {
   ): Promise<AccessToken | null> {
     return {
       token: this.token,
-      expiresOnTimestamp: this.expiresOn.getTime()
+      expiresOnTimestamp: this.expiresOn.getTime(),
     };
   }
 }
 
 export function getUniqueName(prefix: string): string {
-  return `${prefix}${new Date().getTime()}${padStart(
-    Math.floor(Math.random() * 10000).toString(),
-    5,
-    "00000"
-  )}`;
+  return `${prefix}${new Date().getTime()}${Math.floor(Math.random() * 10000)
+    .toString()
+    .padStart(5, "00000")}`;
 }
 
 export function base64encode(content: string): string {

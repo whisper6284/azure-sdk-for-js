@@ -39,17 +39,19 @@ export {
   XmlOptions,
   SerializerOptions,
   RawResponseCallback,
-  CommonClientOptions
+  CommonClientOptions,
+  AdditionalPolicyConfig,
 } from "./interfaces";
 export {
   deserializationPolicy,
   deserializationPolicyName,
   DeserializationPolicyOptions,
-  DeserializationContentTypes
+  DeserializationContentTypes,
 } from "./deserializationPolicy";
 export {
   serializationPolicy,
   serializationPolicyName,
-  SerializationPolicyOptions
+  SerializationPolicyOptions,
 } from "./serializationPolicy";
-import "@azure/core-asynciterator-polyfill";
+export { authorizeRequestOnClaimChallenge } from "./authorizeRequestOnClaimChallenge";
+export { authorizeRequestOnTenantChallenge } from "./authorizeRequestOnTenantChallenge";

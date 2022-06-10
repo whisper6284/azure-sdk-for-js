@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 import assert from "assert";
-import { CosmosClient } from "../../../dist-esm/";
-import { endpoint, masterKey } from "../../public/common/_testConfig";
-import { SasTokenPermissionKind } from "../../../dist-esm/common";
-import { createAuthorizationSasToken } from "../../../dist-esm/utils/SasToken";
-import { SasTokenProperties } from "../../../dist-esm/client/SasToken/SasTokenProperties";
+import { CosmosClient } from "../../../src";
+import { endpoint } from "../../public/common/_testConfig";
+import { masterKey, userSasTokenKey } from "../../public/common/_fakeTestSecrets";
+import { SasTokenPermissionKind } from "../../../src/common";
+import { createAuthorizationSasToken } from "../../../src/utils/SasToken";
+import { SasTokenProperties } from "../../../src/client/SasToken/SasTokenProperties";
 
-describe.skip("SAS Token Authorization", function() {
+describe.skip("SAS Token Authorization", function () {
   const sasTokenProperties = <SasTokenProperties>{
     user: "user1",
     userTag: "",
@@ -21,10 +22,10 @@ describe.skip("SAS Token Authorization", function() {
     controlPlaneReaderScope: SasTokenPermissionKind.ContainerReadAny,
     controlPlaneWriterScope: 0,
     dataPlaneReaderScope: SasTokenPermissionKind.ContainerFullAccess,
-    dataPlaneWriterScope: 0
+    dataPlaneWriterScope: 0,
   };
 
-  it("should connect with sas token properties set", async function() {
+  it("should connect with sas token properties set", async function () {
     const key = await createAuthorizationSasToken(masterKey, sasTokenProperties);
 
     // If connecting to the Cosmos DB Emulator, disable TLS verification for your node process:
@@ -32,7 +33,7 @@ describe.skip("SAS Token Authorization", function() {
     const client = new CosmosClient({
       endpoint,
       key: key,
-      connectionPolicy: { enableBackgroundEndpointRefreshing: false }
+      connectionPolicy: { enableBackgroundEndpointRefreshing: false },
     });
 
     const database = client.database(sasTokenProperties.databaseName);
@@ -42,7 +43,7 @@ describe.skip("SAS Token Authorization", function() {
       category: "fun",
       name: "Cosmos DB",
       description: "Complete Cosmos DB Node.js Quickstart ⚡.",
-      isComplete: false
+      isComplete: false,
     };
 
     const item = await container.items.create(newItem);
@@ -52,13 +53,11 @@ describe.skip("SAS Token Authorization", function() {
     assert(undefined !== dbs, "Should be able to fetch list of databases");
   });
 
-  it("should connect when a user set sas token", async function() {
-    const userSasTokenKey =
-      "type=sas&ver=1.0&sig=pCgZFxV9JQN1i3vzYNTfQldW1No7I+MSgN628TZcJAI=;dXNlcjEKCi9kYnMvZGIxL2NvbGxzL2NvbGwxLwoKNUZFRTY2MDEKNjIxM0I3MDEKMAo2MAowCkZGRkZGRkZGCjAK";
+  it("should connect when a user set sas token", async function () {
     const sasTokenClient = new CosmosClient({
       endpoint,
       key: userSasTokenKey,
-      connectionPolicy: { enableBackgroundEndpointRefreshing: false }
+      connectionPolicy: { enableBackgroundEndpointRefreshing: false },
     });
 
     const dbs = await sasTokenClient.databases.readAll().fetchAll();

@@ -6,7 +6,7 @@ import {
   isNode,
   RequestPolicy,
   RequestPolicyOptions,
-  WebResource
+  WebResource,
 } from "@azure/core-http";
 
 import { HeaderConstants, UrlConstants } from "../utils/constants";
@@ -29,6 +29,9 @@ export class StorageBrowserPolicy extends BaseRequestPolicy {
    * @param nextPolicy -
    * @param options -
    */
+
+  // The base class has a protected constructor. Adding a public one to enable constructing of this class.
+  /* eslint-disable-next-line @typescript-eslint/no-useless-constructor*/
   constructor(nextPolicy: RequestPolicy, options: RequestPolicyOptions) {
     super(nextPolicy, options);
   }

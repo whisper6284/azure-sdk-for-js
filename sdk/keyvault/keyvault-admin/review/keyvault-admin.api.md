@@ -4,6 +4,8 @@
 
 ```ts
 
+/// <reference lib="esnext.asynciterable" />
+
 import { CommonClientOptions } from '@azure/core-client';
 import { OperationOptions } from '@azure/core-client';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
@@ -207,7 +209,7 @@ export enum KnownKeyVaultRoleScope {
 }
 
 // @public
-export const LATEST_API_VERSION = "7.3-preview";
+export const LATEST_API_VERSION = "7.3";
 
 // @public
 export interface ListRoleAssignmentsOptions extends OperationOptions {
@@ -240,8 +242,7 @@ export interface SetRoleDefinitionOptions extends OperationOptions {
 }
 
 // @public
-export type SUPPORTED_API_VERSIONS = "7.2" | "7.3-preview";
-
+export type SUPPORTED_API_VERSIONS = "7.2" | "7.3";
 
 // (No @packageDocumentation comment for this package)
 

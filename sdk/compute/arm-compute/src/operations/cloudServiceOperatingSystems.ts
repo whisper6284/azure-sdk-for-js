@@ -6,13 +6,12 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import "@azure/core-paging";
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import { CloudServiceOperatingSystems } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { ComputeManagementClientContext } from "../computeManagementClientContext";
+import { ComputeManagementClient } from "../computeManagementClient";
 import {
   OSVersion,
   CloudServiceOperatingSystemsListOSVersionsNextOptionalParams,
@@ -31,16 +30,16 @@ import {
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
-/** Class representing a CloudServiceOperatingSystems. */
+/** Class containing CloudServiceOperatingSystems operations. */
 export class CloudServiceOperatingSystemsImpl
   implements CloudServiceOperatingSystems {
-  private readonly client: ComputeManagementClientContext;
+  private readonly client: ComputeManagementClient;
 
   /**
    * Initialize a new instance of the class CloudServiceOperatingSystems class.
    * @param client Reference to the service client
    */
-  constructor(client: ComputeManagementClientContext) {
+  constructor(client: ComputeManagementClient) {
     this.client = client;
   }
 
@@ -271,7 +270,7 @@ const getOSVersionOperationSpec: coreClient.OperationSpec = {
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.location,
+    Parameters.location1,
     Parameters.osVersionName
   ],
   headerParameters: [Parameters.accept],
@@ -293,7 +292,7 @@ const listOSVersionsOperationSpec: coreClient.OperationSpec = {
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.location
+    Parameters.location1
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -314,7 +313,7 @@ const getOSFamilyOperationSpec: coreClient.OperationSpec = {
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.location,
+    Parameters.location1,
     Parameters.osFamilyName
   ],
   headerParameters: [Parameters.accept],
@@ -336,7 +335,7 @@ const listOSFamiliesOperationSpec: coreClient.OperationSpec = {
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.location
+    Parameters.location1
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -357,7 +356,7 @@ const listOSVersionsNextOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.nextLink,
-    Parameters.location
+    Parameters.location1
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -378,7 +377,7 @@ const listOSFamiliesNextOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.nextLink,
-    Parameters.location
+    Parameters.location1
   ],
   headerParameters: [Parameters.accept],
   serializer

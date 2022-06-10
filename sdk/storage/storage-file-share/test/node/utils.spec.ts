@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as assert from "assert";
-import * as dotenv from "dotenv";
+import { assert } from "chai";
 import { extractConnectionStringParts } from "../../src/utils/utils.common";
-import { record, Recorder } from "@azure/test-utils-recorder";
+import { record, Recorder } from "@azure-tools/test-recorder";
 import { recorderEnvSetup } from "../utils";
-dotenv.config();
+import { Context } from "mocha";
 
 describe("Utility Helpers Node.js only", () => {
   let recorder: Recorder;
@@ -35,11 +34,11 @@ describe("Utility Helpers Node.js only", () => {
     );
   }
 
-  beforeEach(async function() {
+  beforeEach(async function (this: Context) {
     recorder = record(this, recorderEnvSetup);
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await recorder.stop();
   });
 
@@ -49,7 +48,7 @@ describe("Utility Helpers Node.js only", () => {
         "DefaultEndpointsProtocol=a;AccountName=b;AccountKey=c;EndpointSuffix=d"
       );
       assert.fail("Expecting an thrown error but didn't get one.");
-    } catch (error) {
+    } catch (error: any) {
       assert.ok(error);
     }
   });
@@ -62,7 +61,7 @@ describe("Utility Helpers Node.js only", () => {
       );
 
       assert.fail("Expecting an thrown error but didn't get one.");
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(
         "Invalid AccountName in the provided Connection String",
         error.message,
@@ -77,7 +76,7 @@ describe("Utility Helpers Node.js only", () => {
         "DefaultEndpointsProtocol=https;AccountName=b;AccountKey=cdefg;EndpointSuffix="
       );
       assert.fail("Expecting an thrown error but didn't get one.");
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(
         "Invalid EndpointSuffix in the provided Connection String",
         error.message,
@@ -92,7 +91,7 @@ describe("Utility Helpers Node.js only", () => {
         "DefaultEndpointsProtocol=https;AccountName=b;AccountKey=;EndpointSuffix=d"
       );
       assert.fail("Expecting an thrown error but didn't get one.");
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(
         "Invalid AccountKey in the provided Connection String",
         error.message,
@@ -107,7 +106,7 @@ describe("Utility Helpers Node.js only", () => {
         "DefaultEndpointsProtocol=https;AccountName=;AccountKey=c;EndpointSuffix=d"
       );
       assert.fail("Expecting an thrown error but didn't get one.");
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(
         "Invalid AccountName in the provided Connection String",
         error.message,
@@ -122,7 +121,7 @@ describe("Utility Helpers Node.js only", () => {
         "DefaultEndpointsProtocol=;AccountName=b;AccountKey=c;EndpointSuffix=d"
       );
       assert.fail("Expecting an thrown error but didn't get one.");
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(
         "Invalid DefaultEndpointsProtocol in the provided Connection String. Expecting 'https' or 'http'",
         error.message,

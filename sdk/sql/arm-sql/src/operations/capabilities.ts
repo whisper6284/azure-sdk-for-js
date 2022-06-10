@@ -10,21 +10,21 @@ import { Capabilities } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { SqlManagementClientContext } from "../sqlManagementClientContext";
+import { SqlManagementClient } from "../sqlManagementClient";
 import {
   CapabilitiesListByLocationOptionalParams,
   CapabilitiesListByLocationResponse
 } from "../models";
 
-/** Class representing a Capabilities. */
+/** Class containing Capabilities operations. */
 export class CapabilitiesImpl implements Capabilities {
-  private readonly client: SqlManagementClientContext;
+  private readonly client: SqlManagementClient;
 
   /**
    * Initialize a new instance of the class Capabilities class.
    * @param client Reference to the service client
    */
-  constructor(client: SqlManagementClientContext) {
+  constructor(client: SqlManagementClient) {
     this.client = client;
   }
 

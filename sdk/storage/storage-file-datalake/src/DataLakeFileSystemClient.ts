@@ -39,13 +39,17 @@ import {
   DeletedPath,
   FileSystemUndeletePathResponse,
   FileSystemUndeletePathOption,
-  ListDeletedPathsSegmentOptions
+  ListDeletedPathsSegmentOptions,
 } from "./models";
 import { newPipeline, Pipeline, StoragePipelineOptions } from "./Pipeline";
 import { StorageClient } from "./StorageClient";
 import { toContainerPublicAccessType, toPublicAccessType, toPermissions } from "./transforms";
 import { convertTracingToRequestOptionsBase, createSpan } from "./utils/tracing";
-import { appendToURLPath, appendToURLQuery } from "./utils/utils.common";
+import {
+  appendToURLPath,
+  appendToURLQuery,
+  windowsFileTimeTicksToTime,
+} from "./utils/utils.common";
 import { DataLakeFileClient, DataLakeDirectoryClient } from "./clients";
 import { generateDataLakeSASQueryParameters } from "./sas/DataLakeSASSignatureValues";
 import { DeletionIdKey, PathResultTypeConstants } from "./utils/constants";
@@ -83,6 +87,8 @@ export class DataLakeFileSystemClient extends StorageClient {
   constructor(
     url: string,
     credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   );
 
@@ -104,6 +110,8 @@ export class DataLakeFileSystemClient extends StorageClient {
       | AnonymousCredential
       | TokenCredential
       | Pipeline,
+    // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions
   ) {
     if (credentialOrPipeline instanceof Pipeline) {
@@ -139,6 +147,8 @@ export class DataLakeFileSystemClient extends StorageClient {
    *
    * @param directoryName -
    */
+  // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+  /* eslint-disable-next-line @azure/azure-sdk/ts-naming-subclients */
   public getDirectoryClient(directoryName: string): DataLakeDirectoryClient {
     return new DataLakeDirectoryClient(
       appendToURLPath(this.url, encodeURIComponent(directoryName)),
@@ -151,6 +161,8 @@ export class DataLakeFileSystemClient extends StorageClient {
    *
    * @param fileName -
    */
+  // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
+  /* eslint-disable-next-line @azure/azure-sdk/ts-naming-subclients */
   public getFileClient(fileName: string): DataLakeFileClient {
     return new DataLakeFileClient(
       appendToURLPath(this.url, encodeURIComponent(fileName)),
@@ -181,12 +193,12 @@ export class DataLakeFileSystemClient extends StorageClient {
       return await this.blobContainerClient.create({
         ...options,
         access: toContainerPublicAccessType(options.access),
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -213,12 +225,12 @@ export class DataLakeFileSystemClient extends StorageClient {
       return await this.blobContainerClient.createIfNotExists({
         ...options,
         access: toContainerPublicAccessType(options.access),
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -239,10 +251,10 @@ export class DataLakeFileSystemClient extends StorageClient {
     const { span, updatedOptions } = createSpan("DataLakeFileSystemClient-exists", options);
     try {
       return await this.blobContainerClient.exists(updatedOptions);
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -262,12 +274,12 @@ export class DataLakeFileSystemClient extends StorageClient {
     try {
       return await this.blobContainerClient.delete({
         ...options,
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -288,10 +300,10 @@ export class DataLakeFileSystemClient extends StorageClient {
     const { span, updatedOptions } = createSpan("DataLakeFileSystemClient-deleteIfExists", options);
     try {
       return await this.blobContainerClient.deleteIfExists(updatedOptions);
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -319,7 +331,7 @@ export class DataLakeFileSystemClient extends StorageClient {
     try {
       const rawResponse = await this.blobContainerClient.getProperties({
         ...options,
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
 
       // Transfer and rename blobPublicAccess to publicAccess
@@ -332,10 +344,10 @@ export class DataLakeFileSystemClient extends StorageClient {
       delete rawResponse._response.parsedHeaders.blobPublicAccess;
 
       return response;
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -363,12 +375,12 @@ export class DataLakeFileSystemClient extends StorageClient {
     try {
       return await this.blobContainerClient.setMetadata(metadata, {
         ...options,
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -397,11 +409,11 @@ export class DataLakeFileSystemClient extends StorageClient {
     try {
       const rawResponse = await this.blobContainerClient.getAccessPolicy({
         ...options,
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
 
       // Transfer and rename blobPublicAccess to publicAccess
-      const response = (rawResponse as unknown) as FileSystemGetAccessPolicyResponse;
+      const response = rawResponse as unknown as FileSystemGetAccessPolicyResponse;
 
       response.publicAccess = toPublicAccessType(rawResponse.blobPublicAccess);
       response._response.parsedHeaders.publicAccess = response.publicAccess;
@@ -410,10 +422,10 @@ export class DataLakeFileSystemClient extends StorageClient {
       delete rawResponse._response.parsedHeaders.blobPublicAccess;
 
       return response;
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -450,13 +462,13 @@ export class DataLakeFileSystemClient extends StorageClient {
         fileSystemAcl,
         {
           ...options,
-          tracingOptions: updatedOptions.tracingOptions
+          tracingOptions: updatedOptions.tracingOptions,
         }
       );
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -551,9 +563,9 @@ export class DataLakeFileSystemClient extends StorageClient {
       byPage: (settings: PageSettings = {}) => {
         return this.listSegments(settings.continuationToken, {
           maxResults: settings.maxPageSize,
-          ...options
+          ...options,
         });
-      }
+      },
     };
   }
 
@@ -590,7 +602,7 @@ export class DataLakeFileSystemClient extends StorageClient {
         continuation,
         ...options,
         upn: options.userPrincipalName,
-        ...convertTracingToRequestOptionsBase(updatedOptions)
+        ...convertTracingToRequestOptionsBase(updatedOptions),
       });
 
       const response = rawResponse as FileSystemListPathsResponse;
@@ -598,16 +610,18 @@ export class DataLakeFileSystemClient extends StorageClient {
       for (const path of rawResponse.paths || []) {
         response.pathItems.push({
           ...path,
-          permissions: toPermissions(path.permissions)
+          permissions: toPermissions(path.permissions),
+          createdOn: windowsFileTimeTicksToTime(path.creationTime),
+          expiresOn: windowsFileTimeTicksToTime(path.expiryTime),
         });
       }
       delete rawResponse.paths;
 
       return response;
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -700,9 +714,9 @@ export class DataLakeFileSystemClient extends StorageClient {
       byPage: (settings: PageSettings = {}) => {
         return this.listDeletedSegments(settings.continuationToken, {
           maxResults: settings.maxPageSize,
-          ...options
+          ...options,
         });
-      }
+      },
     };
   }
   private async *listDeletedItems(
@@ -740,7 +754,7 @@ export class DataLakeFileSystemClient extends StorageClient {
         marker: continuation,
         ...options,
         prefix: options.prefix === "" ? undefined : options.prefix,
-        ...convertTracingToRequestOptionsBase(updatedOptions)
+        ...convertTracingToRequestOptionsBase(updatedOptions),
       });
 
       const response = rawResponse as FileSystemListDeletedPathsResponse;
@@ -750,19 +764,19 @@ export class DataLakeFileSystemClient extends StorageClient {
           name: path.name,
           deletionId: path.deletionId,
           deletedOn: path.properties.deletedTime,
-          remainingRetentionDays: path.properties.remainingRetentionDays
+          remainingRetentionDays: path.properties.remainingRetentionDays,
         });
       }
 
-      if (!(response.nextMarker == undefined || response.nextMarker === "")) {
+      if (!(response.nextMarker === undefined || response.nextMarker === "")) {
         response.continuation = response.nextMarker;
       }
 
       return response;
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -796,24 +810,24 @@ export class DataLakeFileSystemClient extends StorageClient {
       const rawResponse = await pathClient.blobPathContext.undelete({
         undeleteSource: "?" + DeletionIdKey + "=" + deletionId,
         ...options,
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
 
       if (rawResponse.resourceType === PathResultTypeConstants.DirectoryResourceType) {
         return {
           pathClient: this.getDirectoryClient(deletedPath),
-          ...rawResponse
+          ...rawResponse,
         };
       } else {
         return {
           pathClient: this.getFileClient(deletedPath),
-          ...rawResponse
+          ...rawResponse,
         };
       }
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -843,7 +857,7 @@ export class DataLakeFileSystemClient extends StorageClient {
       const sas = generateDataLakeSASQueryParameters(
         {
           fileSystemName: this.name,
-          ...options
+          ...options,
         },
         this.credential
       ).toString();

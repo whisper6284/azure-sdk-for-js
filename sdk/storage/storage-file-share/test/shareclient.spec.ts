@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as assert from "assert";
-import * as dotenv from "dotenv";
+import { assert } from "chai";
 import { getBSU, getSASConnectionStringFromEnvironment, recorderEnvSetup } from "./utils";
 import { ShareClient, ShareServiceClient } from "../src";
-import { record, Recorder } from "@azure/test-utils-recorder";
-dotenv.config();
+import { record, Recorder } from "@azure-tools/test-recorder";
+import { Context } from "mocha";
 
 describe("ShareClient", () => {
   let serviceClient: ShareServiceClient;
@@ -15,7 +14,7 @@ describe("ShareClient", () => {
 
   let recorder: Recorder;
 
-  beforeEach(async function() {
+  beforeEach(async function (this: Context) {
     recorder = record(this, recorderEnvSetup);
     serviceClient = getBSU();
     shareName = recorder.getUniqueName("share");
@@ -23,7 +22,7 @@ describe("ShareClient", () => {
     await shareClient.create();
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await shareClient.delete();
     await recorder.stop();
   });
@@ -32,7 +31,7 @@ describe("ShareClient", () => {
     const metadata = {
       key0: "val0",
       keya: "vala",
-      keyb: "valb"
+      keyb: "valb",
     };
     await shareClient.setMetadata(metadata);
 
@@ -113,7 +112,7 @@ describe("ShareClient", () => {
   it("create snapshot", async () => {
     const metadata = { key1: "value1", key2: "value2" };
     const createSnapshotResponse = await shareClient.createSnapshot({
-      metadata
+      metadata,
     });
 
     assert.notEqual(createSnapshotResponse.snapshot, undefined);
@@ -124,7 +123,7 @@ describe("ShareClient", () => {
     assert.deepStrictEqual(snapshotProperties.metadata, metadata);
 
     const originProperties = await shareClient.getProperties();
-    assert.notDeepStrictEqual(originProperties.metadata, metadata);
+    assert.notDeepEqual(originProperties.metadata, metadata);
 
     await snapshotShareClient.delete({});
   });
@@ -143,7 +142,7 @@ describe("ShareClient", () => {
       assert.fail(
         "Expecting an error in getting properties from a deleted block blob but didn't get one."
       );
-    } catch (error) {
+    } catch (error: any) {
       assert.ok((error.statusCode as number) === 404);
     }
   });
@@ -161,7 +160,7 @@ describe("ShareClient", () => {
       assert.fail(
         "Expecting an error in getting properties from a deleted block blob but didn't get one."
       );
-    } catch (error) {
+    } catch (error: any) {
       assert.ok((error.statusCode as number) === 404);
     }
   });
@@ -186,8 +185,8 @@ describe("ShareClient", () => {
   it("can be created with a sas connection string and a share name and an option bag", async () => {
     const newClient = new ShareClient(getSASConnectionStringFromEnvironment(), shareName, {
       retryOptions: {
-        maxTries: 5
-      }
+        maxTries: 5,
+      },
     });
     const result = await newClient.getProperties();
 
@@ -200,10 +199,9 @@ describe("ShareClient", () => {
 
   it("throws error if constructor shareName parameter is empty", async () => {
     try {
-      // tslint:disable-next-line: no-unused-expression
       new ShareClient(getSASConnectionStringFromEnvironment(), "");
       assert.fail("Expecting an thrown error but didn't get one.");
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(
         "Expecting non-empty strings for name parameter",
         error.message,

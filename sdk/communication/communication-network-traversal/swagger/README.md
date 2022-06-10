@@ -5,21 +5,22 @@
 ## Configuration
 
 ```yaml
-package-name: azure-communication-network-traversal
+package-name: "@azure/communication-network-traversal"
 override-client-name: NetworkRelayRestClient
 description: Communication Network Traversal Client
-package-version: package-2021-06-21-preview
+package-version: 1.1.0-beta.2
 generate-metadata: false
 license-header: MICROSOFT_MIT_NO_VERSION
 output-folder: ../src/generated
-tag: package-2021-06-21-preview
+tag: package-2022-03-01-preview
 require:
-  - https://raw.githubusercontent.com/Azure/azure-rest-api-specs/86408a8777e623f5f41e260472ed831309b85086/specification/communication/data-plane/Turn/readme.md
+  - https://raw.githubusercontent.com/Azure/azure-rest-api-specs/6282e522ef78366170de518e76b8adb0e27563a2/specification/communication/data-plane/NetworkTraversal/readme.md
 model-date-time-as-string: false
 optional-response-headers: true
 payload-flattening-threshold: 10
 use-extension:
-  "@autorest/typescript": "6.0.0-dev.20200623.2"
+  "@autorest/typescript": "6.0.0-beta.15"
 add-credentials: false
 azure-arm: false
+v3: true
 ```

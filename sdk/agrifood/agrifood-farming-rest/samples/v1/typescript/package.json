@@ -1,5 +1,5 @@
 {
-  "name": "azure-agrifood-farming-samples-ts",
+  "name": "@azure-samples/agrifood-farming-ts",
   "private": true,
   "version": "1.0.0",
   "description": "Azure FarmBeats rest client library samples for TypeScript",
@@ -32,7 +32,7 @@
   "dependencies": {
     "@azure-rest/agrifood-farming": "next",
     "dotenv": "latest",
-    "@azure/identity": "^1.1.0"
+    "@azure/identity": "^2.0.1"
   },
   "devDependencies": {
     "typescript": "~4.2.0",

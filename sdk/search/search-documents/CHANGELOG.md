@@ -1,14 +1,69 @@
 # Release History
 
-## 11.3.0-beta.3 (Unreleased)
+## 11.3.0-beta.8 (unreleased)
+
+Added `core-http-compat` dependency
+
+## 11.3.0-beta.7 (2022-03-08)
 
 ### Features Added
 
+- Added new APIs `createAlias`, `createOrUpdateAlias`, `deleteAlias`, `getAlias` & `listAliases` operations to the `SearchIndexClient`.
+
+## 11.3.0-beta.6 (2022-02-08)
+
+### Features Added
+
+- Added new type of SearchIndexer skill - `AzureMachineLearningSkill`. Please refer [#20183](https://github.com/Azure/azure-sdk-for-js/pull/20183) for further details.
+
+### Other Changes
+
+- Deprecated `SearchClientOptions.apiVersion` in favor of `SearchClientOptions.serviceVersion`.
+  - `apiVersion` will continue to be supported in version 11.x; however, customers are encouraged to migrate to `serviceVersion` instead which is more consistent with the rest of our client libraries.
+
+## 11.3.0-beta.5 (2021-11-09)
+
+### Features Added
+
+- Added `semanticConfiguration` property to `SearchRequest` object.
+- Several new languages are added to the `KnownQueryLanguage` object.
+- Added `semanticSettings` property to `SearchIndex` object.
+
 ### Breaking Changes
+
+- Renamed `IndexerCurrentState` property to `IndexerState` property.
+- Renamed `AllDocsInitialChangeTrackingState` property to `AllDocumentsInitialChangeTrackingState` property.
+- Renamed `AllDocsFinalChangeTrackingState` property to `AllDocumentsFinalChangeTrackingState` property.
+- Renamed `ResetDocsInitialChangeTrackingState` property to `ResetDocumentsInitialChangeTrackingState` property.
+- Renamed `ResetDocsFinalChangeTrackingState` property to `ResetDocumentsFinalChangeTrackingState` property.
+- Renamed `SkillNames` property to `ResetSkillsOptions` (with a `SkillNames` property)
+- Renamed `ResetDocs` method to `ResetDocuments` in the SDK client.
 
 ### Bugs Fixed
 
-### Other Changes
+- Fixed the issue with the presence of recursive structure while uploading documents. Please refer [#15656](https://github.com/Azure/azure-sdk-for-js/issues/15656) for further details.
+
+## 11.3.0-beta.4 (2021-10-05)
+
+### Features Added
+
+- Added properties `currentState` & `statusDetail` to the `IndexerExecutionResult` object.
+- Added operations `resetDocs` & `resetSkills` to the `SearchIndexerClient` class.
+
+### Breaking Changes
+
+- Changed property `ignoreResetRequirements` to `skipIndexerResetRequirementForCache` in `CreateorUpdateDataSourceConnectionOptions`, `CreateorUpdateIndexerOptions` & `CreateOrUpdateSkillsetOptions` objects.
+- Changed the type of `answers` property from `Answers` to `QueryAnswerType`, in the `SearchRequest` object.
+- Changed the type of `captions` property from `Captions` to `QueryCaptionType`, in the `SearchRequest` object.
+- Changed the type of `speller` property from `Speller` to `QuerySpellerType`, in the `SearchRequest` object.
+- Changed the underlying dependency of the SDK from `core-http` to `core-rest-pipeline` package.
+
+## 11.3.0-beta.3 (2021-09-07)
+
+### Features Added
+
+- Added a new property `normalizerName` to the `AnalyzeRequest` object.
+- Added 2 new properties `captions` & `semanticFields` to the `SearchRequestOptions` object.
 
 ## 11.3.0-beta.2 (2021-08-10)
 

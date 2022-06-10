@@ -1,6 +1,6 @@
 # Release History
 
-## 1.1.0-beta.2 (Unreleased)
+## 1.2.1 (Unreleased)
 
 ### Features Added
 
@@ -9,6 +9,38 @@
 ### Bugs Fixed
 
 ### Other Changes
+
+## 1.2.0 (2022-04-05)
+
+### Features Added
+
+- Updated to @azure/communication-signaling@1.0.0-beta.13.
+- Updated to @azure/communication-common@2.0.0.
+
+## 1.1.2 (2022-02-08)
+
+### Breaking Changes
+
+- Prohibit sending the typing notification request within 8 seconds of the previous request.
+
+### Features Added
+
+- Updated to @azure/communication-signaling@1.0.0-beta.12.
+- Added two new events realTimeNotificationConnected and realTimeNotificationDisconnected that allow the developer to know when the connection to the call server is active
+
+## 1.1.1 (2021-10-19)
+
+### Features Added
+
+- Updated to @azure/communication-signaling@1.0.0-beta.11.
+- Added `signalingClientOptions` in `ClientOptions`.
+
+## 1.1.0 (2021-09-15)
+
+### Features Added
+
+- Migrated from using `@azure/core-http` to `@azure/core-rest-pipeline` for the handling of HTTP requests. See [Azure Core v1 vs v2](https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/core/core-rest-pipeline/documentation/core2.md) for more on the difference and benefits of the move.
+- Updated to @azure/communication-signaling@1.0.0-beta.10.
 
 ## 1.1.0-beta.1 (2021-08-10)
 

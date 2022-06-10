@@ -10,7 +10,7 @@ import { createSpanFunction } from "@azure/core-tracing";
  */
 export const createSpan = createSpanFunction({
   packagePrefix: "Azure.Storage.Queue",
-  namespace: "Microsoft.Storage"
+  namespace: "Microsoft.Storage",
 });
 
 /**
@@ -24,7 +24,8 @@ export function convertTracingToRequestOptionsBase(
   options?: OperationOptions
 ): Pick<RequestOptionsBase, "spanOptions" | "tracingContext"> {
   return {
-    spanOptions: options?.tracingOptions?.spanOptions,
-    tracingContext: options?.tracingOptions?.tracingContext
+    // By passing spanOptions if they exist at runtime, we're backwards compatible with @azure/core-tracing@preview.13 and earlier.
+    spanOptions: (options?.tracingOptions as any)?.spanOptions,
+    tracingContext: options?.tracingOptions?.tracingContext,
   };
 }

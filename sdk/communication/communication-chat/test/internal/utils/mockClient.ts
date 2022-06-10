@@ -2,46 +2,52 @@
 // Licensed under the MIT license.
 
 import { AzureCommunicationTokenCredential } from "@azure/communication-common";
-import { HttpClient, HttpHeaders, WebResourceLike, HttpOperationResponse } from "@azure/core-http";
+import {
+  HttpClient,
+  PipelineRequest,
+  PipelineResponse,
+  createHttpHeaders,
+} from "@azure/core-rest-pipeline";
 import * as RestModel from "../../../src/generated/src/models";
 import { ChatClient, ChatParticipant, ChatThreadClient } from "../../../src";
 import { CommunicationIdentifierModel } from "../../../src/generated/src";
 import { baseUri, generateToken } from "../../public/utils/connectionUtils";
 
 export const mockCommunicationIdentifier: CommunicationIdentifierModel = {
-  communicationUser: { id: "id" }
+  communicationUser: { id: "id" },
+  rawId: "id",
 };
 
 export const mockParticipant: RestModel.ChatParticipant = {
   communicationIdentifier: mockCommunicationIdentifier,
   displayName: "displayName",
-  shareHistoryTime: new Date("2020-05-26T18:06:06Z")
+  shareHistoryTime: new Date("2020-05-26T18:06:06Z"),
 };
 
 export const mockSdkModelParticipant: ChatParticipant = {
   id: {
-    communicationUserId: mockParticipant.communicationIdentifier.communicationUser?.id as string
+    communicationUserId: mockParticipant.communicationIdentifier.communicationUser?.id as string,
   },
   displayName: mockParticipant.displayName,
-  shareHistoryTime: mockParticipant.shareHistoryTime
+  shareHistoryTime: mockParticipant.shareHistoryTime,
 };
 
 export const mockThread: RestModel.ChatThreadProperties = {
   id: "threadid",
   topic: "topic",
   createdByCommunicationIdentifier: mockCommunicationIdentifier,
-  createdOn: new Date("2020-06-26T18:06:06Z")
+  createdOn: new Date("2020-06-26T18:06:06Z"),
 };
 
 export const mockCreateThreadResult: RestModel.CreateChatThreadResult = {
   chatThread: mockThread,
-  invalidParticipants: undefined
+  invalidParticipants: undefined,
 };
 
 export const mockThreadItem: RestModel.ChatThreadItem = {
   id: "threadid",
   topic: "topic",
-  lastMessageReceivedOn: new Date("2020-06-26T18:06:06Z")
+  lastMessageReceivedOn: new Date("2020-06-26T18:06:06Z"),
 };
 
 export const mockMessage: RestModel.ChatMessage = {
@@ -51,38 +57,38 @@ export const mockMessage: RestModel.ChatMessage = {
   sequenceId: "sequenceId",
   content: {
     message: "content",
-    topic: "topic"
+    topic: "topic",
   },
   createdOn: new Date("2020-06-26T18:06:06Z"),
   senderDisplayName: "senderDisplayName",
   senderCommunicationIdentifier: mockCommunicationIdentifier,
   deletedOn: new Date("2020-06-26T18:06:06Z"),
-  metadata: { tags: "tag" }
+  metadata: { tags: "tag" },
 };
 
 export const mockChatMessageReadReceipt: RestModel.ChatMessageReadReceipt = {
   senderCommunicationIdentifier: mockCommunicationIdentifier,
   chatMessageId: mockMessage.id,
-  readOn: new Date("2020-06-26T18:06:06Z")
+  readOn: new Date("2020-06-26T18:06:06Z"),
 };
 
 export const generateHttpClient = (status: number, parsedBody?: unknown): HttpClient => {
   const mockHttpClient: HttpClient = {
-    async sendRequest(httpRequest: WebResourceLike): Promise<HttpOperationResponse> {
+    async sendRequest(httpRequest: PipelineRequest): Promise<PipelineResponse> {
       return {
         status: status,
-        headers: new HttpHeaders(),
+        headers: createHttpHeaders(),
         request: httpRequest,
-        parsedBody: parsedBody
+        bodyAsText: JSON.stringify(parsedBody),
       };
-    }
+    },
   };
   return mockHttpClient;
 };
 
 export const createChatClient = (mockHttpClient: HttpClient): ChatClient => {
   return new ChatClient(baseUri, new AzureCommunicationTokenCredential(generateToken()), {
-    httpClient: mockHttpClient
+    httpClient: mockHttpClient,
   });
 };
 
@@ -95,7 +101,7 @@ export const createChatThreadClient = (
     threadId,
     new AzureCommunicationTokenCredential(generateToken()),
     {
-      httpClient: mockHttpClient
+      httpClient: mockHttpClient,
     }
   );
 };

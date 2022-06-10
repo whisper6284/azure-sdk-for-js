@@ -10,15 +10,17 @@ generate-metadata: false
 license-header: MICROSOFT_MIT_NO_VERSION
 output-folder: ../
 source-code-folder-path: ./src/generated/service
-input-file: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/d2183715d380084ff04313a73c8803d042fe91b9/specification/search/data-plane/Azure.Search/preview/2021-04-30-Preview/searchservice.json
+input-file: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/d850f41f89530917000d8e6bb463f42bb745b930/specification/search/data-plane/Azure.Search/preview/2021-04-30-Preview/searchservice.json
 add-credentials: false
 use-extension:
-  "@autorest/typescript": "6.0.0-beta.4"
+  "@autorest/typescript": "6.0.0-alpha.17.20220318.1"
+core-http-compat-mode: true
+package-version: 11.3.0-beta.8
 disable-async-iterators: true
 api-version-parameter: choice
 v3: true
 hide-clients: true
-use-core-v2: false
+use-core-v2: true
 ```
 
 ## Customizations for Track 2 Generator
@@ -288,4 +290,54 @@ directive:
   where: $.definitions.LexicalNormalizer
   transform: >
     $["discriminator"] = "@odata.type";
+```
+
+### Renames
+
+```yaml
+directive:
+  from: swagger-document
+  where: $.definitions.IndexerCurrentState
+  transform: >
+    $["x-ms-client-name"] = "IndexerState";
+```
+
+```yaml
+directive:
+  from: swagger-document
+  where: $.definitions.IndexerCurrentState.properties.allDocsInitialChangeTrackingState
+  transform: >
+    $["x-ms-client-name"] = "allDocumentsInitialChangeTrackingState";
+```
+
+```yaml
+directive:
+  from: swagger-document
+  where: $.definitions.IndexerCurrentState.properties.allDocsFinalChangeTrackingState
+  transform: >
+    $["x-ms-client-name"] = "allDocumentsFinalChangeTrackingState";
+```
+
+```yaml
+directive:
+  from: swagger-document
+  where: $.definitions.IndexerCurrentState.properties.resetDocsInitialChangeTrackingState
+  transform: >
+    $["x-ms-client-name"] = "resetDocumentsInitialChangeTrackingState";
+```
+
+```yaml
+directive:
+  from: swagger-document
+  where: $.definitions.IndexerCurrentState.properties.resetDocsFinalChangeTrackingState
+  transform: >
+    $["x-ms-client-name"] = "ResetDocumentsFinalChangeTrackingState";
+```
+
+```yaml
+directive:
+  from: swagger-document
+  where: $.definitions.SemanticField.properties.fieldName
+  transform: >
+    $["x-ms-client-name"] = "name";
 ```

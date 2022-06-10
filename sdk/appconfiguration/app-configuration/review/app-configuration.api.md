@@ -4,11 +4,13 @@
 
 ```ts
 
-import { HttpResponse } from '@azure/core-http';
-import { OperationOptions } from '@azure/core-http';
+/// <reference lib="esnext.asynciterable" />
+
+import { CommonClientOptions } from '@azure/core-client';
+import { CompatResponse } from '@azure/core-http-compat';
+import { OperationOptions } from '@azure/core-client';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
 import { TokenCredential } from '@azure/core-auth';
-import { UserAgentOptions } from '@azure/core-http';
 
 // @public
 export interface AddConfigurationSettingOptions extends OperationOptions {
@@ -36,9 +38,7 @@ export class AppConfigurationClient {
 }
 
 // @public
-export interface AppConfigurationClientOptions {
-    retryOptions?: RetryOptions;
-    userAgentOptions?: UserAgentOptions;
+export interface AppConfigurationClientOptions extends CommonClientOptions {
 }
 
 // @public
@@ -122,7 +122,7 @@ export interface HttpOnlyIfUnchangedField {
 
 // @public
 export interface HttpResponseField<HeadersT> {
-    _response: HttpResponse & {
+    _response: CompatResponse & {
         parsedHeaders: HeadersT;
         bodyAsText: string;
     };
@@ -217,7 +217,6 @@ export interface SetReadOnlyResponse extends ConfigurationSetting, SyncTokenHead
 export interface SyncTokenHeaderField {
     syncToken?: string;
 }
-
 
 // (No @packageDocumentation comment for this package)
 

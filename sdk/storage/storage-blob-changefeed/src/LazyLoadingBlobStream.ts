@@ -75,7 +75,7 @@ export class LazyLoadingBlobStream extends Readable {
     try {
       const properties = await this.blobClient.getProperties({
         abortSignal: options.abortSignal,
-        tracingOptions: updatedOptions.tracingOptions
+        tracingOptions: updatedOptions.tracingOptions,
       });
       this.blobLength = properties.contentLength!;
 
@@ -90,14 +90,14 @@ export class LazyLoadingBlobStream extends Readable {
         this.lastDownloadBytes,
         {
           abortSignal: options.abortSignal,
-          tracingOptions: updatedOptions.tracingOptions
+          tracingOptions: updatedOptions.tracingOptions,
         }
       );
       this.offset += this.lastDownloadBytes;
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       throw e;
     } finally {
@@ -110,7 +110,7 @@ export class LazyLoadingBlobStream extends Readable {
    *
    * @param size - Optional. The size of data to be read
    */
-  public async _read(size?: number) {
+  public async _read(size?: number): Promise<void> {
     const { span, updatedOptions } = createSpan("LazyLoadingBlobStream-read", this.options);
 
     try {
@@ -124,7 +124,7 @@ export class LazyLoadingBlobStream extends Readable {
         if (this.lastDownloadData === undefined || this.lastDownloadData?.byteLength === 0) {
           await this.downloadBlock({
             abortSignal: this.options?.abortSignal,
-            tracingOptions: updatedOptions?.tracingOptions
+            tracingOptions: updatedOptions?.tracingOptions,
           });
         }
         if (this.lastDownloadData?.byteLength) {
@@ -142,10 +142,10 @@ export class LazyLoadingBlobStream extends Readable {
       if (count < size) {
         this.push(null);
       }
-    } catch (e) {
+    } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e.message
+        message: e.message,
       });
       this.emit("error", e);
     } finally {

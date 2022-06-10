@@ -9,13 +9,15 @@ export {
   EventGridPublisherClient,
   EventGridPublisherClientOptions,
   SendOptions,
+  CloudEventSendOptions,
   InputSchema,
-  InputSchemaToInputTypeMap
+  InputSchemaToInputTypeMap,
+  InputSchemaToOptionsTypeMap,
 } from "./eventGridClient";
 
 export {
   generateSharedAccessSignature,
-  GenerateSharedAccessSignatureOptions
+  GenerateSharedAccessSignatureOptions,
 } from "./generateSharedAccessSignature";
 
 export { EventGridDeserializer } from "./consumer";
@@ -44,12 +46,28 @@ export {
   AcsRecordingFileStatusUpdatedEventData,
   AcsRecordingStorageInfo,
   AcsRecordingChunkInfo,
+  ApiManagementApiCreatedEventData,
+  ApiManagementApiDeletedEventData,
+  ApiManagementApiReleaseCreatedEventData,
+  ApiManagementApiReleaseDeletedEventData,
+  ApiManagementApiReleaseUpdatedEventData,
+  ApiManagementApiUpdatedEventData,
+  ApiManagementProductCreatedEventData,
+  ApiManagementProductDeletedEventData,
+  ApiManagementProductUpdatedEventData,
+  ApiManagementSubscriptionCreatedEventData,
+  ApiManagementSubscriptionDeletedEventData,
+  ApiManagementSubscriptionUpdatedEventData,
+  ApiManagementUserCreatedEventData,
+  ApiManagementUserDeletedEventData,
+  ApiManagementUserUpdatedEventData,
   CommunicationIdentifierModel,
   CommunicationUserIdentifierModel,
   CommunicationCloudEnvironmentModel,
   MicrosoftTeamsUserIdentifierModel,
   PhoneNumberIdentifierModel,
   AcsChatThreadParticipant,
+  AcsUserDisconnectedEventData,
   AcsSmsDeliveryAttempt,
   AcsSmsDeliveryReportReceivedEventData,
   AcsSmsEventBase,
@@ -69,6 +87,10 @@ export {
   DeviceTwinInfo,
   DeviceTwinInfoProperties,
   DeviceTwinInfoX509Thumbprint,
+  HealthcareFhirResourceCreatedEventData,
+  HealthcareFhirResourceUpdatedEventData,
+  HealthcareFhirResourceDeletedEventData,
+  HealthcareFhirResourceType,
   IotHubDeviceCreatedEventData,
   IotHubDeviceDeletedEventData,
   IotHubDeviceConnectedEventData,
@@ -118,6 +140,7 @@ export {
   MediaJobOutputProgressEventData,
   MediaJobOutputUnion,
   MediaJobState,
+  MediaLiveEventChannelArchiveHeartbeatEventData,
   MediaLiveEventEncoderConnectedEventData,
   MediaLiveEventConnectionRejectedEventData,
   MediaLiveEventEncoderDisconnectedEventData,
@@ -186,5 +209,11 @@ export {
   PolicyInsightsPolicyStateDeletedEventData,
   StorageAsyncOperationInitiatedEventData,
   StorageBlobTierChangedEventData,
-  StorageBlobInventoryPolicyCompletedEventData
+  StorageBlobInventoryPolicyCompletedEventData,
+  RecordingChannelType,
+  RecordingContentType,
+  RecordingFormatType,
+  ResourceAuthorization,
+  ResourceHttpRequest,
+  ContainerRegistryEventConnectedRegistry,
 } from "./generated/models";
